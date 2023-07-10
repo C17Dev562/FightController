@@ -1,0 +1,2455 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"hal_outputs.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c"
+  20              		.section	.text.inv_get_rotation,"ax",%progbits
+  21              		.align	1
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	inv_get_rotation:
+  27              	.LVL0:
+  28              	.LFB13:
+   1:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  $
+   6:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+   8:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /**
+   9:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *   @defgroup  HAL_Outputs hal_outputs
+  10:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *   @brief     Motion Library - HAL Outputs
+  11:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *              Sets up common outputs for HAL
+  12:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *
+  13:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *   @{
+  14:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *       @file  hal_outputs.c
+  15:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  *       @brief HAL Outputs.
+  16:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  */
+  17:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  18:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include <string.h>
+  19:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  20:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "hal_outputs.h"
+  21:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "log.h"
+  22:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "ml_math_func.h"
+  23:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "mlmath.h"
+  24:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "start_manager.h"
+  25:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "data_builder.h"
+  26:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #include "results_holder.h"
+  27:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  28:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** struct hal_output_t {
+  29:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int accuracy_mag;    /**< Compass accuracy */
+  30:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** //    int accuracy_gyro;   /**< Gyro Accuracy */
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 2
+
+
+  31:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** //    int accuracy_accel;  /**< Accel Accuracy */
+  32:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int accuracy_quat;   /**< quat Accuracy */
+  33:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  34:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_time_t nav_timestamp;
+  35:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_time_t gam_timestamp;
+  36:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** //    inv_time_t accel_timestamp;
+  37:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_time_t mag_timestamp;
+  38:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long nav_quat[4];
+  39:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int gyro_status;
+  40:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int accel_status;
+  41:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int compass_status;
+  42:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int nine_axis_status;
+  43:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_biquad_filter_t lp_filter[3];
+  44:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     float compass_float[3];
+  45:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** };
+  46:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  47:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** static struct hal_output_t hal_out;
+  48:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  49:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Acceleration (m/s^2) in body frame.
+  50:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Acceleration in m/s^2 includes gravity. So while not in motion, it
+  51:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             should return a vector of magnitude near 9.81 m/s^2
+  52:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy of the measurment, 0 is least accurate, while 3 is most accurate.
+  53:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp The timestamp for this sensor. Derived from the timestamp sent to
+  54:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             inv_build_accel().
+  55:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+  56:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+  57:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_accelerometer(float *values, int8_t *accuracy,
+  58:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                        inv_time_t * timestamp)
+  59:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+  60:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+  61:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     /* Converts fixed point to m/s^2. Fixed point has 1g = 2^16.
+  62:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****      * So this 9.80665 / 2^16 */
+  63:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #define ACCEL_CONVERSION 0.000149637603759766f
+  64:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long accel[3];
+  65:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_accel_set(accel, accuracy, timestamp);
+  66:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = accel[0] * ACCEL_CONVERSION;
+  67:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+  68:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+  69:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.accel_status & INV_NEW_DATA)
+  70:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+  71:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+  72:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 0;
+  73:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return status;
+  74:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+  75:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  76:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Linear Acceleration (m/s^2) in Body Frame.
+  77:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Linear Acceleration in body frame, length 3, (m/s^2). May show
+  78:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             accel biases while at rest.
+  79:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy of the measurment, 0 is least accurate, while 3 is most accurate.
+  80:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp The timestamp for this sensor. Derived from the timestamp sent to
+  81:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             inv_build_accel().
+  82:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+  83:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+  84:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_linear_acceleration(float *values, int8_t *accuracy,
+  85:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         inv_time_t * timestamp)
+  86:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+  87:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gravity[3], accel[3];
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 3
+
+
+  88:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  89:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_accel_set(accel, accuracy, timestamp);
+  90:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+  91:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[0] -= gravity[0] >> 14;
+  92:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[1] -= gravity[1] >> 14;
+  93:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[2] -= gravity[2] >> 14;
+  94:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = accel[0] * ACCEL_CONVERSION;
+  95:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+  96:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+  97:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+  98:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return 1;
+  99:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 100:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 101:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Gravity vector (m/s^2) in Body Frame.
+ 102:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Gravity vector in body frame, length 3, (m/s^2)
+ 103:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy of the measurment, 0 is least accurate, while 3 is most accurate.
+ 104:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp The timestamp for this sensor. Derived from the timestamp sent to
+ 105:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             inv_build_accel().
+ 106:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+ 107:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 108:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_gravity(float *values, int8_t *accuracy,
+ 109:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                  inv_time_t * timestamp)
+ 110:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 111:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gravity[3];
+ 112:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 114:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 115:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = (gravity[0] >> 14) * ACCEL_CONVERSION;
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = (gravity[1] >> 14) * ACCEL_CONVERSION;
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = (gravity[2] >> 14) * ACCEL_CONVERSION;
+ 119:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 120:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return 1;
+ 121:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 122:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 123:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /* Converts fixed point to rad/sec. Fixed point has 1 dps = 2^16.
+ 124:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  * So this is: pi / 2^16 / 180 */
+ 125:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** #define GYRO_CONVERSION 2.66316109007924e-007f
+ 126:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 127:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Gyroscope calibrated data (rad/s) in body frame.
+ 128:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Rotation Rate in rad/sec.
+ 129:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy of the measurment, 0 is least accurate, while 3 is most accurate.
+ 130:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp The timestamp for this sensor. Derived from the timestamp sent to
+ 131:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             inv_build_gyro().
+ 132:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+ 133:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 134:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_gyroscope(float *values, int8_t *accuracy,
+ 135:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                    inv_time_t * timestamp)
+ 136:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gyro[3];
+ 138:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gyro_set(gyro, accuracy, timestamp);
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = gyro[0] * GYRO_CONVERSION;
+ 142:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 4
+
+
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 146:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 0;
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return status;
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 151:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Gyroscope raw data (rad/s) in body frame.
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Rotation Rate in rad/sec.
+ 153:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy of the measurment, 0 is least accurate, while 3 is most accurate.
+ 154:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp The timestamp for this sensor. Derived from the timestamp sent to
+ 155:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             inv_build_gyro().
+ 156:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+ 157:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 158:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_gyroscope_raw(float *values, int8_t *accuracy,
+ 159:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                    inv_time_t * timestamp)
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 161:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gyro[3];
+ 162:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gyro_set_raw(gyro, accuracy, timestamp);
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = gyro[0] * GYRO_CONVERSION;
+ 166:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 167:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 168:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ 169:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 170:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 171:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 0;
+ 172:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return status;
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 174:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 175:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /**
+ 176:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * This corresponds to Sensor.TYPE_ROTATION_VECTOR.
+ 177:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * The rotation vector represents the orientation of the device as a combination
+ 178:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * of an angle and an axis, in which the device has rotated through an angle @f$\theta@f$
+ 179:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * around an axis {x, y, z}. <br>
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * The three elements of the rotation vector are
+ 181:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * {x*sin(@f$\theta@f$/2), y*sin(@f$\theta@f$/2), z*sin(@f$\theta@f$/2)}, such that the magnitude of
+ 182:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * vector is equal to sin(@f$\theta@f$/2), and the direction of the rotation vector is
+ 183:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * equal to the direction of the axis of rotation.
+ 184:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *
+ 185:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * The three elements of the rotation vector are equal to the last three components of a unit quater
+ 186:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * {x*sin(@f$\theta@f$/2), y*sin(@f$\theta@f$/2), z*sin(@f$\theta@f$/2)>. The 4th element is cos(@f$
+ 187:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *
+ 188:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * Elements of the rotation vector are unitless. The x,y and z axis are defined in the same way as t
+ 189:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * The reference coordinate system is defined as a direct orthonormal basis, where:
+ 190:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 191:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     -X is defined as the vector product Y.Z (It is tangential to the ground at the device's current
+ 192:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     -Y is tangential to the ground at the device's current location and points towards the magnetic
+ 193:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     -Z points towards the sky and is perpendicular to the ground.
+ 194:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Length 4.
+ 195:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy 0 to 3, 3 = most accurate
+ 196:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp Timestamp. In (ns) for Android.
+ 197:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+ 198:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 199:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_rotation_vector(float *values, int8_t *accuracy,
+ 200:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         inv_time_t * timestamp)
+ 201:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 5
+
+
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 204:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.nav_quat[0] >= 0) {
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[0] = hal_out.nav_quat[1] * INV_TWO_POWER_NEG_30;
+ 207:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 208:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 210:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     } else {
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[0] = -hal_out.nav_quat[1] * INV_TWO_POWER_NEG_30;
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = -hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = -hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 215:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 216:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[4] = inv_get_heading_confidence_interval();
+ 217:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 218:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return hal_out.nine_axis_status;
+ 219:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 220:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 221:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Compass data (uT) in body frame.
+ 222:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Compass data in (uT), length 3. May be calibrated by having
+ 223:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *             biases removed and sensitivity adjusted
+ 224:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy 0 to 3, 3 = most accurate
+ 225:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp Timestamp. In (ns) for Android.
+ 226:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+ 227:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 228:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_magnetic_field(float *values, int8_t *accuracy,
+ 229:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                         inv_time_t * timestamp)
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 231:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 232:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     /* Converts fixed point to uT. Fixed point has 1 uT = 2^16.
+ 233:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****      * So this is: 1 / 2^16*/
+ 234:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** //#define COMPASS_CONVERSION 1.52587890625e-005f
+ 235:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int i;
+ 236:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 237:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.mag_timestamp;
+ 238:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_mag;
+ 239:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     for (i=0; i<3; i++)  {
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[i] = hal_out.compass_float[i];
+ 242:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.compass_status & INV_NEW_DATA)
+ 244:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 245:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 246:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 0;
+ 247:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     hal_out.compass_status = 0;
+ 248:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return status;
+ 249:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 250:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 251:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** static void inv_get_rotation(float r[3][3])
+ 252:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+  29              		.loc 1 252 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 40
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 252 1 is_stmt 0 view .LVU1
+  34 0000 10B5     		push	{r4, lr}
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 6
+
+
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 4, -8
+  38              		.cfi_offset 14, -4
+  39 0002 8AB0     		sub	sp, sp, #40
+  40              	.LCFI1:
+  41              		.cfi_def_cfa_offset 48
+  42 0004 0446     		mov	r4, r0
+ 253:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long rot[9];
+  43              		.loc 1 253 5 is_stmt 1 view .LVU2
+ 254:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     float conv = 1.f / (1L<<30);
+  44              		.loc 1 254 5 view .LVU3
+  45              	.LVL1:
+ 255:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 256:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_quaternion_to_rotation(hal_out.nav_quat, rot);
+  46              		.loc 1 256 5 view .LVU4
+  47 0006 01A9     		add	r1, sp, #4
+  48 0008 2748     		ldr	r0, .L3
+  49              	.LVL2:
+  50              		.loc 1 256 5 is_stmt 0 view .LVU5
+  51 000a FFF7FEFF 		bl	inv_quaternion_to_rotation
+  52              	.LVL3:
+ 257:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[0][0] = rot[0]*conv;
+  53              		.loc 1 257 5 is_stmt 1 view .LVU6
+  54              		.loc 1 257 21 is_stmt 0 view .LVU7
+  55 000e DDED017A 		vldr.32	s15, [sp, #4]	@ int
+  56 0012 B8EEE77A 		vcvt.f32.s32	s14, s15
+  57 0016 DFED257A 		vldr.32	s15, .L3+4
+  58 001a 27EE277A 		vmul.f32	s14, s14, s15
+  59              		.loc 1 257 13 view .LVU8
+  60 001e 84ED007A 		vstr.32	s14, [r4]
+ 258:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[0][1] = rot[1]*conv;
+  61              		.loc 1 258 5 is_stmt 1 view .LVU9
+  62              		.loc 1 258 21 is_stmt 0 view .LVU10
+  63 0022 9DED027A 		vldr.32	s14, [sp, #8]	@ int
+  64 0026 B8EEC77A 		vcvt.f32.s32	s14, s14
+  65 002a 27EE277A 		vmul.f32	s14, s14, s15
+  66              		.loc 1 258 13 view .LVU11
+  67 002e 84ED017A 		vstr.32	s14, [r4, #4]
+ 259:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[0][2] = rot[2]*conv;
+  68              		.loc 1 259 5 is_stmt 1 view .LVU12
+  69              		.loc 1 259 21 is_stmt 0 view .LVU13
+  70 0032 9DED037A 		vldr.32	s14, [sp, #12]	@ int
+  71 0036 B8EEC77A 		vcvt.f32.s32	s14, s14
+  72 003a 27EE277A 		vmul.f32	s14, s14, s15
+  73              		.loc 1 259 13 view .LVU14
+  74 003e 84ED027A 		vstr.32	s14, [r4, #8]
+ 260:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[1][0] = rot[3]*conv;
+  75              		.loc 1 260 5 is_stmt 1 view .LVU15
+  76              		.loc 1 260 21 is_stmt 0 view .LVU16
+  77 0042 9DED047A 		vldr.32	s14, [sp, #16]	@ int
+  78 0046 B8EEC77A 		vcvt.f32.s32	s14, s14
+  79 004a 27EE277A 		vmul.f32	s14, s14, s15
+  80              		.loc 1 260 13 view .LVU17
+  81 004e 84ED037A 		vstr.32	s14, [r4, #12]
+ 261:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[1][1] = rot[4]*conv;
+  82              		.loc 1 261 5 is_stmt 1 view .LVU18
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 7
+
+
+  83              		.loc 1 261 21 is_stmt 0 view .LVU19
+  84 0052 9DED057A 		vldr.32	s14, [sp, #20]	@ int
+  85 0056 B8EEC77A 		vcvt.f32.s32	s14, s14
+  86 005a 27EE277A 		vmul.f32	s14, s14, s15
+  87              		.loc 1 261 13 view .LVU20
+  88 005e 84ED047A 		vstr.32	s14, [r4, #16]
+ 262:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[1][2] = rot[5]*conv;
+  89              		.loc 1 262 5 is_stmt 1 view .LVU21
+  90              		.loc 1 262 21 is_stmt 0 view .LVU22
+  91 0062 9DED067A 		vldr.32	s14, [sp, #24]	@ int
+  92 0066 B8EEC77A 		vcvt.f32.s32	s14, s14
+  93 006a 27EE277A 		vmul.f32	s14, s14, s15
+  94              		.loc 1 262 13 view .LVU23
+  95 006e 84ED057A 		vstr.32	s14, [r4, #20]
+ 263:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[2][0] = rot[6]*conv;
+  96              		.loc 1 263 5 is_stmt 1 view .LVU24
+  97              		.loc 1 263 21 is_stmt 0 view .LVU25
+  98 0072 9DED077A 		vldr.32	s14, [sp, #28]	@ int
+  99 0076 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 100 007a 27EE277A 		vmul.f32	s14, s14, s15
+ 101              		.loc 1 263 13 view .LVU26
+ 102 007e 84ED067A 		vstr.32	s14, [r4, #24]
+ 264:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[2][1] = rot[7]*conv;
+ 103              		.loc 1 264 5 is_stmt 1 view .LVU27
+ 104              		.loc 1 264 21 is_stmt 0 view .LVU28
+ 105 0082 9DED087A 		vldr.32	s14, [sp, #32]	@ int
+ 106 0086 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 107 008a 27EE277A 		vmul.f32	s14, s14, s15
+ 108              		.loc 1 264 13 view .LVU29
+ 109 008e 84ED077A 		vstr.32	s14, [r4, #28]
+ 265:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     r[2][2] = rot[8]*conv;
+ 110              		.loc 1 265 5 is_stmt 1 view .LVU30
+ 111              		.loc 1 265 21 is_stmt 0 view .LVU31
+ 112 0092 9DED097A 		vldr.32	s14, [sp, #36]	@ int
+ 113 0096 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 114 009a 67EE277A 		vmul.f32	s15, s14, s15
+ 115              		.loc 1 265 13 view .LVU32
+ 116 009e C4ED087A 		vstr.32	s15, [r4, #32]
+ 266:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 117              		.loc 1 266 1 view .LVU33
+ 118 00a2 0AB0     		add	sp, sp, #40
+ 119              	.LCFI2:
+ 120              		.cfi_def_cfa_offset 8
+ 121              		@ sp needed
+ 122 00a4 10BD     		pop	{r4, pc}
+ 123              	.LVL4:
+ 124              	.L4:
+ 125              		.loc 1 266 1 view .LVU34
+ 126 00a6 00BF     		.align	2
+ 127              	.L3:
+ 128 00a8 14000000 		.word	hal_out+20
+ 129 00ac 00008030 		.word	813694976
+ 130              		.cfi_endproc
+ 131              	.LFE13:
+ 133              		.section	.text.google_orientation,"ax",%progbits
+ 134              		.align	1
+ 135              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 8
+
+
+ 136              		.thumb
+ 137              		.thumb_func
+ 139              	google_orientation:
+ 140              	.LVL5:
+ 141              	.LFB14:
+ 267:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 268:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** static void google_orientation(float *g)
+ 269:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 142              		.loc 1 269 1 is_stmt 1 view -0
+ 143              		.cfi_startproc
+ 144              		@ args = 0, pretend = 0, frame = 40
+ 145              		@ frame_needed = 0, uses_anonymous_args = 0
+ 146              		.loc 1 269 1 is_stmt 0 view .LVU36
+ 147 0000 10B5     		push	{r4, lr}
+ 148              	.LCFI3:
+ 149              		.cfi_def_cfa_offset 8
+ 150              		.cfi_offset 4, -8
+ 151              		.cfi_offset 14, -4
+ 152 0002 2DED028B 		vpush.64	{d8}
+ 153              	.LCFI4:
+ 154              		.cfi_def_cfa_offset 16
+ 155              		.cfi_offset 80, -16
+ 156              		.cfi_offset 81, -12
+ 157 0006 8AB0     		sub	sp, sp, #40
+ 158              	.LCFI5:
+ 159              		.cfi_def_cfa_offset 56
+ 160 0008 0446     		mov	r4, r0
+ 270:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     float rad2deg = (float)(180.0 / M_PI);
+ 161              		.loc 1 270 5 is_stmt 1 view .LVU37
+ 162              	.LVL6:
+ 271:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     float R[3][3];
+ 163              		.loc 1 271 5 view .LVU38
+ 272:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 273:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_rotation(R);
+ 164              		.loc 1 273 5 view .LVU39
+ 165 000a 01A8     		add	r0, sp, #4
+ 166              	.LVL7:
+ 167              		.loc 1 273 5 is_stmt 0 view .LVU40
+ 168 000c FFF7FEFF 		bl	inv_get_rotation
+ 169              	.LVL8:
+ 274:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 275:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     g[0] = atan2f(-R[1][0], R[0][0]) * rad2deg;
+ 170              		.loc 1 275 5 is_stmt 1 view .LVU41
+ 171              		.loc 1 275 12 is_stmt 0 view .LVU42
+ 172 0010 DDED010A 		vldr.32	s1, [sp, #4]
+ 173 0014 9DED040A 		vldr.32	s0, [sp, #16]
+ 174 0018 B1EE400A 		vneg.f32	s0, s0
+ 175 001c FFF7FEFF 		bl	atan2f
+ 176              	.LVL9:
+ 177              		.loc 1 275 38 view .LVU43
+ 178 0020 DFED148A 		vldr.32	s17, .L11
+ 179 0024 20EE288A 		vmul.f32	s16, s0, s17
+ 180              		.loc 1 275 10 view .LVU44
+ 181 0028 84ED008A 		vstr.32	s16, [r4]
+ 276:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     g[1] = atan2f(-R[2][1], R[2][2]) * rad2deg;
+ 182              		.loc 1 276 5 is_stmt 1 view .LVU45
+ 183              		.loc 1 276 12 is_stmt 0 view .LVU46
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 9
+
+
+ 184 002c DDED090A 		vldr.32	s1, [sp, #36]
+ 185 0030 9DED080A 		vldr.32	s0, [sp, #32]
+ 186 0034 B1EE400A 		vneg.f32	s0, s0
+ 187 0038 FFF7FEFF 		bl	atan2f
+ 188              	.LVL10:
+ 189              		.loc 1 276 38 view .LVU47
+ 190 003c 20EE280A 		vmul.f32	s0, s0, s17
+ 191              		.loc 1 276 10 view .LVU48
+ 192 0040 84ED010A 		vstr.32	s0, [r4, #4]
+ 277:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     g[2] = asinf ( R[2][0])          * rad2deg;
+ 193              		.loc 1 277 5 is_stmt 1 view .LVU49
+ 194              		.loc 1 277 12 is_stmt 0 view .LVU50
+ 195 0044 9DED070A 		vldr.32	s0, [sp, #28]
+ 196 0048 FFF7FEFF 		bl	asinf
+ 197              	.LVL11:
+ 198              		.loc 1 277 38 view .LVU51
+ 199 004c 20EE280A 		vmul.f32	s0, s0, s17
+ 200              		.loc 1 277 10 view .LVU52
+ 201 0050 84ED020A 		vstr.32	s0, [r4, #8]
+ 278:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (g[0] < 0)
+ 202              		.loc 1 278 5 is_stmt 1 view .LVU53
+ 203              		.loc 1 278 8 is_stmt 0 view .LVU54
+ 204 0054 B5EEC08A 		vcmpe.f32	s16, #0
+ 205 0058 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 206 005c 03D4     		bmi	.L10
+ 207              	.L5:
+ 279:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         g[0] += 360;
+ 280:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 208              		.loc 1 280 1 view .LVU55
+ 209 005e 0AB0     		add	sp, sp, #40
+ 210              	.LCFI6:
+ 211              		.cfi_remember_state
+ 212              		.cfi_def_cfa_offset 16
+ 213              		@ sp needed
+ 214 0060 BDEC028B 		vldm	sp!, {d8}
+ 215              	.LCFI7:
+ 216              		.cfi_restore 80
+ 217              		.cfi_restore 81
+ 218              		.cfi_def_cfa_offset 8
+ 219 0064 10BD     		pop	{r4, pc}
+ 220              	.LVL12:
+ 221              	.L10:
+ 222              	.LCFI8:
+ 223              		.cfi_restore_state
+ 279:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         g[0] += 360;
+ 224              		.loc 1 279 9 is_stmt 1 view .LVU56
+ 279:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         g[0] += 360;
+ 225              		.loc 1 279 14 is_stmt 0 view .LVU57
+ 226 0066 DFED047A 		vldr.32	s15, .L11+4
+ 227 006a 38EE278A 		vadd.f32	s16, s16, s15
+ 228 006e 84ED008A 		vstr.32	s16, [r4]
+ 229              		.loc 1 280 1 view .LVU58
+ 230 0072 F4E7     		b	.L5
+ 231              	.L12:
+ 232              		.align	2
+ 233              	.L11:
+ 234 0074 E12E6542 		.word	1113927393
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 10
+
+
+ 235 0078 0000B443 		.word	1135869952
+ 236              		.cfi_endproc
+ 237              	.LFE14:
+ 239              		.section	.text.inv_generate_hal_outputs,"ax",%progbits
+ 240              		.align	1
+ 241              		.global	inv_generate_hal_outputs
+ 242              		.syntax unified
+ 243              		.thumb
+ 244              		.thumb_func
+ 246              	inv_generate_hal_outputs:
+ 247              	.LVL13:
+ 248              	.LFB16:
+ 281:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 282:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 283:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** This corresponds to Sensor.TYPE_ORIENTATION. All values are angles in degrees.
+ 284:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] values Length 3, Degrees.<br>
+ 285:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        - values[0]: Azimuth, angle between the magnetic north direction
+ 286:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *         and the y-axis, around the z-axis (0 to 359). 0=North, 90=East, 180=South, 270=West<br>
+ 287:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        - values[1]: Pitch, rotation around x-axis (-180 to 180), with positive values
+ 288:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *         when the z-axis moves toward the y-axis.<br>
+ 289:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        - values[2]: Roll, rotation around y-axis (-90 to 90), with positive
+ 290:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *          values when the x-axis moves toward the z-axis.<br>
+ 291:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *
+ 292:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @note  This definition is different from yaw, pitch and roll used in aviation
+ 293:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        where the X axis is along the long side of the plane (tail to nose).
+ 294:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        Note: This sensor type exists for legacy reasons, please use getRotationMatrix()
+ 295:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        in conjunction with remapCoordinateSystem() and getOrientation() to compute
+ 296:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        these values instead.
+ 297:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        Important note: For historical reasons the roll angle is positive in the
+ 298:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        clockwise direction (mathematically speaking, it should be positive in
+ 299:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** *        the counter-clockwise direction).
+ 300:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] accuracy Accuracy of the measurment, 0 is least accurate, while 3 is most accurate.
+ 301:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[out] timestamp The timestamp for this sensor.
+ 302:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return     Returns 1 if the data was updated or 0 if it was not updated.
+ 303:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 304:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** int inv_get_sensor_type_orientation(float *values, int8_t *accuracy,
+ 305:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                      inv_time_t * timestamp)
+ 306:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 307:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 308:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 309:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 310:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     google_orientation(values);
+ 311:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 312:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return hal_out.nine_axis_status;
+ 313:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 314:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 315:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Main callback to generate HAL outputs. Typically not called by library users.
+ 316:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @param[in] sensor_cal Input variable to take sensor data whenever there is new
+ 317:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * sensor data.
+ 318:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 319:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 320:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** inv_error_t inv_generate_hal_outputs(struct inv_sensor_cal_t *sensor_cal)
+ 321:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 249              		.loc 1 321 1 is_stmt 1 view -0
+ 250              		.cfi_startproc
+ 251              		@ args = 0, pretend = 0, frame = 16
+ 252              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 11
+
+
+ 253              		.loc 1 321 1 is_stmt 0 view .LVU60
+ 254 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 255              	.LCFI9:
+ 256              		.cfi_def_cfa_offset 20
+ 257              		.cfi_offset 4, -20
+ 258              		.cfi_offset 5, -16
+ 259              		.cfi_offset 6, -12
+ 260              		.cfi_offset 7, -8
+ 261              		.cfi_offset 14, -4
+ 262 0002 85B0     		sub	sp, sp, #20
+ 263              	.LCFI10:
+ 264              		.cfi_def_cfa_offset 40
+ 265 0004 0546     		mov	r5, r0
+ 322:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int use_sensor = 0;
+ 266              		.loc 1 322 5 is_stmt 1 view .LVU61
+ 267              	.LVL14:
+ 323:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long sr = 1000;
+ 268              		.loc 1 323 5 view .LVU62
+ 324:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long compass[3];
+ 269              		.loc 1 324 5 view .LVU63
+ 325:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int8_t accuracy;
+ 270              		.loc 1 325 5 view .LVU64
+ 326:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int i;
+ 271              		.loc 1 326 5 view .LVU65
+ 327:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     (void) sensor_cal;
+ 272              		.loc 1 327 5 view .LVU66
+ 328:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 329:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_quaternion_set(hal_out.nav_quat, &hal_out.accuracy_quat,
+ 273              		.loc 1 329 5 view .LVU67
+ 274 0006 634C     		ldr	r4, .L41
+ 275 0008 2246     		mov	r2, r4
+ 276 000a 211F     		subs	r1, r4, #4
+ 277 000c 04F10C00 		add	r0, r4, #12
+ 278              	.LVL15:
+ 279              		.loc 1 329 5 is_stmt 0 view .LVU68
+ 280 0010 FFF7FEFF 		bl	inv_get_quaternion_set
+ 281              	.LVL16:
+ 330:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                            &hal_out.nav_timestamp);
+ 331:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     hal_out.gyro_status = sensor_cal->gyro.status;
+ 282              		.loc 1 331 5 is_stmt 1 view .LVU69
+ 283              		.loc 1 331 43 is_stmt 0 view .LVU70
+ 284 0014 296B     		ldr	r1, [r5, #48]
+ 285              		.loc 1 331 25 view .LVU71
+ 286 0016 E161     		str	r1, [r4, #28]
+ 332:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     hal_out.accel_status = sensor_cal->accel.status;
+ 287              		.loc 1 332 5 is_stmt 1 view .LVU72
+ 288              		.loc 1 332 45 is_stmt 0 view .LVU73
+ 289 0018 6B6F     		ldr	r3, [r5, #116]
+ 290              		.loc 1 332 26 view .LVU74
+ 291 001a 2362     		str	r3, [r4, #32]
+ 333:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     hal_out.compass_status = sensor_cal->compass.status;
+ 292              		.loc 1 333 5 is_stmt 1 view .LVU75
+ 293              		.loc 1 333 49 is_stmt 0 view .LVU76
+ 294 001c D5F8B820 		ldr	r2, [r5, #184]
+ 295              		.loc 1 333 28 view .LVU77
+ 296 0020 6262     		str	r2, [r4, #36]
+ 334:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 12
+
+
+ 335:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     // Find the highest sample rate and tie generating 9-axis to that one.
+ 336:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (sensor_cal->gyro.status & INV_SENSOR_ON) {
+ 297              		.loc 1 336 5 is_stmt 1 view .LVU78
+ 298              		.loc 1 336 8 is_stmt 0 view .LVU79
+ 299 0022 11F4807F 		tst	r1, #256
+ 300 0026 28D0     		beq	.L32
+ 337:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         sr = sensor_cal->gyro.sample_rate_ms;
+ 301              		.loc 1 337 9 is_stmt 1 view .LVU80
+ 302              		.loc 1 337 12 is_stmt 0 view .LVU81
+ 303 0028 EC6A     		ldr	r4, [r5, #44]
+ 304              	.LVL17:
+ 338:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         use_sensor = 0;
+ 305              		.loc 1 338 9 is_stmt 1 view .LVU82
+ 306              	.L14:
+ 339:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 340:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if ((sensor_cal->accel.status & INV_SENSOR_ON) && (sr > sensor_cal->accel.sample_rate_ms)) {
+ 307              		.loc 1 340 5 view .LVU83
+ 308              		.loc 1 340 8 is_stmt 0 view .LVU84
+ 309 002a 13F48076 		ands	r6, r3, #256
+ 310 002e 03D0     		beq	.L15
+ 311              		.loc 1 340 78 discriminator 1 view .LVU85
+ 312 0030 286F     		ldr	r0, [r5, #112]
+ 313              		.loc 1 340 52 discriminator 1 view .LVU86
+ 314 0032 A042     		cmp	r0, r4
+ 315 0034 24DB     		blt	.L33
+ 316              		.loc 1 340 52 view .LVU87
+ 317 0036 0026     		movs	r6, #0
+ 318              	.LVL18:
+ 319              	.L15:
+ 341:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 342:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         use_sensor = 1;
+ 343:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 344:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if ((sensor_cal->compass.status & INV_SENSOR_ON) && (sr > sensor_cal->compass.sample_rate_ms)) 
+ 320              		.loc 1 344 5 is_stmt 1 view .LVU88
+ 321              		.loc 1 344 8 is_stmt 0 view .LVU89
+ 322 0038 12F4807F 		tst	r2, #256
+ 323 003c 05D0     		beq	.L16
+ 324              		.loc 1 344 82 discriminator 1 view .LVU90
+ 325 003e D5F8B400 		ldr	r0, [r5, #180]
+ 326              		.loc 1 344 54 discriminator 1 view .LVU91
+ 327 0042 A042     		cmp	r0, r4
+ 328 0044 01DA     		bge	.L16
+ 345:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         sr = sensor_cal->compass.sample_rate_ms;
+ 329              		.loc 1 345 12 view .LVU92
+ 330 0046 0446     		mov	r4, r0
+ 331              	.LVL19:
+ 346:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         use_sensor = 2;
+ 332              		.loc 1 346 20 view .LVU93
+ 333 0048 0226     		movs	r6, #2
+ 334              	.LVL20:
+ 335              	.L16:
+ 347:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 348:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if ((sensor_cal->quat.status & INV_SENSOR_ON) && (sr > sensor_cal->quat.sample_rate_ms)) {
+ 336              		.loc 1 348 5 is_stmt 1 view .LVU94
+ 337              		.loc 1 348 26 is_stmt 0 view .LVU95
+ 338 004a D5F82001 		ldr	r0, [r5, #288]
+ 339              		.loc 1 348 8 view .LVU96
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 13
+
+
+ 340 004e 10F4807C 		ands	ip, r0, #256
+ 341 0052 04D0     		beq	.L17
+ 342              		.loc 1 348 51 discriminator 1 view .LVU97
+ 343 0054 D5F82C71 		ldr	r7, [r5, #300]
+ 344 0058 A742     		cmp	r7, r4
+ 345 005a 00DA     		bge	.L17
+ 349:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         sr = sensor_cal->quat.sample_rate_ms;
+ 350:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         use_sensor = 3;
+ 346              		.loc 1 350 20 view .LVU98
+ 347 005c 0326     		movs	r6, #3
+ 348              	.LVL21:
+ 349              	.L17:
+ 351:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 352:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 353:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     // Only output 9-axis if all 9 sensors are on.
+ 354:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (sensor_cal->quat.status & INV_SENSOR_ON) {
+ 350              		.loc 1 354 5 is_stmt 1 view .LVU99
+ 351              		.loc 1 354 8 is_stmt 0 view .LVU100
+ 352 005e BCF1000F 		cmp	ip, #0
+ 353 0062 10D0     		beq	.L18
+ 355:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         // If quaternion sensor is on, gyros are not required as quaternion already has that part
+ 356:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         if ((sensor_cal->accel.status & sensor_cal->compass.status & INV_SENSOR_ON) == 0) {
+ 354              		.loc 1 356 9 is_stmt 1 view .LVU101
+ 355              		.loc 1 356 39 is_stmt 0 view .LVU102
+ 356 0064 03EA0204 		and	r4, r3, r2
+ 357              		.loc 1 356 12 view .LVU103
+ 358 0068 14F4807F 		tst	r4, #256
+ 359 006c 11D0     		beq	.L19
+ 360              	.L20:
+ 357:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             use_sensor = -1;
+ 358:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         }
+ 359:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     } else {
+ 360:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         if ((sensor_cal->gyro.status & sensor_cal->accel.status & sensor_cal->compass.status & INV_
+ 361:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             use_sensor = -1;
+ 362:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         }
+ 363:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 364:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 365:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     switch (use_sensor) {
+ 361              		.loc 1 365 5 is_stmt 1 view .LVU104
+ 362 006e 032E     		cmp	r6, #3
+ 363 0070 0FD8     		bhi	.L19
+ 364 0072 DFE806F0 		tbb	[pc, r6]
+ 365              	.L22:
+ 366 0076 1E       		.byte	(.L25-.L22)/2
+ 367 0077 25       		.byte	(.L24-.L22)/2
+ 368 0078 2C       		.byte	(.L23-.L22)/2
+ 369 0079 34       		.byte	(.L21-.L22)/2
+ 370              	.LVL22:
+ 371              		.p2align 1
+ 372              	.L32:
+ 323:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long compass[3];
+ 373              		.loc 1 323 10 is_stmt 0 view .LVU105
+ 374 007a 4FF47A74 		mov	r4, #1000
+ 375 007e D4E7     		b	.L14
+ 376              	.LVL23:
+ 377              	.L33:
+ 341:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         use_sensor = 1;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 14
+
+
+ 378              		.loc 1 341 12 view .LVU106
+ 379 0080 0446     		mov	r4, r0
+ 380              	.LVL24:
+ 342:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 381              		.loc 1 342 20 view .LVU107
+ 382 0082 0126     		movs	r6, #1
+ 383 0084 D8E7     		b	.L15
+ 384              	.LVL25:
+ 385              	.L18:
+ 360:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             use_sensor = -1;
+ 386              		.loc 1 360 9 is_stmt 1 view .LVU108
+ 360:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             use_sensor = -1;
+ 387              		.loc 1 360 38 is_stmt 0 view .LVU109
+ 388 0086 01EA0304 		and	r4, r1, r3
+ 360:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             use_sensor = -1;
+ 389              		.loc 1 360 65 view .LVU110
+ 390 008a 1440     		ands	r4, r4, r2
+ 360:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             use_sensor = -1;
+ 391              		.loc 1 360 12 view .LVU111
+ 392 008c 14F4807F 		tst	r4, #256
+ 393 0090 EDD1     		bne	.L20
+ 394              	.L19:
+ 395              	.LVL26:
+ 366:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 0:
+ 367:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nine_axis_status = (sensor_cal->gyro.status & INV_NEW_DATA) ? 1 : 0;
+ 368:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->gyro.timestamp;
+ 369:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 370:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 1:
+ 371:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nine_axis_status = (sensor_cal->accel.status & INV_NEW_DATA) ? 1 : 0;
+ 372:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->accel.timestamp;
+ 373:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 374:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 2:
+ 375:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nine_axis_status = (sensor_cal->compass.status & INV_NEW_DATA) ? 1 : 0;
+ 376:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->compass.timestamp;
+ 377:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 378:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 3:
+ 379:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nine_axis_status = (sensor_cal->quat.status & INV_NEW_DATA) ? 1 : 0;
+ 380:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->quat.timestamp;
+ 381:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 382:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     default:
+ 383:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nine_axis_status = 0; // Don't output quaternion related info
+ 396              		.loc 1 383 9 is_stmt 1 view .LVU112
+ 397              		.loc 1 383 34 is_stmt 0 view .LVU113
+ 398 0092 414B     		ldr	r3, .L41+4
+ 399 0094 0022     		movs	r2, #0
+ 400 0096 1A63     		str	r2, [r3, #48]
+ 384:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 401              		.loc 1 384 9 is_stmt 1 view .LVU114
+ 402              	.L26:
+ 385:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 386:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 387:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     /* Converts fixed point to uT. Fixed point has 1 uT = 2^16.
+ 388:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****      * So this is: 1 / 2^16*/
+ 389:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     #define COMPASS_CONVERSION 1.52587890625e-005f
+ 390:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 391:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_compass_set(compass, &accuracy, &(hal_out.mag_timestamp) );
+ 403              		.loc 1 391 5 view .LVU115
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 15
+
+
+ 404 0098 404C     		ldr	r4, .L41+8
+ 405 009a 2246     		mov	r2, r4
+ 406 009c 0DF10301 		add	r1, sp, #3
+ 407 00a0 01A8     		add	r0, sp, #4
+ 408 00a2 FFF7FEFF 		bl	inv_get_compass_set
+ 409              	.LVL27:
+ 392:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     hal_out.accuracy_mag = (int ) accuracy;
+ 410              		.loc 1 392 5 view .LVU116
+ 411              		.loc 1 392 28 is_stmt 0 view .LVU117
+ 412 00a6 9DF90330 		ldrsb	r3, [sp, #3]
+ 413              		.loc 1 392 26 view .LVU118
+ 414 00aa 44F8103C 		str	r3, [r4, #-16]
+ 393:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 394:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     for (i=0; i<3; i++) {
+ 415              		.loc 1 394 5 is_stmt 1 view .LVU119
+ 416              	.LVL28:
+ 417              		.loc 1 394 11 is_stmt 0 view .LVU120
+ 418 00ae 0024     		movs	r4, #0
+ 419              		.loc 1 394 5 view .LVU121
+ 420 00b0 49E0     		b	.L27
+ 421              	.LVL29:
+ 422              	.L25:
+ 367:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->gyro.timestamp;
+ 423              		.loc 1 367 9 is_stmt 1 view .LVU122
+ 367:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->gyro.timestamp;
+ 424              		.loc 1 367 81 is_stmt 0 view .LVU123
+ 425 00b2 C1F38011 		ubfx	r1, r1, #6, #1
+ 367:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->gyro.timestamp;
+ 426              		.loc 1 367 34 view .LVU124
+ 427 00b6 384B     		ldr	r3, .L41+4
+ 428 00b8 1963     		str	r1, [r3, #48]
+ 368:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 429              		.loc 1 368 9 is_stmt 1 view .LVU125
+ 368:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 430              		.loc 1 368 49 is_stmt 0 view .LVU126
+ 431 00ba AA6B     		ldr	r2, [r5, #56]
+ 368:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 432              		.loc 1 368 31 view .LVU127
+ 433 00bc 9A60     		str	r2, [r3, #8]
+ 369:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 1:
+ 434              		.loc 1 369 9 is_stmt 1 view .LVU128
+ 435 00be EBE7     		b	.L26
+ 436              	.L24:
+ 371:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->accel.timestamp;
+ 437              		.loc 1 371 9 view .LVU129
+ 371:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->accel.timestamp;
+ 438              		.loc 1 371 82 is_stmt 0 view .LVU130
+ 439 00c0 C3F38013 		ubfx	r3, r3, #6, #1
+ 371:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->accel.timestamp;
+ 440              		.loc 1 371 34 view .LVU131
+ 441 00c4 344A     		ldr	r2, .L41+4
+ 442 00c6 1363     		str	r3, [r2, #48]
+ 372:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 443              		.loc 1 372 9 is_stmt 1 view .LVU132
+ 372:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 444              		.loc 1 372 50 is_stmt 0 view .LVU133
+ 445 00c8 EB6F     		ldr	r3, [r5, #124]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 16
+
+
+ 372:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 446              		.loc 1 372 31 view .LVU134
+ 447 00ca 9360     		str	r3, [r2, #8]
+ 373:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 2:
+ 448              		.loc 1 373 9 is_stmt 1 view .LVU135
+ 449 00cc E4E7     		b	.L26
+ 450              	.L23:
+ 375:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->compass.timestamp;
+ 451              		.loc 1 375 9 view .LVU136
+ 375:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->compass.timestamp;
+ 452              		.loc 1 375 84 is_stmt 0 view .LVU137
+ 453 00ce C2F38012 		ubfx	r2, r2, #6, #1
+ 375:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->compass.timestamp;
+ 454              		.loc 1 375 34 view .LVU138
+ 455 00d2 314B     		ldr	r3, .L41+4
+ 456 00d4 1A63     		str	r2, [r3, #48]
+ 376:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 457              		.loc 1 376 9 is_stmt 1 view .LVU139
+ 376:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 458              		.loc 1 376 52 is_stmt 0 view .LVU140
+ 459 00d6 D5F8C020 		ldr	r2, [r5, #192]
+ 376:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 460              		.loc 1 376 31 view .LVU141
+ 461 00da 9A60     		str	r2, [r3, #8]
+ 377:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     case 3:
+ 462              		.loc 1 377 9 is_stmt 1 view .LVU142
+ 463 00dc DCE7     		b	.L26
+ 464              	.L21:
+ 379:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->quat.timestamp;
+ 465              		.loc 1 379 9 view .LVU143
+ 379:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->quat.timestamp;
+ 466              		.loc 1 379 81 is_stmt 0 view .LVU144
+ 467 00de C0F38010 		ubfx	r0, r0, #6, #1
+ 379:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         hal_out.nav_timestamp = sensor_cal->quat.timestamp;
+ 468              		.loc 1 379 34 view .LVU145
+ 469 00e2 2D4B     		ldr	r3, .L41+4
+ 470 00e4 1863     		str	r0, [r3, #48]
+ 380:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 471              		.loc 1 380 9 is_stmt 1 view .LVU146
+ 380:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 472              		.loc 1 380 49 is_stmt 0 view .LVU147
+ 473 00e6 D5F82421 		ldr	r2, [r5, #292]
+ 380:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         break;
+ 474              		.loc 1 380 31 view .LVU148
+ 475 00ea 9A60     		str	r2, [r3, #8]
+ 381:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     default:
+ 476              		.loc 1 381 9 is_stmt 1 view .LVU149
+ 477 00ec D4E7     		b	.L26
+ 478              	.LVL30:
+ 479              	.L39:
+ 395:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         if ((sensor_cal->compass.status & (INV_NEW_DATA | INV_CONTIGUOUS)) ==
+ 396:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                                              INV_NEW_DATA )  {
+ 397:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             // set the state variables to match output with input
+ 398:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             inv_calc_state_to_match_output(&hal_out.lp_filter[i], (float ) compass[i]);
+ 480              		.loc 1 398 13 view .LVU150
+ 481              		.loc 1 398 83 is_stmt 0 view .LVU151
+ 482 00ee 04AB     		add	r3, sp, #16
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 17
+
+
+ 483 00f0 03EB8403 		add	r3, r3, r4, lsl #2
+ 484 00f4 13ED030A 		vldr.32	s0, [r3, #-12]	@ int
+ 485              		.loc 1 398 13 view .LVU152
+ 486 00f8 2C20     		movs	r0, #44
+ 487 00fa 04FB00F0 		mul	r0, r4, r0
+ 488 00fe 3030     		adds	r0, r0, #48
+ 489 0100 254B     		ldr	r3, .L41+4
+ 490 0102 1844     		add	r0, r0, r3
+ 491 0104 B8EEC00A 		vcvt.f32.s32	s0, s0
+ 492 0108 0430     		adds	r0, r0, #4
+ 493 010a FFF7FEFF 		bl	inv_calc_state_to_match_output
+ 494              	.LVL31:
+ 495 010e 22E0     		b	.L28
+ 496              	.L40:
+ 399:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         }
+ 400:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 401:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         if ((sensor_cal->compass.status & (INV_NEW_DATA | INV_RAW_DATA)) ==
+ 402:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                          (INV_NEW_DATA | INV_RAW_DATA)   )  {
+ 403:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 404:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             hal_out.compass_float[i] = inv_biquad_filter_process(&hal_out.lp_filter[i],
+ 497              		.loc 1 404 13 is_stmt 1 view .LVU153
+ 405:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                            (float ) compass[i]) * COMPASS_CONVERSION;
+ 498              		.loc 1 405 60 is_stmt 0 view .LVU154
+ 499 0110 04AB     		add	r3, sp, #16
+ 500 0112 03EB8403 		add	r3, r3, r4, lsl #2
+ 501 0116 13ED030A 		vldr.32	s0, [r3, #-12]	@ int
+ 404:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                            (float ) compass[i]) * COMPASS_CONVERSION;
+ 502              		.loc 1 404 40 view .LVU155
+ 503 011a 2C20     		movs	r0, #44
+ 504 011c 04FB00F0 		mul	r0, r4, r0
+ 505 0120 3030     		adds	r0, r0, #48
+ 506 0122 1D4E     		ldr	r6, .L41+4
+ 507 0124 3044     		add	r0, r0, r6
+ 508 0126 B8EEC00A 		vcvt.f32.s32	s0, s0
+ 509 012a 0430     		adds	r0, r0, #4
+ 510 012c FFF7FEFF 		bl	inv_biquad_filter_process
+ 511              	.LVL32:
+ 512              		.loc 1 405 65 view .LVU156
+ 513 0130 DFED1B7A 		vldr.32	s15, .L41+12
+ 514 0134 20EE270A 		vmul.f32	s0, s0, s15
+ 404:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                            (float ) compass[i]) * COMPASS_CONVERSION;
+ 515              		.loc 1 404 38 view .LVU157
+ 516 0138 04F12E03 		add	r3, r4, #46
+ 517 013c 06EB8306 		add	r6, r6, r3, lsl #2
+ 518 0140 86ED000A 		vstr.32	s0, [r6]
+ 519              	.L30:
+ 394:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         if ((sensor_cal->compass.status & (INV_NEW_DATA | INV_CONTIGUOUS)) ==
+ 520              		.loc 1 394 21 is_stmt 1 discriminator 2 view .LVU158
+ 521 0144 0134     		adds	r4, r4, #1
+ 522              	.LVL33:
+ 523              	.L27:
+ 394:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         if ((sensor_cal->compass.status & (INV_NEW_DATA | INV_CONTIGUOUS)) ==
+ 524              		.loc 1 394 16 discriminator 1 view .LVU159
+ 525 0146 022C     		cmp	r4, #2
+ 526 0148 21DC     		bgt	.L38
+ 395:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                                              INV_NEW_DATA )  {
+ 527              		.loc 1 395 9 view .LVU160
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 18
+
+
+ 395:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                                              INV_NEW_DATA )  {
+ 528              		.loc 1 395 33 is_stmt 0 view .LVU161
+ 529 014a D5F8B830 		ldr	r3, [r5, #184]
+ 395:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                                              INV_NEW_DATA )  {
+ 530              		.loc 1 395 41 view .LVU162
+ 531 014e 03F05003 		and	r3, r3, #80
+ 395:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                                              INV_NEW_DATA )  {
+ 532              		.loc 1 395 12 view .LVU163
+ 533 0152 402B     		cmp	r3, #64
+ 534 0154 CBD0     		beq	.L39
+ 535              	.L28:
+ 401:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                          (INV_NEW_DATA | INV_RAW_DATA)   )  {
+ 536              		.loc 1 401 9 is_stmt 1 view .LVU164
+ 401:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                          (INV_NEW_DATA | INV_RAW_DATA)   )  {
+ 537              		.loc 1 401 33 is_stmt 0 view .LVU165
+ 538 0156 D5F8B830 		ldr	r3, [r5, #184]
+ 401:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                          (INV_NEW_DATA | INV_RAW_DATA)   )  {
+ 539              		.loc 1 401 41 view .LVU166
+ 540 015a 03F0C002 		and	r2, r3, #192
+ 401:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                                          (INV_NEW_DATA | INV_RAW_DATA)   )  {
+ 541              		.loc 1 401 12 view .LVU167
+ 542 015e C02A     		cmp	r2, #192
+ 543 0160 D6D0     		beq	.L40
+ 406:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 407:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         } else if ((sensor_cal->compass.status & INV_NEW_DATA) == INV_NEW_DATA )  {
+ 544              		.loc 1 407 16 is_stmt 1 view .LVU168
+ 545              		.loc 1 407 19 is_stmt 0 view .LVU169
+ 546 0162 13F0400F 		tst	r3, #64
+ 547 0166 EDD0     		beq	.L30
+ 408:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****             hal_out.compass_float[i] = (float ) compass[i] * COMPASS_CONVERSION;
+ 548              		.loc 1 408 13 is_stmt 1 view .LVU170
+ 549              		.loc 1 408 56 is_stmt 0 view .LVU171
+ 550 0168 04AB     		add	r3, sp, #16
+ 551 016a 03EB8403 		add	r3, r3, r4, lsl #2
+ 552 016e 53ED037A 		vldr.32	s15, [r3, #-12]	@ int
+ 553              		.loc 1 408 40 view .LVU172
+ 554 0172 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 555              		.loc 1 408 60 view .LVU173
+ 556 0176 9FED0A7A 		vldr.32	s14, .L41+12
+ 557 017a 67EE877A 		vmul.f32	s15, s15, s14
+ 558              		.loc 1 408 38 view .LVU174
+ 559 017e 04F12E02 		add	r2, r4, #46
+ 560 0182 054B     		ldr	r3, .L41+4
+ 561 0184 03EB8203 		add	r3, r3, r2, lsl #2
+ 562 0188 C3ED007A 		vstr.32	s15, [r3]
+ 563 018c DAE7     		b	.L30
+ 564              	.L38:
+ 409:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         }
+ 410:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 411:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 412:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return INV_SUCCESS;
+ 565              		.loc 1 412 5 is_stmt 1 view .LVU175
+ 413:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 566              		.loc 1 413 1 is_stmt 0 view .LVU176
+ 567 018e 0020     		movs	r0, #0
+ 568 0190 05B0     		add	sp, sp, #20
+ 569              	.LCFI11:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 19
+
+
+ 570              		.cfi_def_cfa_offset 20
+ 571              		@ sp needed
+ 572 0192 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 573              	.LVL34:
+ 574              	.L42:
+ 575              		.loc 1 413 1 view .LVU177
+ 576              		.align	2
+ 577              	.L41:
+ 578 0194 08000000 		.word	hal_out+8
+ 579 0198 00000000 		.word	hal_out
+ 580 019c 10000000 		.word	hal_out+16
+ 581 01a0 00008037 		.word	931135488
+ 582              		.cfi_endproc
+ 583              	.LFE16:
+ 585              		.section	.text.inv_start_hal_outputs,"ax",%progbits
+ 586              		.align	1
+ 587              		.global	inv_start_hal_outputs
+ 588              		.syntax unified
+ 589              		.thumb
+ 590              		.thumb_func
+ 592              	inv_start_hal_outputs:
+ 593              	.LFB18:
+ 414:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 415:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Turns off generation of HAL outputs.
+ 416:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 417:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****  */
+ 418:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** inv_error_t inv_stop_hal_outputs(void)
+ 419:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 420:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_error_t result;
+ 421:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     result = inv_unregister_data_cb(inv_generate_hal_outputs);
+ 422:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return result;
+ 423:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 424:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 425:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Turns on generation of HAL outputs. This should be called after inv_stop_hal_outputs()
+ 426:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * to turn generation of HAL outputs back on. It is automatically called by inv_enable_hal_outputs()
+ 427:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 428:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 429:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** inv_error_t inv_start_hal_outputs(void)
+ 430:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 594              		.loc 1 430 1 is_stmt 1 view -0
+ 595              		.cfi_startproc
+ 596              		@ args = 0, pretend = 0, frame = 0
+ 597              		@ frame_needed = 0, uses_anonymous_args = 0
+ 598 0000 08B5     		push	{r3, lr}
+ 599              	.LCFI12:
+ 600              		.cfi_def_cfa_offset 8
+ 601              		.cfi_offset 3, -8
+ 602              		.cfi_offset 14, -4
+ 431:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_error_t result;
+ 603              		.loc 1 431 5 view .LVU179
+ 432:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     result =
+ 604              		.loc 1 432 5 view .LVU180
+ 433:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         inv_register_data_cb(inv_generate_hal_outputs,
+ 605              		.loc 1 433 9 is_stmt 0 view .LVU181
+ 606 0002 0722     		movs	r2, #7
+ 607 0004 4FF46171 		mov	r1, #900
+ 608 0008 0148     		ldr	r0, .L45
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 20
+
+
+ 609 000a FFF7FEFF 		bl	inv_register_data_cb
+ 610              	.LVL35:
+ 434:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                              INV_PRIORITY_HAL_OUTPUTS,
+ 435:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****                              INV_GYRO_NEW | INV_ACCEL_NEW | INV_MAG_NEW);
+ 436:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return result;
+ 611              		.loc 1 436 5 is_stmt 1 view .LVU182
+ 437:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 612              		.loc 1 437 1 is_stmt 0 view .LVU183
+ 613 000e 08BD     		pop	{r3, pc}
+ 614              	.L46:
+ 615              		.align	2
+ 616              	.L45:
+ 617 0010 00000000 		.word	inv_generate_hal_outputs
+ 618              		.cfi_endproc
+ 619              	.LFE18:
+ 621              		.section	.text.inv_get_sensor_type_accelerometer,"ax",%progbits
+ 622              		.align	1
+ 623              		.global	inv_get_sensor_type_accelerometer
+ 624              		.syntax unified
+ 625              		.thumb
+ 626              		.thumb_func
+ 628              	inv_get_sensor_type_accelerometer:
+ 629              	.LVL36:
+ 630              	.LFB6:
+  59:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 631              		.loc 1 59 1 is_stmt 1 view -0
+ 632              		.cfi_startproc
+ 633              		@ args = 0, pretend = 0, frame = 16
+ 634              		@ frame_needed = 0, uses_anonymous_args = 0
+  59:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 635              		.loc 1 59 1 is_stmt 0 view .LVU185
+ 636 0000 10B5     		push	{r4, lr}
+ 637              	.LCFI13:
+ 638              		.cfi_def_cfa_offset 8
+ 639              		.cfi_offset 4, -8
+ 640              		.cfi_offset 14, -4
+ 641 0002 84B0     		sub	sp, sp, #16
+ 642              	.LCFI14:
+ 643              		.cfi_def_cfa_offset 24
+ 644 0004 0446     		mov	r4, r0
+  60:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     /* Converts fixed point to m/s^2. Fixed point has 1g = 2^16.
+ 645              		.loc 1 60 5 is_stmt 1 view .LVU186
+  64:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_accel_set(accel, accuracy, timestamp);
+ 646              		.loc 1 64 5 view .LVU187
+  65:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = accel[0] * ACCEL_CONVERSION;
+ 647              		.loc 1 65 5 view .LVU188
+ 648 0006 01A8     		add	r0, sp, #4
+ 649              	.LVL37:
+  65:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = accel[0] * ACCEL_CONVERSION;
+ 650              		.loc 1 65 5 is_stmt 0 view .LVU189
+ 651 0008 FFF7FEFF 		bl	inv_get_accel_set
+ 652              	.LVL38:
+  66:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+ 653              		.loc 1 66 5 is_stmt 1 view .LVU190
+  66:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+ 654              		.loc 1 66 26 is_stmt 0 view .LVU191
+ 655 000c DDED017A 		vldr.32	s15, [sp, #4]	@ int
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 21
+
+
+ 656 0010 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 657 0014 9FED0E7A 		vldr.32	s14, .L50
+ 658 0018 67EE877A 		vmul.f32	s15, s15, s14
+  66:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+ 659              		.loc 1 66 15 view .LVU192
+ 660 001c C4ED007A 		vstr.32	s15, [r4]
+  67:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+ 661              		.loc 1 67 5 is_stmt 1 view .LVU193
+  67:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+ 662              		.loc 1 67 26 is_stmt 0 view .LVU194
+ 663 0020 DDED027A 		vldr.32	s15, [sp, #8]	@ int
+ 664 0024 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 665 0028 67EE877A 		vmul.f32	s15, s15, s14
+  67:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+ 666              		.loc 1 67 15 view .LVU195
+ 667 002c C4ED017A 		vstr.32	s15, [r4, #4]
+  68:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.accel_status & INV_NEW_DATA)
+ 668              		.loc 1 68 5 is_stmt 1 view .LVU196
+  68:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.accel_status & INV_NEW_DATA)
+ 669              		.loc 1 68 26 is_stmt 0 view .LVU197
+ 670 0030 DDED037A 		vldr.32	s15, [sp, #12]	@ int
+ 671 0034 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 672 0038 67EE877A 		vmul.f32	s15, s15, s14
+  68:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.accel_status & INV_NEW_DATA)
+ 673              		.loc 1 68 15 view .LVU198
+ 674 003c C4ED027A 		vstr.32	s15, [r4, #8]
+  69:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 675              		.loc 1 69 5 is_stmt 1 view .LVU199
+  69:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 676              		.loc 1 69 16 is_stmt 0 view .LVU200
+ 677 0040 044B     		ldr	r3, .L50+4
+ 678 0042 986A     		ldr	r0, [r3, #40]
+  69:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 679              		.loc 1 69 8 view .LVU201
+ 680 0044 10F04000 		ands	r0, r0, #64
+ 681 0048 00D0     		beq	.L47
+  70:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 682              		.loc 1 70 16 view .LVU202
+ 683 004a 0120     		movs	r0, #1
+ 684              	.LVL39:
+  73:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 685              		.loc 1 73 5 is_stmt 1 view .LVU203
+ 686              	.L47:
+  74:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 687              		.loc 1 74 1 is_stmt 0 view .LVU204
+ 688 004c 04B0     		add	sp, sp, #16
+ 689              	.LCFI15:
+ 690              		.cfi_def_cfa_offset 8
+ 691              		@ sp needed
+ 692 004e 10BD     		pop	{r4, pc}
+ 693              	.LVL40:
+ 694              	.L51:
+  74:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 695              		.loc 1 74 1 view .LVU205
+ 696              		.align	2
+ 697              	.L50:
+ 698 0050 0AE81C39 		.word	958195722
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 22
+
+
+ 699 0054 00000000 		.word	hal_out
+ 700              		.cfi_endproc
+ 701              	.LFE6:
+ 703              		.section	.text.inv_get_sensor_type_linear_acceleration,"ax",%progbits
+ 704              		.align	1
+ 705              		.global	inv_get_sensor_type_linear_acceleration
+ 706              		.syntax unified
+ 707              		.thumb
+ 708              		.thumb_func
+ 710              	inv_get_sensor_type_linear_acceleration:
+ 711              	.LVL41:
+ 712              	.LFB7:
+  86:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gravity[3], accel[3];
+ 713              		.loc 1 86 1 is_stmt 1 view -0
+ 714              		.cfi_startproc
+ 715              		@ args = 0, pretend = 0, frame = 24
+ 716              		@ frame_needed = 0, uses_anonymous_args = 0
+  86:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gravity[3], accel[3];
+ 717              		.loc 1 86 1 is_stmt 0 view .LVU207
+ 718 0000 10B5     		push	{r4, lr}
+ 719              	.LCFI16:
+ 720              		.cfi_def_cfa_offset 8
+ 721              		.cfi_offset 4, -8
+ 722              		.cfi_offset 14, -4
+ 723 0002 86B0     		sub	sp, sp, #24
+ 724              	.LCFI17:
+ 725              		.cfi_def_cfa_offset 32
+ 726 0004 0446     		mov	r4, r0
+  87:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 727              		.loc 1 87 5 is_stmt 1 view .LVU208
+  89:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+ 728              		.loc 1 89 5 view .LVU209
+ 729 0006 6846     		mov	r0, sp
+ 730              	.LVL42:
+  89:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+ 731              		.loc 1 89 5 is_stmt 0 view .LVU210
+ 732 0008 FFF7FEFF 		bl	inv_get_accel_set
+ 733              	.LVL43:
+  90:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[0] -= gravity[0] >> 14;
+ 734              		.loc 1 90 5 is_stmt 1 view .LVU211
+ 735 000c 03A8     		add	r0, sp, #12
+ 736 000e FFF7FEFF 		bl	inv_get_gravity
+ 737              	.LVL44:
+  91:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[1] -= gravity[1] >> 14;
+ 738              		.loc 1 91 5 view .LVU212
+  91:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[1] -= gravity[1] >> 14;
+ 739              		.loc 1 91 14 is_stmt 0 view .LVU213
+ 740 0012 0099     		ldr	r1, [sp]
+ 741 0014 039B     		ldr	r3, [sp, #12]
+ 742 0016 A1EBA331 		sub	r1, r1, r3, asr #14
+ 743 001a 0091     		str	r1, [sp]
+  92:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[2] -= gravity[2] >> 14;
+ 744              		.loc 1 92 5 is_stmt 1 view .LVU214
+  92:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     accel[2] -= gravity[2] >> 14;
+ 745              		.loc 1 92 14 is_stmt 0 view .LVU215
+ 746 001c 019A     		ldr	r2, [sp, #4]
+ 747 001e 049B     		ldr	r3, [sp, #16]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 23
+
+
+ 748 0020 A2EBA332 		sub	r2, r2, r3, asr #14
+ 749 0024 0192     		str	r2, [sp, #4]
+  93:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = accel[0] * ACCEL_CONVERSION;
+ 750              		.loc 1 93 5 is_stmt 1 view .LVU216
+  93:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = accel[0] * ACCEL_CONVERSION;
+ 751              		.loc 1 93 14 is_stmt 0 view .LVU217
+ 752 0026 029B     		ldr	r3, [sp, #8]
+ 753 0028 0598     		ldr	r0, [sp, #20]
+ 754 002a A3EBA033 		sub	r3, r3, r0, asr #14
+ 755 002e 0293     		str	r3, [sp, #8]
+  94:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+ 756              		.loc 1 94 5 is_stmt 1 view .LVU218
+  94:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+ 757              		.loc 1 94 26 is_stmt 0 view .LVU219
+ 758 0030 07EE901A 		vmov	s15, r1	@ int
+ 759 0034 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 760 0038 9FED0C7A 		vldr.32	s14, .L54
+ 761 003c 67EE877A 		vmul.f32	s15, s15, s14
+  94:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = accel[1] * ACCEL_CONVERSION;
+ 762              		.loc 1 94 15 view .LVU220
+ 763 0040 C4ED007A 		vstr.32	s15, [r4]
+  95:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+ 764              		.loc 1 95 5 is_stmt 1 view .LVU221
+  95:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+ 765              		.loc 1 95 26 is_stmt 0 view .LVU222
+ 766 0044 07EE902A 		vmov	s15, r2	@ int
+ 767 0048 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 768 004c 67EE877A 		vmul.f32	s15, s15, s14
+  95:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = accel[2] * ACCEL_CONVERSION;
+ 769              		.loc 1 95 15 view .LVU223
+ 770 0050 C4ED017A 		vstr.32	s15, [r4, #4]
+  96:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 771              		.loc 1 96 5 is_stmt 1 view .LVU224
+  96:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 772              		.loc 1 96 26 is_stmt 0 view .LVU225
+ 773 0054 07EE903A 		vmov	s15, r3	@ int
+ 774 0058 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 775 005c 67EE877A 		vmul.f32	s15, s15, s14
+  96:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 776              		.loc 1 96 15 view .LVU226
+ 777 0060 C4ED027A 		vstr.32	s15, [r4, #8]
+  98:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 778              		.loc 1 98 5 is_stmt 1 view .LVU227
+  99:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 779              		.loc 1 99 1 is_stmt 0 view .LVU228
+ 780 0064 0120     		movs	r0, #1
+ 781 0066 06B0     		add	sp, sp, #24
+ 782              	.LCFI18:
+ 783              		.cfi_def_cfa_offset 8
+ 784              		@ sp needed
+ 785 0068 10BD     		pop	{r4, pc}
+ 786              	.LVL45:
+ 787              	.L55:
+  99:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 788              		.loc 1 99 1 view .LVU229
+ 789 006a 00BF     		.align	2
+ 790              	.L54:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 24
+
+
+ 791 006c 0AE81C39 		.word	958195722
+ 792              		.cfi_endproc
+ 793              	.LFE7:
+ 795              		.section	.text.inv_get_sensor_type_gravity,"ax",%progbits
+ 796              		.align	1
+ 797              		.global	inv_get_sensor_type_gravity
+ 798              		.syntax unified
+ 799              		.thumb
+ 800              		.thumb_func
+ 802              	inv_get_sensor_type_gravity:
+ 803              	.LVL46:
+ 804              	.LFB8:
+ 110:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gravity[3];
+ 805              		.loc 1 110 1 is_stmt 1 view -0
+ 806              		.cfi_startproc
+ 807              		@ args = 0, pretend = 0, frame = 16
+ 808              		@ frame_needed = 0, uses_anonymous_args = 0
+ 110:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gravity[3];
+ 809              		.loc 1 110 1 is_stmt 0 view .LVU231
+ 810 0000 10B5     		push	{r4, lr}
+ 811              	.LCFI19:
+ 812              		.cfi_def_cfa_offset 8
+ 813              		.cfi_offset 4, -8
+ 814              		.cfi_offset 14, -4
+ 815 0002 84B0     		sub	sp, sp, #16
+ 816              	.LCFI20:
+ 817              		.cfi_def_cfa_offset 24
+ 818 0004 0446     		mov	r4, r0
+ 111:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 819              		.loc 1 111 5 is_stmt 1 view .LVU232
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 820              		.loc 1 113 5 view .LVU233
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 821              		.loc 1 113 33 is_stmt 0 view .LVU234
+ 822 0006 164B     		ldr	r3, .L58
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 823              		.loc 1 113 17 view .LVU235
+ 824 0008 93F90400 		ldrsb	r0, [r3, #4]
+ 825              	.LVL47:
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 826              		.loc 1 113 15 view .LVU236
+ 827 000c 0870     		strb	r0, [r1]
+ 114:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+ 828              		.loc 1 114 5 is_stmt 1 view .LVU237
+ 114:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+ 829              		.loc 1 114 25 is_stmt 0 view .LVU238
+ 830 000e 9B68     		ldr	r3, [r3, #8]
+ 114:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_get_gravity(gravity);
+ 831              		.loc 1 114 16 view .LVU239
+ 832 0010 1360     		str	r3, [r2]
+ 115:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = (gravity[0] >> 14) * ACCEL_CONVERSION;
+ 833              		.loc 1 115 5 is_stmt 1 view .LVU240
+ 834 0012 01A8     		add	r0, sp, #4
+ 835 0014 FFF7FEFF 		bl	inv_get_gravity
+ 836              	.LVL48:
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = (gravity[1] >> 14) * ACCEL_CONVERSION;
+ 837              		.loc 1 116 5 view .LVU241
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 25
+
+
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = (gravity[1] >> 14) * ACCEL_CONVERSION;
+ 838              		.loc 1 116 25 is_stmt 0 view .LVU242
+ 839 0018 019B     		ldr	r3, [sp, #4]
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = (gravity[1] >> 14) * ACCEL_CONVERSION;
+ 840              		.loc 1 116 29 view .LVU243
+ 841 001a 9B13     		asrs	r3, r3, #14
+ 842 001c 07EE903A 		vmov	s15, r3	@ int
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = (gravity[1] >> 14) * ACCEL_CONVERSION;
+ 843              		.loc 1 116 36 view .LVU244
+ 844 0020 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 845 0024 9FED0F7A 		vldr.32	s14, .L58+4
+ 846 0028 67EE877A 		vmul.f32	s15, s15, s14
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = (gravity[1] >> 14) * ACCEL_CONVERSION;
+ 847              		.loc 1 116 15 view .LVU245
+ 848 002c C4ED007A 		vstr.32	s15, [r4]
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = (gravity[2] >> 14) * ACCEL_CONVERSION;
+ 849              		.loc 1 117 5 is_stmt 1 view .LVU246
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = (gravity[2] >> 14) * ACCEL_CONVERSION;
+ 850              		.loc 1 117 25 is_stmt 0 view .LVU247
+ 851 0030 029B     		ldr	r3, [sp, #8]
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = (gravity[2] >> 14) * ACCEL_CONVERSION;
+ 852              		.loc 1 117 29 view .LVU248
+ 853 0032 9B13     		asrs	r3, r3, #14
+ 854 0034 07EE903A 		vmov	s15, r3	@ int
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = (gravity[2] >> 14) * ACCEL_CONVERSION;
+ 855              		.loc 1 117 36 view .LVU249
+ 856 0038 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 857 003c 67EE877A 		vmul.f32	s15, s15, s14
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = (gravity[2] >> 14) * ACCEL_CONVERSION;
+ 858              		.loc 1 117 15 view .LVU250
+ 859 0040 C4ED017A 		vstr.32	s15, [r4, #4]
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 860              		.loc 1 118 5 is_stmt 1 view .LVU251
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 861              		.loc 1 118 25 is_stmt 0 view .LVU252
+ 862 0044 039B     		ldr	r3, [sp, #12]
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 863              		.loc 1 118 29 view .LVU253
+ 864 0046 9B13     		asrs	r3, r3, #14
+ 865 0048 07EE903A 		vmov	s15, r3	@ int
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 866              		.loc 1 118 36 view .LVU254
+ 867 004c F8EEE77A 		vcvt.f32.s32	s15, s15
+ 868 0050 67EE877A 		vmul.f32	s15, s15, s14
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 869              		.loc 1 118 15 view .LVU255
+ 870 0054 C4ED027A 		vstr.32	s15, [r4, #8]
+ 120:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 871              		.loc 1 120 5 is_stmt 1 view .LVU256
+ 121:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 872              		.loc 1 121 1 is_stmt 0 view .LVU257
+ 873 0058 0120     		movs	r0, #1
+ 874 005a 04B0     		add	sp, sp, #16
+ 875              	.LCFI21:
+ 876              		.cfi_def_cfa_offset 8
+ 877              		@ sp needed
+ 878 005c 10BD     		pop	{r4, pc}
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 26
+
+
+ 879              	.LVL49:
+ 880              	.L59:
+ 121:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 881              		.loc 1 121 1 view .LVU258
+ 882 005e 00BF     		.align	2
+ 883              	.L58:
+ 884 0060 00000000 		.word	hal_out
+ 885 0064 0AE81C39 		.word	958195722
+ 886              		.cfi_endproc
+ 887              	.LFE8:
+ 889              		.section	.text.inv_get_sensor_type_gyroscope,"ax",%progbits
+ 890              		.align	1
+ 891              		.global	inv_get_sensor_type_gyroscope
+ 892              		.syntax unified
+ 893              		.thumb
+ 894              		.thumb_func
+ 896              	inv_get_sensor_type_gyroscope:
+ 897              	.LVL50:
+ 898              	.LFB9:
+ 136:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gyro[3];
+ 899              		.loc 1 136 1 is_stmt 1 view -0
+ 900              		.cfi_startproc
+ 901              		@ args = 0, pretend = 0, frame = 16
+ 902              		@ frame_needed = 0, uses_anonymous_args = 0
+ 136:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gyro[3];
+ 903              		.loc 1 136 1 is_stmt 0 view .LVU260
+ 904 0000 10B5     		push	{r4, lr}
+ 905              	.LCFI22:
+ 906              		.cfi_def_cfa_offset 8
+ 907              		.cfi_offset 4, -8
+ 908              		.cfi_offset 14, -4
+ 909 0002 84B0     		sub	sp, sp, #16
+ 910              	.LCFI23:
+ 911              		.cfi_def_cfa_offset 24
+ 912 0004 0446     		mov	r4, r0
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 913              		.loc 1 137 5 is_stmt 1 view .LVU261
+ 138:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 914              		.loc 1 138 5 view .LVU262
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = gyro[0] * GYRO_CONVERSION;
+ 915              		.loc 1 140 5 view .LVU263
+ 916 0006 01A8     		add	r0, sp, #4
+ 917              	.LVL51:
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = gyro[0] * GYRO_CONVERSION;
+ 918              		.loc 1 140 5 is_stmt 0 view .LVU264
+ 919 0008 FFF7FEFF 		bl	inv_get_gyro_set
+ 920              	.LVL52:
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 921              		.loc 1 141 5 is_stmt 1 view .LVU265
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 922              		.loc 1 141 25 is_stmt 0 view .LVU266
+ 923 000c DDED017A 		vldr.32	s15, [sp, #4]	@ int
+ 924 0010 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 925 0014 9FED0E7A 		vldr.32	s14, .L63
+ 926 0018 67EE877A 		vmul.f32	s15, s15, s14
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 927              		.loc 1 141 15 view .LVU267
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 27
+
+
+ 928 001c C4ED007A 		vstr.32	s15, [r4]
+ 142:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 929              		.loc 1 142 5 is_stmt 1 view .LVU268
+ 142:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 930              		.loc 1 142 25 is_stmt 0 view .LVU269
+ 931 0020 DDED027A 		vldr.32	s15, [sp, #8]	@ int
+ 932 0024 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 933 0028 67EE877A 		vmul.f32	s15, s15, s14
+ 142:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 934              		.loc 1 142 15 view .LVU270
+ 935 002c C4ED017A 		vstr.32	s15, [r4, #4]
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ 936              		.loc 1 143 5 is_stmt 1 view .LVU271
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ 937              		.loc 1 143 25 is_stmt 0 view .LVU272
+ 938 0030 DDED037A 		vldr.32	s15, [sp, #12]	@ int
+ 939 0034 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 940 0038 67EE877A 		vmul.f32	s15, s15, s14
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ 941              		.loc 1 143 15 view .LVU273
+ 942 003c C4ED027A 		vstr.32	s15, [r4, #8]
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 943              		.loc 1 144 5 is_stmt 1 view .LVU274
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 944              		.loc 1 144 16 is_stmt 0 view .LVU275
+ 945 0040 044B     		ldr	r3, .L63+4
+ 946 0042 586A     		ldr	r0, [r3, #36]
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 947              		.loc 1 144 8 view .LVU276
+ 948 0044 10F04000 		ands	r0, r0, #64
+ 949 0048 00D0     		beq	.L60
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 950              		.loc 1 145 16 view .LVU277
+ 951 004a 0120     		movs	r0, #1
+ 952              	.LVL53:
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 953              		.loc 1 148 5 is_stmt 1 view .LVU278
+ 954              	.L60:
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 955              		.loc 1 149 1 is_stmt 0 view .LVU279
+ 956 004c 04B0     		add	sp, sp, #16
+ 957              	.LCFI24:
+ 958              		.cfi_def_cfa_offset 8
+ 959              		@ sp needed
+ 960 004e 10BD     		pop	{r4, pc}
+ 961              	.LVL54:
+ 962              	.L64:
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 963              		.loc 1 149 1 view .LVU280
+ 964              		.align	2
+ 965              	.L63:
+ 966 0050 35FA8E34 		.word	881785397
+ 967 0054 00000000 		.word	hal_out
+ 968              		.cfi_endproc
+ 969              	.LFE9:
+ 971              		.section	.text.inv_get_sensor_type_gyroscope_raw,"ax",%progbits
+ 972              		.align	1
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 28
+
+
+ 973              		.global	inv_get_sensor_type_gyroscope_raw
+ 974              		.syntax unified
+ 975              		.thumb
+ 976              		.thumb_func
+ 978              	inv_get_sensor_type_gyroscope_raw:
+ 979              	.LVL55:
+ 980              	.LFB10:
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gyro[3];
+ 981              		.loc 1 160 1 is_stmt 1 view -0
+ 982              		.cfi_startproc
+ 983              		@ args = 0, pretend = 0, frame = 16
+ 984              		@ frame_needed = 0, uses_anonymous_args = 0
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     long gyro[3];
+ 985              		.loc 1 160 1 is_stmt 0 view .LVU282
+ 986 0000 10B5     		push	{r4, lr}
+ 987              	.LCFI25:
+ 988              		.cfi_def_cfa_offset 8
+ 989              		.cfi_offset 4, -8
+ 990              		.cfi_offset 14, -4
+ 991 0002 84B0     		sub	sp, sp, #16
+ 992              	.LCFI26:
+ 993              		.cfi_def_cfa_offset 24
+ 994 0004 0446     		mov	r4, r0
+ 161:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 995              		.loc 1 161 5 is_stmt 1 view .LVU283
+ 162:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 996              		.loc 1 162 5 view .LVU284
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = gyro[0] * GYRO_CONVERSION;
+ 997              		.loc 1 164 5 view .LVU285
+ 998 0006 01A8     		add	r0, sp, #4
+ 999              	.LVL56:
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[0] = gyro[0] * GYRO_CONVERSION;
+ 1000              		.loc 1 164 5 is_stmt 0 view .LVU286
+ 1001 0008 FFF7FEFF 		bl	inv_get_gyro_set_raw
+ 1002              	.LVL57:
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 1003              		.loc 1 165 5 is_stmt 1 view .LVU287
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 1004              		.loc 1 165 25 is_stmt 0 view .LVU288
+ 1005 000c DDED017A 		vldr.32	s15, [sp, #4]	@ int
+ 1006 0010 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1007 0014 9FED0E7A 		vldr.32	s14, .L68
+ 1008 0018 67EE877A 		vmul.f32	s15, s15, s14
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[1] = gyro[1] * GYRO_CONVERSION;
+ 1009              		.loc 1 165 15 view .LVU289
+ 1010 001c C4ED007A 		vstr.32	s15, [r4]
+ 166:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 1011              		.loc 1 166 5 is_stmt 1 view .LVU290
+ 166:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 1012              		.loc 1 166 25 is_stmt 0 view .LVU291
+ 1013 0020 DDED027A 		vldr.32	s15, [sp, #8]	@ int
+ 1014 0024 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1015 0028 67EE877A 		vmul.f32	s15, s15, s14
+ 166:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     values[2] = gyro[2] * GYRO_CONVERSION;
+ 1016              		.loc 1 166 15 view .LVU292
+ 1017 002c C4ED017A 		vstr.32	s15, [r4, #4]
+ 167:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 29
+
+
+ 1018              		.loc 1 167 5 is_stmt 1 view .LVU293
+ 167:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ 1019              		.loc 1 167 25 is_stmt 0 view .LVU294
+ 1020 0030 DDED037A 		vldr.32	s15, [sp, #12]	@ int
+ 1021 0034 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1022 0038 67EE877A 		vmul.f32	s15, s15, s14
+ 167:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     if (hal_out.gyro_status & INV_NEW_DATA)
+ 1023              		.loc 1 167 15 view .LVU295
+ 1024 003c C4ED027A 		vstr.32	s15, [r4, #8]
+ 168:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1025              		.loc 1 168 5 is_stmt 1 view .LVU296
+ 168:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1026              		.loc 1 168 16 is_stmt 0 view .LVU297
+ 1027 0040 044B     		ldr	r3, .L68+4
+ 1028 0042 586A     		ldr	r0, [r3, #36]
+ 168:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1029              		.loc 1 168 8 view .LVU298
+ 1030 0044 10F04000 		ands	r0, r0, #64
+ 1031 0048 00D0     		beq	.L65
+ 169:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 1032              		.loc 1 169 16 view .LVU299
+ 1033 004a 0120     		movs	r0, #1
+ 1034              	.LVL58:
+ 172:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1035              		.loc 1 172 5 is_stmt 1 view .LVU300
+ 1036              	.L65:
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1037              		.loc 1 173 1 is_stmt 0 view .LVU301
+ 1038 004c 04B0     		add	sp, sp, #16
+ 1039              	.LCFI27:
+ 1040              		.cfi_def_cfa_offset 8
+ 1041              		@ sp needed
+ 1042 004e 10BD     		pop	{r4, pc}
+ 1043              	.LVL59:
+ 1044              	.L69:
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1045              		.loc 1 173 1 view .LVU302
+ 1046              		.align	2
+ 1047              	.L68:
+ 1048 0050 35FA8E34 		.word	881785397
+ 1049 0054 00000000 		.word	hal_out
+ 1050              		.cfi_endproc
+ 1051              	.LFE10:
+ 1053              		.section	.text.inv_get_sensor_type_rotation_vector,"ax",%progbits
+ 1054              		.align	1
+ 1055              		.global	inv_get_sensor_type_rotation_vector
+ 1056              		.syntax unified
+ 1057              		.thumb
+ 1058              		.thumb_func
+ 1060              	inv_get_sensor_type_rotation_vector:
+ 1061              	.LVL60:
+ 1062              	.LFB11:
+ 201:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 1063              		.loc 1 201 1 is_stmt 1 view -0
+ 1064              		.cfi_startproc
+ 1065              		@ args = 0, pretend = 0, frame = 0
+ 1066              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 30
+
+
+ 201:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 1067              		.loc 1 201 1 is_stmt 0 view .LVU304
+ 1068 0000 10B5     		push	{r4, lr}
+ 1069              	.LCFI28:
+ 1070              		.cfi_def_cfa_offset 8
+ 1071              		.cfi_offset 4, -8
+ 1072              		.cfi_offset 14, -4
+ 1073 0002 0446     		mov	r4, r0
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1074              		.loc 1 202 5 is_stmt 1 view .LVU305
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1075              		.loc 1 202 33 is_stmt 0 view .LVU306
+ 1076 0004 2F4B     		ldr	r3, .L74
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1077              		.loc 1 202 17 view .LVU307
+ 1078 0006 93F90400 		ldrsb	r0, [r3, #4]
+ 1079              	.LVL61:
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1080              		.loc 1 202 15 view .LVU308
+ 1081 000a 0870     		strb	r0, [r1]
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1082              		.loc 1 203 5 is_stmt 1 view .LVU309
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1083              		.loc 1 203 25 is_stmt 0 view .LVU310
+ 1084 000c 9968     		ldr	r1, [r3, #8]
+ 1085              	.LVL62:
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1086              		.loc 1 203 16 view .LVU311
+ 1087 000e 1160     		str	r1, [r2]
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[0] = hal_out.nav_quat[1] * INV_TWO_POWER_NEG_30;
+ 1088              		.loc 1 205 5 is_stmt 1 view .LVU312
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[0] = hal_out.nav_quat[1] * INV_TWO_POWER_NEG_30;
+ 1089              		.loc 1 205 25 is_stmt 0 view .LVU313
+ 1090 0010 5B69     		ldr	r3, [r3, #20]
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[0] = hal_out.nav_quat[1] * INV_TWO_POWER_NEG_30;
+ 1091              		.loc 1 205 8 view .LVU314
+ 1092 0012 002B     		cmp	r3, #0
+ 1093 0014 29DB     		blt	.L71
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1094              		.loc 1 206 9 is_stmt 1 view .LVU315
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1095              		.loc 1 206 37 is_stmt 0 view .LVU316
+ 1096 0016 2B4B     		ldr	r3, .L74
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1097              		.loc 1 206 41 view .LVU317
+ 1098 0018 D3ED067A 		vldr.32	s15, [r3, #24]	@ int
+ 1099 001c F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1100 0020 9FED297A 		vldr.32	s14, .L74+4
+ 1101 0024 67EE877A 		vmul.f32	s15, s15, s14
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1102              		.loc 1 206 19 view .LVU318
+ 1103 0028 C4ED007A 		vstr.32	s15, [r4]
+ 207:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1104              		.loc 1 207 9 is_stmt 1 view .LVU319
+ 207:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1105              		.loc 1 207 41 is_stmt 0 view .LVU320
+ 1106 002c D3ED077A 		vldr.32	s15, [r3, #28]	@ int
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 31
+
+
+ 1107 0030 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1108 0034 67EE877A 		vmul.f32	s15, s15, s14
+ 207:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1109              		.loc 1 207 19 view .LVU321
+ 1110 0038 C4ED017A 		vstr.32	s15, [r4, #4]
+ 208:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1111              		.loc 1 208 9 is_stmt 1 view .LVU322
+ 208:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1112              		.loc 1 208 41 is_stmt 0 view .LVU323
+ 1113 003c D3ED087A 		vldr.32	s15, [r3, #32]	@ int
+ 1114 0040 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1115 0044 67EE877A 		vmul.f32	s15, s15, s14
+ 208:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1116              		.loc 1 208 19 view .LVU324
+ 1117 0048 C4ED027A 		vstr.32	s15, [r4, #8]
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     } else {
+ 1118              		.loc 1 209 9 is_stmt 1 view .LVU325
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     } else {
+ 1119              		.loc 1 209 37 is_stmt 0 view .LVU326
+ 1120 004c D3ED057A 		vldr.32	s15, [r3, #20]	@ int
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     } else {
+ 1121              		.loc 1 209 41 view .LVU327
+ 1122 0050 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1123 0054 67EE877A 		vmul.f32	s15, s15, s14
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     } else {
+ 1124              		.loc 1 209 19 view .LVU328
+ 1125 0058 C4ED037A 		vstr.32	s15, [r4, #12]
+ 1126              	.LVL63:
+ 1127              	.L72:
+ 216:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1128              		.loc 1 216 5 is_stmt 1 view .LVU329
+ 216:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1129              		.loc 1 216 17 is_stmt 0 view .LVU330
+ 1130 005c FFF7FEFF 		bl	inv_get_heading_confidence_interval
+ 1131              	.LVL64:
+ 216:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1132              		.loc 1 216 15 view .LVU331
+ 1133 0060 84ED040A 		vstr.32	s0, [r4, #16]
+ 218:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1134              		.loc 1 218 5 is_stmt 1 view .LVU332
+ 219:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1135              		.loc 1 219 1 is_stmt 0 view .LVU333
+ 1136 0064 174B     		ldr	r3, .L74
+ 1137 0066 186B     		ldr	r0, [r3, #48]
+ 1138 0068 10BD     		pop	{r4, pc}
+ 1139              	.LVL65:
+ 1140              	.L71:
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1141              		.loc 1 211 9 is_stmt 1 view .LVU334
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1142              		.loc 1 211 38 is_stmt 0 view .LVU335
+ 1143 006a 164A     		ldr	r2, .L74
+ 1144              	.LVL66:
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1145              		.loc 1 211 38 view .LVU336
+ 1146 006c 9369     		ldr	r3, [r2, #24]
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 32
+
+
+ 1147              		.loc 1 211 21 view .LVU337
+ 1148 006e 5B42     		rsbs	r3, r3, #0
+ 1149 0070 07EE903A 		vmov	s15, r3	@ int
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1150              		.loc 1 211 42 view .LVU338
+ 1151 0074 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1152 0078 9FED137A 		vldr.32	s14, .L74+4
+ 1153 007c 67EE877A 		vmul.f32	s15, s15, s14
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[1] = -hal_out.nav_quat[2] * INV_TWO_POWER_NEG_30;
+ 1154              		.loc 1 211 19 view .LVU339
+ 1155 0080 C4ED007A 		vstr.32	s15, [r4]
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = -hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1156              		.loc 1 212 9 is_stmt 1 view .LVU340
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = -hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1157              		.loc 1 212 38 is_stmt 0 view .LVU341
+ 1158 0084 D369     		ldr	r3, [r2, #28]
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = -hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1159              		.loc 1 212 21 view .LVU342
+ 1160 0086 5B42     		rsbs	r3, r3, #0
+ 1161 0088 07EE903A 		vmov	s15, r3	@ int
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = -hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1162              		.loc 1 212 42 view .LVU343
+ 1163 008c F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1164 0090 67EE877A 		vmul.f32	s15, s15, s14
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[2] = -hal_out.nav_quat[3] * INV_TWO_POWER_NEG_30;
+ 1165              		.loc 1 212 19 view .LVU344
+ 1166 0094 C4ED017A 		vstr.32	s15, [r4, #4]
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = -hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1167              		.loc 1 213 9 is_stmt 1 view .LVU345
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = -hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1168              		.loc 1 213 38 is_stmt 0 view .LVU346
+ 1169 0098 136A     		ldr	r3, [r2, #32]
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = -hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1170              		.loc 1 213 21 view .LVU347
+ 1171 009a 5B42     		rsbs	r3, r3, #0
+ 1172 009c 07EE903A 		vmov	s15, r3	@ int
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = -hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1173              		.loc 1 213 42 view .LVU348
+ 1174 00a0 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1175 00a4 67EE877A 		vmul.f32	s15, s15, s14
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[3] = -hal_out.nav_quat[0] * INV_TWO_POWER_NEG_30;
+ 1176              		.loc 1 213 19 view .LVU349
+ 1177 00a8 C4ED027A 		vstr.32	s15, [r4, #8]
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1178              		.loc 1 214 9 is_stmt 1 view .LVU350
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1179              		.loc 1 214 38 is_stmt 0 view .LVU351
+ 1180 00ac 5369     		ldr	r3, [r2, #20]
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1181              		.loc 1 214 21 view .LVU352
+ 1182 00ae 5B42     		rsbs	r3, r3, #0
+ 1183 00b0 07EE903A 		vmov	s15, r3	@ int
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1184              		.loc 1 214 42 view .LVU353
+ 1185 00b4 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1186 00b8 67EE877A 		vmul.f32	s15, s15, s14
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 33
+
+
+ 1187              		.loc 1 214 19 view .LVU354
+ 1188 00bc C4ED037A 		vstr.32	s15, [r4, #12]
+ 1189 00c0 CCE7     		b	.L72
+ 1190              	.L75:
+ 1191 00c2 00BF     		.align	2
+ 1192              	.L74:
+ 1193 00c4 00000000 		.word	hal_out
+ 1194 00c8 00008030 		.word	813694976
+ 1195              		.cfi_endproc
+ 1196              	.LFE11:
+ 1198              		.section	.text.inv_get_sensor_type_magnetic_field,"ax",%progbits
+ 1199              		.align	1
+ 1200              		.global	inv_get_sensor_type_magnetic_field
+ 1201              		.syntax unified
+ 1202              		.thumb
+ 1203              		.thumb_func
+ 1205              	inv_get_sensor_type_magnetic_field:
+ 1206              	.LVL67:
+ 1207              	.LFB12:
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 1208              		.loc 1 230 1 is_stmt 1 view -0
+ 1209              		.cfi_startproc
+ 1210              		@ args = 0, pretend = 0, frame = 0
+ 1211              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1212              		@ link register save eliminated.
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int status;
+ 1213              		.loc 1 230 1 is_stmt 0 view .LVU356
+ 1214 0000 10B4     		push	{r4}
+ 1215              	.LCFI29:
+ 1216              		.cfi_def_cfa_offset 4
+ 1217              		.cfi_offset 4, -4
+ 231:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     /* Converts fixed point to uT. Fixed point has 1 uT = 2^16.
+ 1218              		.loc 1 231 5 is_stmt 1 view .LVU357
+ 235:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1219              		.loc 1 235 5 view .LVU358
+ 237:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_mag;
+ 1220              		.loc 1 237 5 view .LVU359
+ 237:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_mag;
+ 1221              		.loc 1 237 25 is_stmt 0 view .LVU360
+ 1222 0002 104B     		ldr	r3, .L81
+ 237:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_mag;
+ 1223              		.loc 1 237 16 view .LVU361
+ 1224 0004 1C69     		ldr	r4, [r3, #16]
+ 1225 0006 1460     		str	r4, [r2]
+ 238:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1226              		.loc 1 238 5 is_stmt 1 view .LVU362
+ 238:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1227              		.loc 1 238 17 is_stmt 0 view .LVU363
+ 1228 0008 93F90030 		ldrsb	r3, [r3]
+ 238:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1229              		.loc 1 238 15 view .LVU364
+ 1230 000c 0B70     		strb	r3, [r1]
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[i] = hal_out.compass_float[i];
+ 1231              		.loc 1 240 5 is_stmt 1 view .LVU365
+ 1232              	.LVL68:
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[i] = hal_out.compass_float[i];
+ 1233              		.loc 1 240 11 is_stmt 0 view .LVU366
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 34
+
+
+ 1234 000e 0023     		movs	r3, #0
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[i] = hal_out.compass_float[i];
+ 1235              		.loc 1 240 5 view .LVU367
+ 1236 0010 09E0     		b	.L77
+ 1237              	.LVL69:
+ 1238              	.L78:
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1239              		.loc 1 241 9 is_stmt 1 discriminator 3 view .LVU368
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1240              		.loc 1 241 15 is_stmt 0 discriminator 3 view .LVU369
+ 1241 0012 00EB8301 		add	r1, r0, r3, lsl #2
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1242              		.loc 1 241 42 discriminator 3 view .LVU370
+ 1243 0016 03F12E0C 		add	ip, r3, #46
+ 1244 001a 0A4A     		ldr	r2, .L81
+ 1245 001c 02EB8C02 		add	r2, r2, ip, lsl #2
+ 1246 0020 1268     		ldr	r2, [r2]	@ float
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 1247              		.loc 1 241 19 discriminator 3 view .LVU371
+ 1248 0022 0A60     		str	r2, [r1]	@ float
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[i] = hal_out.compass_float[i];
+ 1249              		.loc 1 240 21 is_stmt 1 discriminator 3 view .LVU372
+ 1250 0024 0133     		adds	r3, r3, #1
+ 1251              	.LVL70:
+ 1252              	.L77:
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         values[i] = hal_out.compass_float[i];
+ 1253              		.loc 1 240 16 discriminator 1 view .LVU373
+ 1254 0026 022B     		cmp	r3, #2
+ 1255 0028 F3DD     		ble	.L78
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1256              		.loc 1 243 5 view .LVU374
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1257              		.loc 1 243 16 is_stmt 0 view .LVU375
+ 1258 002a 064B     		ldr	r3, .L81
+ 1259              	.LVL71:
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1260              		.loc 1 243 16 view .LVU376
+ 1261 002c D86A     		ldr	r0, [r3, #44]
+ 1262              	.LVL72:
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         status = 1;
+ 1263              		.loc 1 243 8 view .LVU377
+ 1264 002e 10F04000 		ands	r0, r0, #64
+ 1265 0032 00D0     		beq	.L79
+ 244:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     else
+ 1266              		.loc 1 244 16 view .LVU378
+ 1267 0034 0120     		movs	r0, #1
+ 1268              	.L79:
+ 1269              	.LVL73:
+ 247:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return status;
+ 1270              		.loc 1 247 5 is_stmt 1 view .LVU379
+ 247:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return status;
+ 1271              		.loc 1 247 28 is_stmt 0 view .LVU380
+ 1272 0036 034B     		ldr	r3, .L81
+ 1273 0038 0022     		movs	r2, #0
+ 1274 003a DA62     		str	r2, [r3, #44]
+ 248:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1275              		.loc 1 248 5 is_stmt 1 view .LVU381
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 35
+
+
+ 249:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1276              		.loc 1 249 1 is_stmt 0 view .LVU382
+ 1277 003c 5DF8044B 		ldr	r4, [sp], #4
+ 1278              	.LCFI30:
+ 1279              		.cfi_restore 4
+ 1280              		.cfi_def_cfa_offset 0
+ 1281 0040 7047     		bx	lr
+ 1282              	.L82:
+ 1283 0042 00BF     		.align	2
+ 1284              	.L81:
+ 1285 0044 00000000 		.word	hal_out
+ 1286              		.cfi_endproc
+ 1287              	.LFE12:
+ 1289              		.section	.text.inv_get_sensor_type_orientation,"ax",%progbits
+ 1290              		.align	1
+ 1291              		.global	inv_get_sensor_type_orientation
+ 1292              		.syntax unified
+ 1293              		.thumb
+ 1294              		.thumb_func
+ 1296              	inv_get_sensor_type_orientation:
+ 1297              	.LVL74:
+ 1298              	.LFB15:
+ 306:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 1299              		.loc 1 306 1 is_stmt 1 view -0
+ 1300              		.cfi_startproc
+ 1301              		@ args = 0, pretend = 0, frame = 0
+ 1302              		@ frame_needed = 0, uses_anonymous_args = 0
+ 306:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *accuracy = (int8_t) hal_out.accuracy_quat;
+ 1303              		.loc 1 306 1 is_stmt 0 view .LVU384
+ 1304 0000 10B5     		push	{r4, lr}
+ 1305              	.LCFI31:
+ 1306              		.cfi_def_cfa_offset 8
+ 1307              		.cfi_offset 4, -8
+ 1308              		.cfi_offset 14, -4
+ 307:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1309              		.loc 1 307 5 is_stmt 1 view .LVU385
+ 307:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1310              		.loc 1 307 33 is_stmt 0 view .LVU386
+ 1311 0002 054C     		ldr	r4, .L85
+ 307:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1312              		.loc 1 307 17 view .LVU387
+ 1313 0004 94F90430 		ldrsb	r3, [r4, #4]
+ 307:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     *timestamp = hal_out.nav_timestamp;
+ 1314              		.loc 1 307 15 view .LVU388
+ 1315 0008 0B70     		strb	r3, [r1]
+ 308:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1316              		.loc 1 308 5 is_stmt 1 view .LVU389
+ 308:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1317              		.loc 1 308 25 is_stmt 0 view .LVU390
+ 1318 000a A368     		ldr	r3, [r4, #8]
+ 308:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1319              		.loc 1 308 16 view .LVU391
+ 1320 000c 1360     		str	r3, [r2]
+ 310:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1321              		.loc 1 310 5 is_stmt 1 view .LVU392
+ 1322 000e FFF7FEFF 		bl	google_orientation
+ 1323              	.LVL75:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 36
+
+
+ 312:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1324              		.loc 1 312 5 view .LVU393
+ 313:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1325              		.loc 1 313 1 is_stmt 0 view .LVU394
+ 1326 0012 206B     		ldr	r0, [r4, #48]
+ 1327 0014 10BD     		pop	{r4, pc}
+ 1328              	.L86:
+ 1329 0016 00BF     		.align	2
+ 1330              	.L85:
+ 1331 0018 00000000 		.word	hal_out
+ 1332              		.cfi_endproc
+ 1333              	.LFE15:
+ 1335              		.section	.text.inv_stop_hal_outputs,"ax",%progbits
+ 1336              		.align	1
+ 1337              		.global	inv_stop_hal_outputs
+ 1338              		.syntax unified
+ 1339              		.thumb
+ 1340              		.thumb_func
+ 1342              	inv_stop_hal_outputs:
+ 1343              	.LFB17:
+ 419:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_error_t result;
+ 1344              		.loc 1 419 1 is_stmt 1 view -0
+ 1345              		.cfi_startproc
+ 1346              		@ args = 0, pretend = 0, frame = 0
+ 1347              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1348 0000 08B5     		push	{r3, lr}
+ 1349              	.LCFI32:
+ 1350              		.cfi_def_cfa_offset 8
+ 1351              		.cfi_offset 3, -8
+ 1352              		.cfi_offset 14, -4
+ 420:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     result = inv_unregister_data_cb(inv_generate_hal_outputs);
+ 1353              		.loc 1 420 5 view .LVU396
+ 421:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return result;
+ 1354              		.loc 1 421 5 view .LVU397
+ 421:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return result;
+ 1355              		.loc 1 421 14 is_stmt 0 view .LVU398
+ 1356 0002 0248     		ldr	r0, .L89
+ 1357 0004 FFF7FEFF 		bl	inv_unregister_data_cb
+ 1358              	.LVL76:
+ 422:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1359              		.loc 1 422 5 is_stmt 1 view .LVU399
+ 423:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 1360              		.loc 1 423 1 is_stmt 0 view .LVU400
+ 1361 0008 08BD     		pop	{r3, pc}
+ 1362              	.L90:
+ 1363 000a 00BF     		.align	2
+ 1364              	.L89:
+ 1365 000c 00000000 		.word	inv_generate_hal_outputs
+ 1366              		.cfi_endproc
+ 1367              	.LFE17:
+ 1369              		.section	.text.inv_init_hal_outputs,"ax",%progbits
+ 1370              		.align	1
+ 1371              		.global	inv_init_hal_outputs
+ 1372              		.syntax unified
+ 1373              		.thumb
+ 1374              		.thumb_func
+ 1376              	inv_init_hal_outputs:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 37
+
+
+ 1377              	.LFB19:
+ 438:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /* file name: lowPassFilterCoeff_1_6.c */
+ 439:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** float compass_low_pass_filter_coeff[5] =
+ 440:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {+2.000000000000f, +1.000000000000f, -1.279632424998f, +0.477592250073f, +0.049489956269f};
+ 441:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 442:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Initializes hal outputs class. This is called automatically by the
+ 443:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * enable function. It may be called any time the feature is enabled, but
+ 444:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * is typically not needed to be called by outside callers.
+ 445:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 446:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 447:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** inv_error_t inv_init_hal_outputs(void)
+ 448:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 1378              		.loc 1 448 1 is_stmt 1 view -0
+ 1379              		.cfi_startproc
+ 1380              		@ args = 0, pretend = 0, frame = 0
+ 1381              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1382 0000 10B5     		push	{r4, lr}
+ 1383              	.LCFI33:
+ 1384              		.cfi_def_cfa_offset 8
+ 1385              		.cfi_offset 4, -8
+ 1386              		.cfi_offset 14, -4
+ 449:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     int i;
+ 1387              		.loc 1 449 5 view .LVU402
+ 450:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     memset(&hal_out, 0, sizeof(hal_out));
+ 1388              		.loc 1 450 5 view .LVU403
+ 1389 0002 C422     		movs	r2, #196
+ 1390 0004 0021     		movs	r1, #0
+ 1391 0006 0A48     		ldr	r0, .L95
+ 1392 0008 FFF7FEFF 		bl	memset
+ 1393              	.LVL77:
+ 451:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     for (i=0; i<3; i++)  {
+ 1394              		.loc 1 451 5 view .LVU404
+ 1395              		.loc 1 451 11 is_stmt 0 view .LVU405
+ 1396 000c 0024     		movs	r4, #0
+ 1397              		.loc 1 451 5 view .LVU406
+ 1398 000e 0AE0     		b	.L92
+ 1399              	.LVL78:
+ 1400              	.L93:
+ 452:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****         inv_init_biquad_filter(&hal_out.lp_filter[i], compass_low_pass_filter_coeff);
+ 1401              		.loc 1 452 9 is_stmt 1 discriminator 3 view .LVU407
+ 1402 0010 2C20     		movs	r0, #44
+ 1403 0012 04FB00F0 		mul	r0, r4, r0
+ 1404 0016 3030     		adds	r0, r0, #48
+ 1405 0018 054B     		ldr	r3, .L95
+ 1406 001a 1844     		add	r0, r0, r3
+ 1407 001c 0549     		ldr	r1, .L95+4
+ 1408 001e 0430     		adds	r0, r0, #4
+ 1409 0020 FFF7FEFF 		bl	inv_init_biquad_filter
+ 1410              	.LVL79:
+ 451:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     for (i=0; i<3; i++)  {
+ 1411              		.loc 1 451 21 discriminator 3 view .LVU408
+ 1412 0024 0134     		adds	r4, r4, #1
+ 1413              	.LVL80:
+ 1414              	.L92:
+ 451:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     for (i=0; i<3; i++)  {
+ 1415              		.loc 1 451 16 discriminator 1 view .LVU409
+ 1416 0026 022C     		cmp	r4, #2
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 38
+
+
+ 1417 0028 F2DD     		ble	.L93
+ 453:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     }
+ 454:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 455:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return INV_SUCCESS;
+ 1418              		.loc 1 455 5 view .LVU410
+ 456:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1419              		.loc 1 456 1 is_stmt 0 view .LVU411
+ 1420 002a 0020     		movs	r0, #0
+ 1421 002c 10BD     		pop	{r4, pc}
+ 1422              	.LVL81:
+ 1423              	.L96:
+ 1424              		.loc 1 456 1 view .LVU412
+ 1425 002e 00BF     		.align	2
+ 1426              	.L95:
+ 1427 0030 00000000 		.word	hal_out
+ 1428 0034 00000000 		.word	compass_low_pass_filter_coeff
+ 1429              		.cfi_endproc
+ 1430              	.LFE19:
+ 1432              		.section	.text.inv_enable_hal_outputs,"ax",%progbits
+ 1433              		.align	1
+ 1434              		.global	inv_enable_hal_outputs
+ 1435              		.syntax unified
+ 1436              		.thumb
+ 1437              		.thumb_func
+ 1439              	inv_enable_hal_outputs:
+ 1440              	.LFB20:
+ 457:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 458:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Turns on creation and storage of HAL type results.
+ 459:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 460:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 461:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** inv_error_t inv_enable_hal_outputs(void)
+ 462:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 1441              		.loc 1 462 1 is_stmt 1 view -0
+ 1442              		.cfi_startproc
+ 1443              		@ args = 0, pretend = 0, frame = 0
+ 1444              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1445 0000 08B5     		push	{r3, lr}
+ 1446              	.LCFI34:
+ 1447              		.cfi_def_cfa_offset 8
+ 1448              		.cfi_offset 3, -8
+ 1449              		.cfi_offset 14, -4
+ 463:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_error_t result;
+ 1450              		.loc 1 463 5 view .LVU414
+ 464:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 465:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 	// don't need to check the result for inv_init_hal_outputs
+ 466:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 	// since it's always INV_SUCCESS
+ 467:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 	inv_init_hal_outputs();
+ 1451              		.loc 1 467 2 view .LVU415
+ 1452 0002 FFF7FEFF 		bl	inv_init_hal_outputs
+ 1453              	.LVL82:
+ 468:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 469:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     result = inv_register_mpl_start_notification(inv_start_hal_outputs);
+ 1454              		.loc 1 469 5 view .LVU416
+ 1455              		.loc 1 469 14 is_stmt 0 view .LVU417
+ 1456 0006 0248     		ldr	r0, .L99
+ 1457 0008 FFF7FEFF 		bl	inv_register_mpl_start_notification
+ 1458              	.LVL83:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 39
+
+
+ 470:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return result;
+ 1459              		.loc 1 470 5 is_stmt 1 view .LVU418
+ 471:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1460              		.loc 1 471 1 is_stmt 0 view .LVU419
+ 1461 000c 08BD     		pop	{r3, pc}
+ 1462              	.L100:
+ 1463 000e 00BF     		.align	2
+ 1464              	.L99:
+ 1465 0010 00000000 		.word	inv_start_hal_outputs
+ 1466              		.cfi_endproc
+ 1467              	.LFE20:
+ 1469              		.section	.text.inv_disable_hal_outputs,"ax",%progbits
+ 1470              		.align	1
+ 1471              		.global	inv_disable_hal_outputs
+ 1472              		.syntax unified
+ 1473              		.thumb
+ 1474              		.thumb_func
+ 1476              	inv_disable_hal_outputs:
+ 1477              	.LFB21:
+ 472:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 473:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** /** Turns off creation and storage of HAL type results.
+ 474:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** */
+ 475:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** inv_error_t inv_disable_hal_outputs(void)
+ 476:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** {
+ 1478              		.loc 1 476 1 is_stmt 1 view -0
+ 1479              		.cfi_startproc
+ 1480              		@ args = 0, pretend = 0, frame = 0
+ 1481              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1482 0000 08B5     		push	{r3, lr}
+ 1483              	.LCFI35:
+ 1484              		.cfi_def_cfa_offset 8
+ 1485              		.cfi_offset 3, -8
+ 1486              		.cfi_offset 14, -4
+ 477:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_error_t result;
+ 1487              		.loc 1 477 5 view .LVU421
+ 478:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** 
+ 479:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     inv_stop_hal_outputs(); // Ignore error if we have already stopped this
+ 1488              		.loc 1 479 5 view .LVU422
+ 1489 0002 FFF7FEFF 		bl	inv_stop_hal_outputs
+ 1490              	.LVL84:
+ 480:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     result = inv_unregister_mpl_start_notification(inv_start_hal_outputs);
+ 1491              		.loc 1 480 5 view .LVU423
+ 1492              		.loc 1 480 14 is_stmt 0 view .LVU424
+ 1493 0006 0248     		ldr	r0, .L103
+ 1494 0008 FFF7FEFF 		bl	inv_unregister_mpl_start_notification
+ 1495              	.LVL85:
+ 481:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c ****     return result;
+ 1496              		.loc 1 481 5 is_stmt 1 view .LVU425
+ 482:Middlewares/MPU6050_Motion_Driver/mllite/hal_outputs.c **** }
+ 1497              		.loc 1 482 1 is_stmt 0 view .LVU426
+ 1498 000c 08BD     		pop	{r3, pc}
+ 1499              	.L104:
+ 1500 000e 00BF     		.align	2
+ 1501              	.L103:
+ 1502 0010 00000000 		.word	inv_start_hal_outputs
+ 1503              		.cfi_endproc
+ 1504              	.LFE21:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 40
+
+
+ 1506              		.global	compass_low_pass_filter_coeff
+ 1507              		.section	.data.compass_low_pass_filter_coeff,"aw"
+ 1508              		.align	2
+ 1511              	compass_low_pass_filter_coeff:
+ 1512 0000 00000040 		.word	1073741824
+ 1513 0004 0000803F 		.word	1065353216
+ 1514 0008 FFCAA3BF 		.word	-1079784705
+ 1515 000c F986F43E 		.word	1056212729
+ 1516 0010 FBB54A3D 		.word	1028306427
+ 1517              		.section	.bss.hal_out,"aw",%nobits
+ 1518              		.align	2
+ 1521              	hal_out:
+ 1522 0000 00000000 		.space	196
+ 1522      00000000 
+ 1522      00000000 
+ 1522      00000000 
+ 1522      00000000 
+ 1523              		.text
+ 1524              	.Letext0:
+ 1525              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/lib/gcc/arm-none-eabi/12.
+ 1526              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 1527              		.file 4 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 1528              		.file 5 "Middlewares/MPU6050_Motion_Driver/driver/include/mltypes.h"
+ 1529              		.file 6 "Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h"
+ 1530              		.file 7 "Middlewares/MPU6050_Motion_Driver/mllite/data_builder.h"
+ 1531              		.file 8 "Middlewares/MPU6050_Motion_Driver/mllite/start_manager.h"
+ 1532              		.file 9 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/str
+ 1533              		.file 10 "Middlewares/MPU6050_Motion_Driver/mllite/results_holder.h"
+ 1534              		.file 11 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/ma
+ 1535              		.file 12 "<built-in>"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 41
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 hal_outputs.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:21     .text.inv_get_rotation:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:26     .text.inv_get_rotation:00000000 inv_get_rotation
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:128    .text.inv_get_rotation:000000a8 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1521   .bss.hal_out:00000000 hal_out
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:134    .text.google_orientation:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:139    .text.google_orientation:00000000 google_orientation
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:234    .text.google_orientation:00000074 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:240    .text.inv_generate_hal_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:246    .text.inv_generate_hal_outputs:00000000 inv_generate_hal_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:366    .text.inv_generate_hal_outputs:00000076 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:371    .text.inv_generate_hal_outputs:0000007a $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:578    .text.inv_generate_hal_outputs:00000194 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:586    .text.inv_start_hal_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:592    .text.inv_start_hal_outputs:00000000 inv_start_hal_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:617    .text.inv_start_hal_outputs:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:622    .text.inv_get_sensor_type_accelerometer:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:628    .text.inv_get_sensor_type_accelerometer:00000000 inv_get_sensor_type_accelerometer
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:698    .text.inv_get_sensor_type_accelerometer:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:704    .text.inv_get_sensor_type_linear_acceleration:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:710    .text.inv_get_sensor_type_linear_acceleration:00000000 inv_get_sensor_type_linear_acceleration
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:791    .text.inv_get_sensor_type_linear_acceleration:0000006c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:796    .text.inv_get_sensor_type_gravity:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:802    .text.inv_get_sensor_type_gravity:00000000 inv_get_sensor_type_gravity
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:884    .text.inv_get_sensor_type_gravity:00000060 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:890    .text.inv_get_sensor_type_gyroscope:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:896    .text.inv_get_sensor_type_gyroscope:00000000 inv_get_sensor_type_gyroscope
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:966    .text.inv_get_sensor_type_gyroscope:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:972    .text.inv_get_sensor_type_gyroscope_raw:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:978    .text.inv_get_sensor_type_gyroscope_raw:00000000 inv_get_sensor_type_gyroscope_raw
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1048   .text.inv_get_sensor_type_gyroscope_raw:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1054   .text.inv_get_sensor_type_rotation_vector:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1060   .text.inv_get_sensor_type_rotation_vector:00000000 inv_get_sensor_type_rotation_vector
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1193   .text.inv_get_sensor_type_rotation_vector:000000c4 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1199   .text.inv_get_sensor_type_magnetic_field:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1205   .text.inv_get_sensor_type_magnetic_field:00000000 inv_get_sensor_type_magnetic_field
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1285   .text.inv_get_sensor_type_magnetic_field:00000044 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1290   .text.inv_get_sensor_type_orientation:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1296   .text.inv_get_sensor_type_orientation:00000000 inv_get_sensor_type_orientation
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1331   .text.inv_get_sensor_type_orientation:00000018 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1336   .text.inv_stop_hal_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1342   .text.inv_stop_hal_outputs:00000000 inv_stop_hal_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1365   .text.inv_stop_hal_outputs:0000000c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1370   .text.inv_init_hal_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1376   .text.inv_init_hal_outputs:00000000 inv_init_hal_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1427   .text.inv_init_hal_outputs:00000030 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1511   .data.compass_low_pass_filter_coeff:00000000 compass_low_pass_filter_coeff
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1433   .text.inv_enable_hal_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1439   .text.inv_enable_hal_outputs:00000000 inv_enable_hal_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1465   .text.inv_enable_hal_outputs:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1470   .text.inv_disable_hal_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1476   .text.inv_disable_hal_outputs:00000000 inv_disable_hal_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1502   .text.inv_disable_hal_outputs:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1508   .data.compass_low_pass_filter_coeff:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s:1518   .bss.hal_out:00000000 $d
+
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccc6yCgE.s 			page 42
+
+
+UNDEFINED SYMBOLS
+inv_quaternion_to_rotation
+atan2f
+asinf
+inv_get_quaternion_set
+inv_get_compass_set
+inv_calc_state_to_match_output
+inv_biquad_filter_process
+inv_register_data_cb
+inv_get_accel_set
+inv_get_gravity
+inv_get_gyro_set
+inv_get_gyro_set_raw
+inv_get_heading_confidence_interval
+inv_unregister_data_cb
+memset
+inv_init_biquad_filter
+inv_register_mpl_start_notification
+inv_unregister_mpl_start_notification

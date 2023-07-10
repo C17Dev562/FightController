@@ -1,0 +1,1724 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"pidControl.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Core/Src/pidControl.c"
+  20              		.section	.text.pidInit,"ax",%progbits
+  21              		.align	1
+  22              		.global	pidInit
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	pidInit:
+  28              	.LVL0:
+  29              	.LFB232:
+   1:Core/Src/pidControl.c **** #include "pidControl.h"
+   2:Core/Src/pidControl.c **** 
+   3:Core/Src/pidControl.c **** #include <results_holder.h>
+   4:Core/Src/pidControl.c **** #include <stdbool.h>
+   5:Core/Src/pidControl.c **** #include <stdint.h>
+   6:Core/Src/pidControl.c **** #include <stdio.h>
+   7:Core/Src/pidControl.c **** 
+   8:Core/Src/pidControl.c **** #include "Dshot.h"
+   9:Core/Src/pidControl.c **** #include "Dshot_tim.h"
+  10:Core/Src/pidControl.c **** #include "FreeRTOS.h"
+  11:Core/Src/pidControl.c **** #include "crsf.h"
+  12:Core/Src/pidControl.c **** #include "math.h"
+  13:Core/Src/pidControl.c **** #include "maths.h"
+  14:Core/Src/pidControl.c **** #include "micros.h"
+  15:Core/Src/pidControl.c **** #include "mpu6050_SL.h"
+  16:Core/Src/pidControl.c **** #include "mpu6050_init.h"
+  17:Core/Src/pidControl.c **** #include "stm32f4xx_hal.h"
+  18:Core/Src/pidControl.c **** #include "stm32f4xx_hal_def.h"
+  19:Core/Src/pidControl.c **** #include "system.h"
+  20:Core/Src/pidControl.c **** #include "task.h"
+  21:Core/Src/pidControl.c **** 
+  22:Core/Src/pidControl.c **** uint16_t my_motor_value[4] = {0, 0, 0, 0};
+  23:Core/Src/pidControl.c **** 
+  24:Core/Src/pidControl.c **** static float Thro = 0.0, Roll = 0.0, Pitch = 0.0, Yaw = 0.0;
+  25:Core/Src/pidControl.c **** pidStruct XGyroPid, YGyroPid, ZGyroPid;
+  26:Core/Src/pidControl.c **** pidStruct XEulerPid, YEulerPid, ZEulerPid;
+  27:Core/Src/pidControl.c **** attitude_t rateDesired;
+  28:Core/Src/pidControl.c **** extern uint16_t ThroValue;
+  29:Core/Src/pidControl.c **** extern RcAngleRateData AngleEXPRateData;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 2
+
+
+  30:Core/Src/pidControl.c **** extern IMU_Result_data IMU_Result;
+  31:Core/Src/pidControl.c **** extern uint32_t crsfChannelData[CRSF_MAX_CHANNEL];
+  32:Core/Src/pidControl.c **** // static int controlAngleSpeed(void);
+  33:Core/Src/pidControl.c **** // static float pidCalculate(pidStruct *pidStruct, float expectedValue,
+  34:Core/Src/pidControl.c ****                           // float currentValue);
+  35:Core/Src/pidControl.c **** // static void controlGyroSpeed(void);
+  36:Core/Src/pidControl.c **** void attitudeRatePID(void);
+  37:Core/Src/pidControl.c **** void attitudeAnglePID(void);
+  38:Core/Src/pidControl.c **** void controlMotor(void);
+  39:Core/Src/pidControl.c **** float pidUpdate(pidStruct *pid,const float error);
+  40:Core/Src/pidControl.c **** 
+  41:Core/Src/pidControl.c **** 
+  42:Core/Src/pidControl.c **** void pidInit(pidStruct *pidStruct, float Kp, float Ki, float Kd, float iLimit,float dT,float output
+  43:Core/Src/pidControl.c **** {
+  30              		.loc 1 43 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  44:Core/Src/pidControl.c ****   pidStruct->Ki = Ki;
+  35              		.loc 1 44 3 view .LVU1
+  36              		.loc 1 44 17 is_stmt 0 view .LVU2
+  37 0000 C0ED060A 		vstr.32	s1, [r0, #24]
+  45:Core/Src/pidControl.c ****   pidStruct->Kd = Kd;
+  38              		.loc 1 45 3 is_stmt 1 view .LVU3
+  39              		.loc 1 45 17 is_stmt 0 view .LVU4
+  40 0004 80ED071A 		vstr.32	s2, [r0, #28]
+  46:Core/Src/pidControl.c ****   pidStruct->Kp = Kp;
+  41              		.loc 1 46 3 is_stmt 1 view .LVU5
+  42              		.loc 1 46 17 is_stmt 0 view .LVU6
+  43 0008 80ED050A 		vstr.32	s0, [r0, #20]
+  47:Core/Src/pidControl.c ****   pidStruct->iLimit = iLimit;
+  44              		.loc 1 47 3 is_stmt 1 view .LVU7
+  45              		.loc 1 47 21 is_stmt 0 view .LVU8
+  46 000c C0ED0B1A 		vstr.32	s3, [r0, #44]
+  48:Core/Src/pidControl.c ****   pidStruct->integration = 0;
+  47              		.loc 1 48 3 is_stmt 1 view .LVU9
+  48              		.loc 1 48 26 is_stmt 0 view .LVU10
+  49 0010 0023     		movs	r3, #0
+  50 0012 C360     		str	r3, [r0, #12]	@ float
+  49:Core/Src/pidControl.c ****   pidStruct->dt = dT;
+  51              		.loc 1 49 3 is_stmt 1 view .LVU11
+  52              		.loc 1 49 17 is_stmt 0 view .LVU12
+  53 0014 80ED0D2A 		vstr.32	s4, [r0, #52]
+  50:Core/Src/pidControl.c ****   pidStruct->outputLimit = outputLimit;
+  54              		.loc 1 50 3 is_stmt 1 view .LVU13
+  55              		.loc 1 50 26 is_stmt 0 view .LVU14
+  56 0018 C0ED0E2A 		vstr.32	s5, [r0, #56]
+  51:Core/Src/pidControl.c **** }
+  57              		.loc 1 51 1 view .LVU15
+  58 001c 7047     		bx	lr
+  59              		.cfi_endproc
+  60              	.LFE232:
+  62              		.section	.text.pidUpdate,"ax",%progbits
+  63              		.align	1
+  64              		.global	pidUpdate
+  65              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 3
+
+
+  66              		.thumb
+  67              		.thumb_func
+  69              	pidUpdate:
+  70              	.LVL1:
+  71              	.LFB235:
+  52:Core/Src/pidControl.c **** void pidControl(void) {
+  53:Core/Src/pidControl.c ****   int ret = 0;
+  54:Core/Src/pidControl.c ****   //判断是否为自稳模式
+  55:Core/Src/pidControl.c ****   if (ret == MPU6050_getValue() && crsfChannelData[5] < 992) {
+  56:Core/Src/pidControl.c ****     attitudeAnglePID();
+  57:Core/Src/pidControl.c ****   }
+  58:Core/Src/pidControl.c **** }
+  59:Core/Src/pidControl.c **** void pidControlGyro(void){
+  60:Core/Src/pidControl.c ****   mpu6050_get_gyrodata();
+  61:Core/Src/pidControl.c **** if(IMU_Result.GyroX <600 && IMU_Result.GyroZ < 500 && IMU_Result.GyroY < 500 && 
+  62:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+  63:Core/Src/pidControl.c ****       attitudeRatePID();
+  64:Core/Src/pidControl.c ****       controlMotor();
+  65:Core/Src/pidControl.c ****   }
+  66:Core/Src/pidControl.c **** }
+  67:Core/Src/pidControl.c **** 
+  68:Core/Src/pidControl.c **** // static float pidCalculate(pidStruct *pidStruct, float expectedValue,
+  69:Core/Src/pidControl.c **** //                           float currentValue) {
+  70:Core/Src/pidControl.c **** //   float termI = 0.0;
+  71:Core/Src/pidControl.c **** //   // UNUSED(dt);
+  72:Core/Src/pidControl.c **** //   // UNUSED(OutorIn);
+  73:Core/Src/pidControl.c **** //   // microsencond convert to sencond;
+  74:Core/Src/pidControl.c **** //   float Dtime = pidStruct->dt;
+  75:Core/Src/pidControl.c **** //   // calculate Porprotion
+  76:Core/Src/pidControl.c **** //   pidStruct->error = expectedValue - currentValue;
+  77:Core/Src/pidControl.c **** //   pidStruct->outP = pidStruct->Kp * pidStruct->error;
+  78:Core/Src/pidControl.c **** //   // calculate Derivation
+  79:Core/Src/pidControl.c **** //   pidStruct->derivation = (pidStruct->error - pidStruct->preError) / Dtime;
+  80:Core/Src/pidControl.c **** //   // pidStruct->derivation = (pidStruct->error - pidStruct->preError);
+  81:Core/Src/pidControl.c **** //   pidStruct->outD = pidStruct->Kd * pidStruct->derivation;
+  82:Core/Src/pidControl.c **** //
+  83:Core/Src/pidControl.c **** //   // if (OutorIn == OUT_LOOP) {
+  84:Core/Src/pidControl.c **** //     pidStruct->outI = pidStruct->Ki * pidStruct->integration;
+  85:Core/Src/pidControl.c **** //   // } else {
+  86:Core/Src/pidControl.c **** //     // pidStruct->integration = 0;
+  87:Core/Src/pidControl.c **** //   // }
+  88:Core/Src/pidControl.c **** //   // set currentError as previousError
+  89:Core/Src/pidControl.c **** //   pidStruct->preError = pidStruct->error;
+  90:Core/Src/pidControl.c **** //
+  91:Core/Src/pidControl.c **** //   pidStruct->pidResult = pidStruct->outI + pidStruct->outD + pidStruct->outP;
+  92:Core/Src/pidControl.c **** //   // calculate Integration
+  93:Core/Src/pidControl.c **** //   if (fabs(pidStruct->pidResult) < Thro) {
+  94:Core/Src/pidControl.c **** //     termI = pidStruct->integration + pidStruct->error * Dtime;
+  95:Core/Src/pidControl.c **** //     // termI = pidStruct->integration + pidStruct->error;
+  96:Core/Src/pidControl.c **** //     if (termI > -pidStruct->iLimit && termI < pidStruct->iLimit &&
+  97:Core/Src/pidControl.c **** //         pidStruct->pidResult > -pidStruct->iLimit &&
+  98:Core/Src/pidControl.c **** //         pidStruct->pidResult < pidStruct->iLimit)
+  99:Core/Src/pidControl.c **** //       pidStruct->integration = termI;
+ 100:Core/Src/pidControl.c **** //     }
+ 101:Core/Src/pidControl.c **** //
+ 102:Core/Src/pidControl.c **** //   if(pidStruct->outputLimit !=0 )
+ 103:Core/Src/pidControl.c **** //   {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 4
+
+
+ 104:Core/Src/pidControl.c **** //     if(pidStruct->pidResult > pidStruct->outputLimit)
+ 105:Core/Src/pidControl.c **** //       pidStruct->pidResult = pidStruct->outputLimit;
+ 106:Core/Src/pidControl.c **** //     else if (pidStruct->pidResult < -pidStruct->outputLimit)
+ 107:Core/Src/pidControl.c **** //         pidStruct->pidResult = -pidStruct->outputLimit;
+ 108:Core/Src/pidControl.c **** //   }
+ 109:Core/Src/pidControl.c **** //
+ 110:Core/Src/pidControl.c **** //
+ 111:Core/Src/pidControl.c **** //   return pidStruct->pidResult;
+ 112:Core/Src/pidControl.c **** // }
+ 113:Core/Src/pidControl.c **** 
+ 114:Core/Src/pidControl.c **** 
+ 115:Core/Src/pidControl.c **** float pidUpdate(pidStruct *pid,const float error)
+ 116:Core/Src/pidControl.c **** {
+  72              		.loc 1 116 1 is_stmt 1 view -0
+  73              		.cfi_startproc
+  74              		@ args = 0, pretend = 0, frame = 0
+  75              		@ frame_needed = 0, uses_anonymous_args = 0
+  76              		@ link register save eliminated.
+  77              		.loc 1 116 1 is_stmt 0 view .LVU17
+  78 0000 B0EE407A 		vmov.f32	s14, s0
+ 117:Core/Src/pidControl.c ****   float output;
+  79              		.loc 1 117 3 is_stmt 1 view .LVU18
+ 118:Core/Src/pidControl.c **** 
+ 119:Core/Src/pidControl.c ****   pid->error = error;
+  80              		.loc 1 119 3 view .LVU19
+  81              		.loc 1 119 14 is_stmt 0 view .LVU20
+  82 0004 80ED010A 		vstr.32	s0, [r0, #4]
+ 120:Core/Src/pidControl.c ****   pid->integration += pid->error * pid-> dt;
+  83              		.loc 1 120 3 is_stmt 1 view .LVU21
+  84              		.loc 1 120 6 is_stmt 0 view .LVU22
+  85 0008 D0ED037A 		vldr.32	s15, [r0, #12]
+  86              		.loc 1 120 39 view .LVU23
+  87 000c 90ED0D6A 		vldr.32	s12, [r0, #52]
+  88              		.loc 1 120 34 view .LVU24
+  89 0010 66EE006A 		vmul.f32	s13, s12, s0
+  90              		.loc 1 120 20 view .LVU25
+  91 0014 77EEA67A 		vadd.f32	s15, s15, s13
+  92 0018 C0ED037A 		vstr.32	s15, [r0, #12]
+ 121:Core/Src/pidControl.c ****   //积分限幅
+ 122:Core/Src/pidControl.c ****   if(pid->integration > pid->iLimit)
+  93              		.loc 1 122 3 is_stmt 1 view .LVU26
+  94              		.loc 1 122 28 is_stmt 0 view .LVU27
+  95 001c D0ED0B6A 		vldr.32	s13, [r0, #44]
+  96              		.loc 1 122 5 view .LVU28
+  97 0020 F4EEE67A 		vcmpe.f32	s15, s13
+  98 0024 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  99 0028 37DD     		ble	.L12
+ 123:Core/Src/pidControl.c ****   {
+ 124:Core/Src/pidControl.c ****     pid->integration = pid->iLimit;
+ 100              		.loc 1 124 5 is_stmt 1 view .LVU29
+ 101              		.loc 1 124 22 is_stmt 0 view .LVU30
+ 102 002a C0ED036A 		vstr.32	s13, [r0, #12]
+ 103              	.L5:
+ 125:Core/Src/pidControl.c ****   }
+ 126:Core/Src/pidControl.c ****   else if (pid->integration < -pid->iLimit)
+ 127:Core/Src/pidControl.c ****   {
+ 128:Core/Src/pidControl.c ****     pid->integration = -pid->iLimit;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 5
+
+
+ 129:Core/Src/pidControl.c ****   }
+ 130:Core/Src/pidControl.c ****  pid->derivation = (pid->error - pid->preError) / pid->dt;
+ 104              		.loc 1 130 2 is_stmt 1 view .LVU31
+ 105              		.loc 1 130 37 is_stmt 0 view .LVU32
+ 106 002e D0ED026A 		vldr.32	s13, [r0, #8]
+ 107              		.loc 1 130 32 view .LVU33
+ 108 0032 77EE666A 		vsub.f32	s13, s14, s13
+ 109              		.loc 1 130 49 view .LVU34
+ 110 0036 C6EE867A 		vdiv.f32	s15, s13, s12
+ 111              		.loc 1 130 18 view .LVU35
+ 112 003a C0ED047A 		vstr.32	s15, [r0, #16]
+ 131:Core/Src/pidControl.c **** 
+ 132:Core/Src/pidControl.c ****   pid->outP = pid->Kp * pid->error;
+ 113              		.loc 1 132 3 is_stmt 1 view .LVU36
+ 114              		.loc 1 132 18 is_stmt 0 view .LVU37
+ 115 003e D0ED056A 		vldr.32	s13, [r0, #20]
+ 116              		.loc 1 132 23 view .LVU38
+ 117 0042 66EE876A 		vmul.f32	s13, s13, s14
+ 118              		.loc 1 132 13 view .LVU39
+ 119 0046 C0ED086A 		vstr.32	s13, [r0, #32]
+ 133:Core/Src/pidControl.c ****   pid->outI = pid->Ki * pid->integration;
+ 120              		.loc 1 133 3 is_stmt 1 view .LVU40
+ 121              		.loc 1 133 18 is_stmt 0 view .LVU41
+ 122 004a 90ED066A 		vldr.32	s12, [r0, #24]
+ 123              		.loc 1 133 28 view .LVU42
+ 124 004e D0ED035A 		vldr.32	s11, [r0, #12]
+ 125              		.loc 1 133 23 view .LVU43
+ 126 0052 26EE256A 		vmul.f32	s12, s12, s11
+ 127              		.loc 1 133 13 view .LVU44
+ 128 0056 80ED096A 		vstr.32	s12, [r0, #36]
+ 134:Core/Src/pidControl.c ****   pid->outD = pid->Kd * pid->derivation;
+ 129              		.loc 1 134 3 is_stmt 1 view .LVU45
+ 130              		.loc 1 134 18 is_stmt 0 view .LVU46
+ 131 005a D0ED075A 		vldr.32	s11, [r0, #28]
+ 132              		.loc 1 134 23 view .LVU47
+ 133 005e 67EEA57A 		vmul.f32	s15, s15, s11
+ 134              		.loc 1 134 13 view .LVU48
+ 135 0062 C0ED0A7A 		vstr.32	s15, [r0, #40]
+ 135:Core/Src/pidControl.c **** 
+ 136:Core/Src/pidControl.c **** 
+ 137:Core/Src/pidControl.c ****   output = pid->outP + pid->outI + pid->outD;
+ 136              		.loc 1 137 3 is_stmt 1 view .LVU49
+ 137              		.loc 1 137 22 is_stmt 0 view .LVU50
+ 138 0066 76EE866A 		vadd.f32	s13, s13, s12
+ 139              		.loc 1 137 10 view .LVU51
+ 140 006a 37EEA60A 		vadd.f32	s0, s15, s13
+ 141              	.LVL2:
+ 138:Core/Src/pidControl.c ****   //输出限幅
+ 139:Core/Src/pidControl.c ****   if(pid->outputLimit !=0 )
+ 142              		.loc 1 139 3 is_stmt 1 view .LVU52
+ 143              		.loc 1 139 9 is_stmt 0 view .LVU53
+ 144 006e D0ED0E7A 		vldr.32	s15, [r0, #56]
+ 145              		.loc 1 139 5 view .LVU54
+ 146 0072 F5EE407A 		vcmp.f32	s15, #0
+ 147 0076 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 148 007a 1AD0     		beq	.L7
+ 140:Core/Src/pidControl.c ****   {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 6
+
+
+ 141:Core/Src/pidControl.c ****     if(output > pid->outputLimit)
+ 149              		.loc 1 141 5 is_stmt 1 view .LVU55
+ 150              		.loc 1 141 7 is_stmt 0 view .LVU56
+ 151 007c F4EEC07A 		vcmpe.f32	s15, s0
+ 152 0080 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 153 0084 13D4     		bmi	.L8
+ 142:Core/Src/pidControl.c ****       output = pid->outputLimit;
+ 143:Core/Src/pidControl.c ****     else if (output < -pid->outputLimit)
+ 154              		.loc 1 143 10 is_stmt 1 view .LVU57
+ 155              		.loc 1 143 23 is_stmt 0 view .LVU58
+ 156 0086 F1EE677A 		vneg.f32	s15, s15
+ 157              		.loc 1 143 13 view .LVU59
+ 158 008a F4EEC07A 		vcmpe.f32	s15, s0
+ 159 008e F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 160 0092 0EDD     		ble	.L7
+ 144:Core/Src/pidControl.c ****         output = -pid->outputLimit;
+ 161              		.loc 1 144 16 view .LVU60
+ 162 0094 B0EE670A 		vmov.f32	s0, s15
+ 163              	.LVL3:
+ 164              		.loc 1 144 16 view .LVU61
+ 165 0098 0BE0     		b	.L7
+ 166              	.LVL4:
+ 167              	.L12:
+ 126:Core/Src/pidControl.c ****   {
+ 168              		.loc 1 126 8 is_stmt 1 view .LVU62
+ 126:Core/Src/pidControl.c ****   {
+ 169              		.loc 1 126 31 is_stmt 0 view .LVU63
+ 170 009a F1EE666A 		vneg.f32	s13, s13
+ 126:Core/Src/pidControl.c ****   {
+ 171              		.loc 1 126 11 view .LVU64
+ 172 009e F4EEE67A 		vcmpe.f32	s15, s13
+ 173 00a2 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 174 00a6 C2D5     		bpl	.L5
+ 128:Core/Src/pidControl.c ****   }
+ 175              		.loc 1 128 5 is_stmt 1 view .LVU65
+ 128:Core/Src/pidControl.c ****   }
+ 176              		.loc 1 128 22 is_stmt 0 view .LVU66
+ 177 00a8 C0ED036A 		vstr.32	s13, [r0, #12]
+ 178 00ac BFE7     		b	.L5
+ 179              	.LVL5:
+ 180              	.L8:
+ 142:Core/Src/pidControl.c ****     else if (output < -pid->outputLimit)
+ 181              		.loc 1 142 14 view .LVU67
+ 182 00ae B0EE670A 		vmov.f32	s0, s15
+ 183              	.LVL6:
+ 184              	.L7:
+ 145:Core/Src/pidControl.c ****   }
+ 146:Core/Src/pidControl.c **** 
+ 147:Core/Src/pidControl.c ****   pid->preError = pid->error;
+ 185              		.loc 1 147 3 is_stmt 1 view .LVU68
+ 186              		.loc 1 147 17 is_stmt 0 view .LVU69
+ 187 00b2 80ED027A 		vstr.32	s14, [r0, #8]
+ 148:Core/Src/pidControl.c ****   pid->pidResult = output;
+ 188              		.loc 1 148 3 is_stmt 1 view .LVU70
+ 189              		.loc 1 148 18 is_stmt 0 view .LVU71
+ 190 00b6 80ED0C0A 		vstr.32	s0, [r0, #48]
+ 149:Core/Src/pidControl.c ****   return output;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 7
+
+
+ 191              		.loc 1 149 3 is_stmt 1 view .LVU72
+ 150:Core/Src/pidControl.c **** }
+ 192              		.loc 1 150 1 is_stmt 0 view .LVU73
+ 193 00ba 7047     		bx	lr
+ 194              		.cfi_endproc
+ 195              	.LFE235:
+ 197              		.section	.text.attitudeAnglePID,"ax",%progbits
+ 198              		.align	1
+ 199              		.global	attitudeAnglePID
+ 200              		.syntax unified
+ 201              		.thumb
+ 202              		.thumb_func
+ 204              	attitudeAnglePID:
+ 205              	.LFB236:
+ 151:Core/Src/pidControl.c **** 
+ 152:Core/Src/pidControl.c **** void attitudeAnglePID(void)
+ 153:Core/Src/pidControl.c **** {
+ 206              		.loc 1 153 1 is_stmt 1 view -0
+ 207              		.cfi_startproc
+ 208              		@ args = 0, pretend = 0, frame = 0
+ 209              		@ frame_needed = 0, uses_anonymous_args = 0
+ 210 0000 70B5     		push	{r4, r5, r6, lr}
+ 211              	.LCFI0:
+ 212              		.cfi_def_cfa_offset 16
+ 213              		.cfi_offset 4, -16
+ 214              		.cfi_offset 5, -12
+ 215              		.cfi_offset 6, -8
+ 216              		.cfi_offset 14, -4
+ 154:Core/Src/pidControl.c ****  rateDesired.yaw   = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.EulerZ);
+ 217              		.loc 1 154 2 view .LVU75
+ 218              		.loc 1 154 59 is_stmt 0 view .LVU76
+ 219 0002 124E     		ldr	r6, .L15
+ 220 0004 96ED010A 		vldr.32	s0, [r6, #4]
+ 221              		.loc 1 154 88 view .LVU77
+ 222 0008 114D     		ldr	r5, .L15+4
+ 223 000a D5ED027A 		vldr.32	s15, [r5, #8]
+ 224              		.loc 1 154 22 view .LVU78
+ 225 000e 30EE670A 		vsub.f32	s0, s0, s15
+ 226 0012 1048     		ldr	r0, .L15+8
+ 227 0014 FFF7FEFF 		bl	pidUpdate
+ 228              	.LVL7:
+ 229              		.loc 1 154 20 view .LVU79
+ 230 0018 0F4C     		ldr	r4, .L15+12
+ 231 001a 84ED030A 		vstr.32	s0, [r4, #12]
+ 155:Core/Src/pidControl.c ****  rateDesired.pitch = pidUpdate(&XEulerPid, AngleEXPRateData.PitchEXPAngleRate - IMU_Result.EulerX);
+ 232              		.loc 1 155 2 is_stmt 1 view .LVU80
+ 233              		.loc 1 155 60 is_stmt 0 view .LVU81
+ 234 001e 96ED000A 		vldr.32	s0, [r6]
+ 235              		.loc 1 155 91 view .LVU82
+ 236 0022 D5ED007A 		vldr.32	s15, [r5]
+ 237              		.loc 1 155 22 view .LVU83
+ 238 0026 30EE670A 		vsub.f32	s0, s0, s15
+ 239 002a 0C48     		ldr	r0, .L15+16
+ 240 002c FFF7FEFF 		bl	pidUpdate
+ 241              	.LVL8:
+ 242              		.loc 1 155 20 view .LVU84
+ 243 0030 84ED020A 		vstr.32	s0, [r4, #8]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 8
+
+
+ 156:Core/Src/pidControl.c ****  rateDesired.roll  = pidUpdate(&YEulerPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.EulerY);
+ 244              		.loc 1 156 2 is_stmt 1 view .LVU85
+ 245              		.loc 1 156 60 is_stmt 0 view .LVU86
+ 246 0034 96ED020A 		vldr.32	s0, [r6, #8]
+ 247              		.loc 1 156 90 view .LVU87
+ 248 0038 D5ED017A 		vldr.32	s15, [r5, #4]
+ 249              		.loc 1 156 22 view .LVU88
+ 250 003c 30EE670A 		vsub.f32	s0, s0, s15
+ 251 0040 0748     		ldr	r0, .L15+20
+ 252 0042 FFF7FEFF 		bl	pidUpdate
+ 253              	.LVL9:
+ 254              		.loc 1 156 20 view .LVU89
+ 255 0046 84ED010A 		vstr.32	s0, [r4, #4]
+ 157:Core/Src/pidControl.c **** }
+ 256              		.loc 1 157 1 view .LVU90
+ 257 004a 70BD     		pop	{r4, r5, r6, pc}
+ 258              	.L16:
+ 259              		.align	2
+ 260              	.L15:
+ 261 004c 00000000 		.word	AngleEXPRateData
+ 262 0050 00000000 		.word	IMU_Result
+ 263 0054 00000000 		.word	ZGyroPid
+ 264 0058 00000000 		.word	rateDesired
+ 265 005c 00000000 		.word	XEulerPid
+ 266 0060 00000000 		.word	YEulerPid
+ 267              		.cfi_endproc
+ 268              	.LFE236:
+ 270              		.section	.text.pidControl,"ax",%progbits
+ 271              		.align	1
+ 272              		.global	pidControl
+ 273              		.syntax unified
+ 274              		.thumb
+ 275              		.thumb_func
+ 277              	pidControl:
+ 278              	.LFB233:
+  52:Core/Src/pidControl.c ****   int ret = 0;
+ 279              		.loc 1 52 23 is_stmt 1 view -0
+ 280              		.cfi_startproc
+ 281              		@ args = 0, pretend = 0, frame = 0
+ 282              		@ frame_needed = 0, uses_anonymous_args = 0
+ 283 0000 08B5     		push	{r3, lr}
+ 284              	.LCFI1:
+ 285              		.cfi_def_cfa_offset 8
+ 286              		.cfi_offset 3, -8
+ 287              		.cfi_offset 14, -4
+  53:Core/Src/pidControl.c ****   //判断是否为自稳模式
+ 288              		.loc 1 53 3 view .LVU92
+ 289              	.LVL10:
+  55:Core/Src/pidControl.c ****     attitudeAnglePID();
+ 290              		.loc 1 55 3 view .LVU93
+  55:Core/Src/pidControl.c ****     attitudeAnglePID();
+ 291              		.loc 1 55 14 is_stmt 0 view .LVU94
+ 292 0002 FFF7FEFF 		bl	MPU6050_getValue
+ 293              	.LVL11:
+  55:Core/Src/pidControl.c ****     attitudeAnglePID();
+ 294              		.loc 1 55 6 view .LVU95
+ 295 0006 20B9     		cbnz	r0, .L17
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 9
+
+
+  55:Core/Src/pidControl.c ****     attitudeAnglePID();
+ 296              		.loc 1 55 51 discriminator 1 view .LVU96
+ 297 0008 044B     		ldr	r3, .L21
+ 298 000a 5B69     		ldr	r3, [r3, #20]
+  55:Core/Src/pidControl.c ****     attitudeAnglePID();
+ 299              		.loc 1 55 33 discriminator 1 view .LVU97
+ 300 000c B3F5787F 		cmp	r3, #992
+ 301 0010 00D3     		bcc	.L20
+ 302              	.L17:
+  58:Core/Src/pidControl.c **** void pidControlGyro(void){
+ 303              		.loc 1 58 1 view .LVU98
+ 304 0012 08BD     		pop	{r3, pc}
+ 305              	.L20:
+  56:Core/Src/pidControl.c ****   }
+ 306              		.loc 1 56 5 is_stmt 1 view .LVU99
+ 307 0014 FFF7FEFF 		bl	attitudeAnglePID
+ 308              	.LVL12:
+  58:Core/Src/pidControl.c **** void pidControlGyro(void){
+ 309              		.loc 1 58 1 is_stmt 0 view .LVU100
+ 310 0018 FBE7     		b	.L17
+ 311              	.L22:
+ 312 001a 00BF     		.align	2
+ 313              	.L21:
+ 314 001c 00000000 		.word	crsfChannelData
+ 315              		.cfi_endproc
+ 316              	.LFE233:
+ 318              		.section	.text.attitudeRatePID,"ax",%progbits
+ 319              		.align	1
+ 320              		.global	attitudeRatePID
+ 321              		.syntax unified
+ 322              		.thumb
+ 323              		.thumb_func
+ 325              	attitudeRatePID:
+ 326              	.LFB237:
+ 158:Core/Src/pidControl.c **** 
+ 159:Core/Src/pidControl.c **** void attitudeRatePID(void)
+ 160:Core/Src/pidControl.c **** {
+ 327              		.loc 1 160 1 is_stmt 1 view -0
+ 328              		.cfi_startproc
+ 329              		@ args = 0, pretend = 0, frame = 0
+ 330              		@ frame_needed = 0, uses_anonymous_args = 0
+ 331 0000 38B5     		push	{r3, r4, r5, lr}
+ 332              	.LCFI2:
+ 333              		.cfi_def_cfa_offset 16
+ 334              		.cfi_offset 3, -16
+ 335              		.cfi_offset 4, -12
+ 336              		.cfi_offset 5, -8
+ 337              		.cfi_offset 14, -4
+ 161:Core/Src/pidControl.c ****   //自稳模式 500hz
+ 162:Core/Src/pidControl.c ****   if (crsfChannelData[5] < 992) {
+ 338              		.loc 1 162 3 view .LVU102
+ 339              		.loc 1 162 22 is_stmt 0 view .LVU103
+ 340 0002 2C4B     		ldr	r3, .L29
+ 341 0004 5B69     		ldr	r3, [r3, #20]
+ 342              		.loc 1 162 6 view .LVU104
+ 343 0006 B3F5787F 		cmp	r3, #992
+ 344 000a 03D3     		bcc	.L27
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 10
+
+
+ 163:Core/Src/pidControl.c ****     // Yaw   = pidUpdate(&ZGyroPid, rateDesired.yaw - IMU_Result.GyroZ); 
+ 164:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 165:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XEulerPid, rateDesired.pitch - IMU_Result.GyroX);
+ 166:Core/Src/pidControl.c ****     Roll  = pidUpdate(&YEulerPid, rateDesired.roll - IMU_Result.GyroY);
+ 167:Core/Src/pidControl.c ****   }
+ 168:Core/Src/pidControl.c ****   else if (crsfChannelData[5] >992) {
+ 345              		.loc 1 168 8 is_stmt 1 view .LVU105
+ 346              		.loc 1 168 11 is_stmt 0 view .LVU106
+ 347 000c B3F5787F 		cmp	r3, #992
+ 348 0010 28D8     		bhi	.L28
+ 349              	.L23:
+ 169:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XGyroPid, AngleEXPRateData.PitchEXPAngleRate - IMU_Result.GyroX);
+ 170:Core/Src/pidControl.c ****     Roll = pidUpdate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.GyroY);
+ 171:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 172:Core/Src/pidControl.c ****   }
+ 173:Core/Src/pidControl.c ****  }
+ 350              		.loc 1 173 2 view .LVU107
+ 351 0012 38BD     		pop	{r3, r4, r5, pc}
+ 352              	.L27:
+ 164:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XEulerPid, rateDesired.pitch - IMU_Result.GyroX);
+ 353              		.loc 1 164 5 is_stmt 1 view .LVU108
+ 164:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XEulerPid, rateDesired.pitch - IMU_Result.GyroX);
+ 354              		.loc 1 164 49 is_stmt 0 view .LVU109
+ 355 0014 284B     		ldr	r3, .L29+4
+ 356 0016 93ED010A 		vldr.32	s0, [r3, #4]
+ 164:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XEulerPid, rateDesired.pitch - IMU_Result.GyroX);
+ 357              		.loc 1 164 78 view .LVU110
+ 358 001a 284C     		ldr	r4, .L29+8
+ 359 001c D4ED087A 		vldr.32	s15, [r4, #32]
+ 164:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XEulerPid, rateDesired.pitch - IMU_Result.GyroX);
+ 360              		.loc 1 164 12 view .LVU111
+ 361 0020 30EE670A 		vsub.f32	s0, s0, s15
+ 362 0024 2648     		ldr	r0, .L29+12
+ 363 0026 FFF7FEFF 		bl	pidUpdate
+ 364              	.LVL13:
+ 164:Core/Src/pidControl.c ****     Pitch = pidUpdate(&XEulerPid, rateDesired.pitch - IMU_Result.GyroX);
+ 365              		.loc 1 164 10 view .LVU112
+ 366 002a 264B     		ldr	r3, .L29+16
+ 367 002c 83ED000A 		vstr.32	s0, [r3]
+ 165:Core/Src/pidControl.c ****     Roll  = pidUpdate(&YEulerPid, rateDesired.roll - IMU_Result.GyroY);
+ 368              		.loc 1 165 5 is_stmt 1 view .LVU113
+ 165:Core/Src/pidControl.c ****     Roll  = pidUpdate(&YEulerPid, rateDesired.roll - IMU_Result.GyroY);
+ 369              		.loc 1 165 46 is_stmt 0 view .LVU114
+ 370 0030 254D     		ldr	r5, .L29+20
+ 371 0032 95ED020A 		vldr.32	s0, [r5, #8]
+ 165:Core/Src/pidControl.c ****     Roll  = pidUpdate(&YEulerPid, rateDesired.roll - IMU_Result.GyroY);
+ 372              		.loc 1 165 65 view .LVU115
+ 373 0036 D4ED067A 		vldr.32	s15, [r4, #24]
+ 165:Core/Src/pidControl.c ****     Roll  = pidUpdate(&YEulerPid, rateDesired.roll - IMU_Result.GyroY);
+ 374              		.loc 1 165 13 view .LVU116
+ 375 003a 30EE670A 		vsub.f32	s0, s0, s15
+ 376 003e 2348     		ldr	r0, .L29+24
+ 377 0040 FFF7FEFF 		bl	pidUpdate
+ 378              	.LVL14:
+ 165:Core/Src/pidControl.c ****     Roll  = pidUpdate(&YEulerPid, rateDesired.roll - IMU_Result.GyroY);
+ 379              		.loc 1 165 11 view .LVU117
+ 380 0044 224B     		ldr	r3, .L29+28
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 11
+
+
+ 381 0046 83ED000A 		vstr.32	s0, [r3]
+ 166:Core/Src/pidControl.c ****   }
+ 382              		.loc 1 166 5 is_stmt 1 view .LVU118
+ 166:Core/Src/pidControl.c ****   }
+ 383              		.loc 1 166 46 is_stmt 0 view .LVU119
+ 384 004a 95ED010A 		vldr.32	s0, [r5, #4]
+ 166:Core/Src/pidControl.c ****   }
+ 385              		.loc 1 166 64 view .LVU120
+ 386 004e D4ED077A 		vldr.32	s15, [r4, #28]
+ 166:Core/Src/pidControl.c ****   }
+ 387              		.loc 1 166 13 view .LVU121
+ 388 0052 30EE670A 		vsub.f32	s0, s0, s15
+ 389 0056 1F48     		ldr	r0, .L29+32
+ 390 0058 FFF7FEFF 		bl	pidUpdate
+ 391              	.LVL15:
+ 166:Core/Src/pidControl.c ****   }
+ 392              		.loc 1 166 11 view .LVU122
+ 393 005c 1E4B     		ldr	r3, .L29+36
+ 394 005e 83ED000A 		vstr.32	s0, [r3]
+ 395 0062 D6E7     		b	.L23
+ 396              	.L28:
+ 169:Core/Src/pidControl.c ****     Roll = pidUpdate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.GyroY);
+ 397              		.loc 1 169 5 is_stmt 1 view .LVU123
+ 169:Core/Src/pidControl.c ****     Roll = pidUpdate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.GyroY);
+ 398              		.loc 1 169 50 is_stmt 0 view .LVU124
+ 399 0064 144D     		ldr	r5, .L29+4
+ 400 0066 95ED000A 		vldr.32	s0, [r5]
+ 169:Core/Src/pidControl.c ****     Roll = pidUpdate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.GyroY);
+ 401              		.loc 1 169 81 view .LVU125
+ 402 006a 144C     		ldr	r4, .L29+8
+ 403 006c D4ED067A 		vldr.32	s15, [r4, #24]
+ 169:Core/Src/pidControl.c ****     Roll = pidUpdate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.GyroY);
+ 404              		.loc 1 169 13 view .LVU126
+ 405 0070 30EE670A 		vsub.f32	s0, s0, s15
+ 406 0074 1948     		ldr	r0, .L29+40
+ 407 0076 FFF7FEFF 		bl	pidUpdate
+ 408              	.LVL16:
+ 169:Core/Src/pidControl.c ****     Roll = pidUpdate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate - IMU_Result.GyroY);
+ 409              		.loc 1 169 11 view .LVU127
+ 410 007a 154B     		ldr	r3, .L29+28
+ 411 007c 83ED000A 		vstr.32	s0, [r3]
+ 170:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 412              		.loc 1 170 5 is_stmt 1 view .LVU128
+ 170:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 413              		.loc 1 170 49 is_stmt 0 view .LVU129
+ 414 0080 95ED020A 		vldr.32	s0, [r5, #8]
+ 170:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 415              		.loc 1 170 79 view .LVU130
+ 416 0084 D4ED077A 		vldr.32	s15, [r4, #28]
+ 170:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 417              		.loc 1 170 12 view .LVU131
+ 418 0088 30EE670A 		vsub.f32	s0, s0, s15
+ 419 008c 1448     		ldr	r0, .L29+44
+ 420 008e FFF7FEFF 		bl	pidUpdate
+ 421              	.LVL17:
+ 170:Core/Src/pidControl.c ****     Yaw  = pidUpdate(&ZGyroPid, AngleEXPRateData.YawEXPAngleRate - IMU_Result.GyroZ);
+ 422              		.loc 1 170 10 view .LVU132
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 12
+
+
+ 423 0092 114B     		ldr	r3, .L29+36
+ 424 0094 83ED000A 		vstr.32	s0, [r3]
+ 171:Core/Src/pidControl.c ****   }
+ 425              		.loc 1 171 5 is_stmt 1 view .LVU133
+ 171:Core/Src/pidControl.c ****   }
+ 426              		.loc 1 171 49 is_stmt 0 view .LVU134
+ 427 0098 95ED010A 		vldr.32	s0, [r5, #4]
+ 171:Core/Src/pidControl.c ****   }
+ 428              		.loc 1 171 78 view .LVU135
+ 429 009c D4ED087A 		vldr.32	s15, [r4, #32]
+ 171:Core/Src/pidControl.c ****   }
+ 430              		.loc 1 171 12 view .LVU136
+ 431 00a0 30EE670A 		vsub.f32	s0, s0, s15
+ 432 00a4 0648     		ldr	r0, .L29+12
+ 433 00a6 FFF7FEFF 		bl	pidUpdate
+ 434              	.LVL18:
+ 171:Core/Src/pidControl.c ****   }
+ 435              		.loc 1 171 10 view .LVU137
+ 436 00aa 064B     		ldr	r3, .L29+16
+ 437 00ac 83ED000A 		vstr.32	s0, [r3]
+ 438              		.loc 1 173 2 view .LVU138
+ 439 00b0 AFE7     		b	.L23
+ 440              	.L30:
+ 441 00b2 00BF     		.align	2
+ 442              	.L29:
+ 443 00b4 00000000 		.word	crsfChannelData
+ 444 00b8 00000000 		.word	AngleEXPRateData
+ 445 00bc 00000000 		.word	IMU_Result
+ 446 00c0 00000000 		.word	ZGyroPid
+ 447 00c4 00000000 		.word	Yaw
+ 448 00c8 00000000 		.word	rateDesired
+ 449 00cc 00000000 		.word	XEulerPid
+ 450 00d0 00000000 		.word	Pitch
+ 451 00d4 00000000 		.word	YEulerPid
+ 452 00d8 00000000 		.word	Roll
+ 453 00dc 00000000 		.word	XGyroPid
+ 454 00e0 00000000 		.word	YGyroPid
+ 455              		.cfi_endproc
+ 456              	.LFE237:
+ 458              		.global	__aeabi_f2d
+ 459              		.global	__aeabi_dmul
+ 460              		.global	__aeabi_dadd
+ 461              		.global	__aeabi_dcmplt
+ 462              		.global	__aeabi_dcmpgt
+ 463              		.global	__aeabi_d2uiz
+ 464              		.global	__aeabi_dsub
+ 465              		.section	.text.controlMotor,"ax",%progbits
+ 466              		.align	1
+ 467              		.global	controlMotor
+ 468              		.syntax unified
+ 469              		.thumb
+ 470              		.thumb_func
+ 472              	controlMotor:
+ 473              	.LFB238:
+ 174:Core/Src/pidControl.c **** 
+ 175:Core/Src/pidControl.c **** // static int controlAngleSpeed(void) {
+ 176:Core/Src/pidControl.c **** //   // static uint32_t previousAngleTime = 0;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 13
+
+
+ 177:Core/Src/pidControl.c **** //   // float currentAngleTime, dT;
+ 178:Core/Src/pidControl.c **** //   // currentAngleTime = micros();
+ 179:Core/Src/pidControl.c **** //   // dT = (previousAngleTime != 0) ? (currentAngleTime - previousAngleTime) : 0;
+ 180:Core/Src/pidControl.c **** //   // if (dT != 0) {
+ 181:Core/Src/pidControl.c **** //     pidCalculate(&YEulerPid, AngleEXPRateData.RollEXPAngleRate,
+ 182:Core/Src/pidControl.c **** //                  IMU_Result.EulerY);
+ 183:Core/Src/pidControl.c **** //     pidCalculate(&XEulerPid, AngleEXPRateData.PitchEXPAngleRate,
+ 184:Core/Src/pidControl.c **** //                  IMU_Result.EulerX);
+ 185:Core/Src/pidControl.c **** //     // pidCalculate(&YEulerPid, AngleEXPRateData.RollEXPAngleRate,
+ 186:Core/Src/pidControl.c **** //     // IMU_Result.EulerY, dT);
+ 187:Core/Src/pidControl.c **** //     // pidCalculate(&XEulerPid, AngleEXPRateData.PitchEXPAngleRate,
+ 188:Core/Src/pidControl.c **** //     // IMU_Result.EulerX, dT);
+ 189:Core/Src/pidControl.c **** //     Yaw = pidCalculate(&ZEulerPid, AngleEXPRateData.YawEXPAngleRate,
+ 190:Core/Src/pidControl.c **** //                        IMU_Result.GyroZ);
+ 191:Core/Src/pidControl.c **** //     // calculate the iner loop
+ 192:Core/Src/pidControl.c **** //     Pitch = pidCalculate(&XGyroPid, XEulerPid.pidResult, IMU_Result.GyroX
+ 193:Core/Src/pidControl.c **** //                         );
+ 194:Core/Src/pidControl.c **** //     Roll = pidCalculate(&YGyroPid, YEulerPid.pidResult, IMU_Result.GyroY
+ 195:Core/Src/pidControl.c **** //                          );
+ 196:Core/Src/pidControl.c **** //     //HandControl
+ 197:Core/Src/pidControl.c **** //     // Pitch = pidCalculate(&XGyroPid, AngleEXPRateData.PitchEXPAngleRate, IMU_Result.GyroX, dT,
+ 198:Core/Src/pidControl.c **** //     // Roll = pidCalculate(&YGyroPid, AngleEXPRateData.RollEXPAngleRate, IMU_Result.GyroY, dT, I
+ 199:Core/Src/pidControl.c **** //     // Yaw = pidCalculate(&ZGyroPid, ZEulerPid.pidResult, IMU_Result.GyroZ, dT);
+ 200:Core/Src/pidControl.c **** //   // }
+ 201:Core/Src/pidControl.c **** //   // previousAngleTime = currentAngleTime;
+ 202:Core/Src/pidControl.c **** //   // controlGyroSpeed();
+ 203:Core/Src/pidControl.c **** //   return PID_CALCULATE_COMPLETE;
+ 204:Core/Src/pidControl.c **** // }
+ 205:Core/Src/pidControl.c **** // static void controlGyroSpeed() {
+ 206:Core/Src/pidControl.c **** //   static uint32_t previousGyroTime = 0;
+ 207:Core/Src/pidControl.c **** //   float currentGyroTime, dT;
+ 208:Core/Src/pidControl.c **** //   currentGyroTime = micros();
+ 209:Core/Src/pidControl.c **** //   dT = (previousGyroTime != 0) ? (currentGyroTime - previousGyroTime) : 0;
+ 210:Core/Src/pidControl.c **** //   if (dT != 0) {
+ 211:Core/Src/pidControl.c **** //     Pitch = pidCalculate(&XGyroPid, YEulerPid.pidResult, IMU_Result.GyroX, dT,
+ 212:Core/Src/pidControl.c **** //                         INTER_LOOP);
+ 213:Core/Src/pidControl.c **** //     Roll = pidCalculate(&YGyroPid, XEulerPid.pidResult, IMU_Result.GyroY, dT,
+ 214:Core/Src/pidControl.c **** //                          INTER_LOOP);
+ 215:Core/Src/pidControl.c **** //   }
+ 216:Core/Src/pidControl.c **** //   previousGyroTime = currentGyroTime;
+ 217:Core/Src/pidControl.c **** //   // return PID_CALCULATE_COMPLETE;
+ 218:Core/Src/pidControl.c **** // }
+ 219:Core/Src/pidControl.c **** void controlMotor(void) {
+ 474              		.loc 1 219 25 is_stmt 1 view -0
+ 475              		.cfi_startproc
+ 476              		@ args = 0, pretend = 0, frame = 16
+ 477              		@ frame_needed = 0, uses_anonymous_args = 0
+ 220:Core/Src/pidControl.c ****   // 开机油门摇杆下拉初始化电机
+ 221:Core/Src/pidControl.c ****   if (crsfChannelData[2] < 185 ) {
+ 478              		.loc 1 221 3 view .LVU140
+ 479              		.loc 1 221 22 is_stmt 0 view .LVU141
+ 480 0000 7D4B     		ldr	r3, .L50+16
+ 481 0002 9B68     		ldr	r3, [r3, #8]
+ 482              		.loc 1 221 6 view .LVU142
+ 483 0004 B82B     		cmp	r3, #184
+ 484 0006 06D8     		bhi	.L32
+ 222:Core/Src/pidControl.c ****     my_motor_value[0] = 0;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 14
+
+
+ 485              		.loc 1 222 5 is_stmt 1 view .LVU143
+ 486              		.loc 1 222 23 is_stmt 0 view .LVU144
+ 487 0008 7C4B     		ldr	r3, .L50+20
+ 488 000a 0022     		movs	r2, #0
+ 489 000c 1A80     		strh	r2, [r3]	@ movhi
+ 223:Core/Src/pidControl.c ****     my_motor_value[1] = 0;
+ 490              		.loc 1 223 5 is_stmt 1 view .LVU145
+ 491              		.loc 1 223 23 is_stmt 0 view .LVU146
+ 492 000e 5A80     		strh	r2, [r3, #2]	@ movhi
+ 224:Core/Src/pidControl.c ****     my_motor_value[2] = 0;
+ 493              		.loc 1 224 5 is_stmt 1 view .LVU147
+ 494              		.loc 1 224 23 is_stmt 0 view .LVU148
+ 495 0010 9A80     		strh	r2, [r3, #4]	@ movhi
+ 225:Core/Src/pidControl.c ****     my_motor_value[3] = 0;
+ 496              		.loc 1 225 5 is_stmt 1 view .LVU149
+ 497              		.loc 1 225 23 is_stmt 0 view .LVU150
+ 498 0012 DA80     		strh	r2, [r3, #6]	@ movhi
+ 499 0014 7047     		bx	lr
+ 500              	.L32:
+ 226:Core/Src/pidControl.c ****   } else if (crsfChannelData[4] > 1300) {
+ 501              		.loc 1 226 10 is_stmt 1 view .LVU151
+ 502              		.loc 1 226 29 is_stmt 0 view .LVU152
+ 503 0016 784B     		ldr	r3, .L50+16
+ 504 0018 1A69     		ldr	r2, [r3, #16]
+ 505              		.loc 1 226 13 view .LVU153
+ 506 001a 40F21453 		movw	r3, #1300
+ 507 001e 9A42     		cmp	r2, r3
+ 508 0020 06D9     		bls	.L34
+ 227:Core/Src/pidControl.c ****     my_motor_value[0] = 0;
+ 509              		.loc 1 227 5 is_stmt 1 view .LVU154
+ 510              		.loc 1 227 23 is_stmt 0 view .LVU155
+ 511 0022 764B     		ldr	r3, .L50+20
+ 512 0024 0022     		movs	r2, #0
+ 513 0026 1A80     		strh	r2, [r3]	@ movhi
+ 228:Core/Src/pidControl.c ****     my_motor_value[1] = 0;
+ 514              		.loc 1 228 5 is_stmt 1 view .LVU156
+ 515              		.loc 1 228 23 is_stmt 0 view .LVU157
+ 516 0028 5A80     		strh	r2, [r3, #2]	@ movhi
+ 229:Core/Src/pidControl.c ****     my_motor_value[2] = 0;
+ 517              		.loc 1 229 5 is_stmt 1 view .LVU158
+ 518              		.loc 1 229 23 is_stmt 0 view .LVU159
+ 519 002a 9A80     		strh	r2, [r3, #4]	@ movhi
+ 230:Core/Src/pidControl.c ****     my_motor_value[3] = 0;
+ 520              		.loc 1 230 5 is_stmt 1 view .LVU160
+ 521              		.loc 1 230 23 is_stmt 0 view .LVU161
+ 522 002c DA80     		strh	r2, [r3, #6]	@ movhi
+ 523 002e 7047     		bx	lr
+ 524              	.L34:
+ 219:Core/Src/pidControl.c ****   // 开机油门摇杆下拉初始化电机
+ 525              		.loc 1 219 25 view .LVU162
+ 526 0030 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 527              	.LCFI3:
+ 528              		.cfi_def_cfa_offset 36
+ 529              		.cfi_offset 4, -36
+ 530              		.cfi_offset 5, -32
+ 531              		.cfi_offset 6, -28
+ 532              		.cfi_offset 7, -24
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 15
+
+
+ 533              		.cfi_offset 8, -20
+ 534              		.cfi_offset 9, -16
+ 535              		.cfi_offset 10, -12
+ 536              		.cfi_offset 11, -8
+ 537              		.cfi_offset 14, -4
+ 538 0034 85B0     		sub	sp, sp, #20
+ 539              	.LCFI4:
+ 540              		.cfi_def_cfa_offset 56
+ 231:Core/Src/pidControl.c ****   } else  {
+ 232:Core/Src/pidControl.c ****     Thro = ThroValue;
+ 541              		.loc 1 232 5 is_stmt 1 view .LVU163
+ 542              		.loc 1 232 10 is_stmt 0 view .LVU164
+ 543 0036 724B     		ldr	r3, .L50+24
+ 544 0038 1B88     		ldrh	r3, [r3]
+ 545 003a 07EE903A 		vmov	s15, r3	@ int
+ 546 003e F8EE677A 		vcvt.f32.u32	s15, s15
+ 547 0042 704B     		ldr	r3, .L50+28
+ 548 0044 C3ED007A 		vstr.32	s15, [r3]
+ 233:Core/Src/pidControl.c ****     // Pitch = Pitch / 2.0f;
+ 234:Core/Src/pidControl.c ****     // Roll = Roll / 2.0f;
+ 235:Core/Src/pidControl.c ****     //PA3 -> M4
+ 236:Core/Src/pidControl.c ****     //PA2 -> M3     M4     M2
+ 237:Core/Src/pidControl.c ****     //PA0 -> M1         o
+ 238:Core/Src/pidControl.c ****     //PA1 -> M2     M3     M1 
+ 239:Core/Src/pidControl.c ****     my_motor_value[0] = CONSTRAIN((0.6 * Thro + Pitch + Roll + Yaw),ANALOG_MIN,ANALOG_MAX);
+ 549              		.loc 1 239 5 is_stmt 1 view .LVU165
+ 550              		.loc 1 239 25 is_stmt 0 view .LVU166
+ 551 0048 17EE900A 		vmov	r0, s15
+ 552 004c FFF7FEFF 		bl	__aeabi_f2d
+ 553              	.LVL19:
+ 554 0050 65A3     		adr	r3, .L50
+ 555 0052 D3E90023 		ldrd	r2, [r3]
+ 556 0056 FFF7FEFF 		bl	__aeabi_dmul
+ 557              	.LVL20:
+ 558 005a 8046     		mov	r8, r0
+ 559 005c 8946     		mov	r9, r1
+ 560 005e 6A4B     		ldr	r3, .L50+32
+ 561 0060 1868     		ldr	r0, [r3]	@ float
+ 562 0062 FFF7FEFF 		bl	__aeabi_f2d
+ 563              	.LVL21:
+ 564 0066 8246     		mov	r10, r0
+ 565 0068 8B46     		mov	fp, r1
+ 566 006a 0246     		mov	r2, r0
+ 567 006c 0B46     		mov	r3, r1
+ 568 006e 4046     		mov	r0, r8
+ 569 0070 4946     		mov	r1, r9
+ 570 0072 FFF7FEFF 		bl	__aeabi_dadd
+ 571              	.LVL22:
+ 572 0076 0446     		mov	r4, r0
+ 573 0078 0D46     		mov	r5, r1
+ 574 007a CDE90045 		strd	r4, [sp]
+ 575 007e 634B     		ldr	r3, .L50+36
+ 576 0080 1868     		ldr	r0, [r3]	@ float
+ 577 0082 FFF7FEFF 		bl	__aeabi_f2d
+ 578              	.LVL23:
+ 579 0086 0646     		mov	r6, r0
+ 580 0088 0F46     		mov	r7, r1
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 16
+
+
+ 581 008a 0246     		mov	r2, r0
+ 582 008c 0B46     		mov	r3, r1
+ 583 008e 2046     		mov	r0, r4
+ 584 0090 2946     		mov	r1, r5
+ 585 0092 FFF7FEFF 		bl	__aeabi_dadd
+ 586              	.LVL24:
+ 587 0096 CDE90201 		strd	r0, [sp, #8]
+ 588 009a 5D4B     		ldr	r3, .L50+40
+ 589 009c 1868     		ldr	r0, [r3]	@ float
+ 590 009e FFF7FEFF 		bl	__aeabi_f2d
+ 591              	.LVL25:
+ 592 00a2 0446     		mov	r4, r0
+ 593 00a4 0D46     		mov	r5, r1
+ 594 00a6 0246     		mov	r2, r0
+ 595 00a8 0B46     		mov	r3, r1
+ 596 00aa DDE90201 		ldrd	r0, [sp, #8]
+ 597 00ae FFF7FEFF 		bl	__aeabi_dadd
+ 598              	.LVL26:
+ 599 00b2 0246     		mov	r2, r0
+ 600 00b4 0B46     		mov	r3, r1
+ 601 00b6 CDE90223 		strd	r2, [sp, #8]
+ 602              		.loc 1 239 23 view .LVU167
+ 603 00ba 0022     		movs	r2, #0
+ 604 00bc 554B     		ldr	r3, .L50+44
+ 605 00be FFF7FEFF 		bl	__aeabi_dcmplt
+ 606              	.LVL27:
+ 607 00c2 68B9     		cbnz	r0, .L39
+ 608              		.loc 1 239 23 discriminator 2 view .LVU168
+ 609 00c4 4AA3     		adr	r3, .L50+8
+ 610 00c6 D3E90023 		ldrd	r2, [r3]
+ 611 00ca DDE90201 		ldrd	r0, [sp, #8]
+ 612 00ce FFF7FEFF 		bl	__aeabi_dcmpgt
+ 613              	.LVL28:
+ 614 00d2 78BB     		cbnz	r0, .L40
+ 615              		.loc 1 239 23 discriminator 5 view .LVU169
+ 616 00d4 DDE90201 		ldrd	r0, [sp, #8]
+ 617 00d8 FFF7FEFF 		bl	__aeabi_d2uiz
+ 618              	.LVL29:
+ 619 00dc 80B2     		uxth	r0, r0
+ 620 00de 00E0     		b	.L35
+ 621              	.L39:
+ 622              		.loc 1 239 23 view .LVU170
+ 623 00e0 3020     		movs	r0, #48
+ 624              	.L35:
+ 625              		.loc 1 239 23 discriminator 8 view .LVU171
+ 626 00e2 464B     		ldr	r3, .L50+20
+ 627 00e4 1880     		strh	r0, [r3]	@ movhi
+ 240:Core/Src/pidControl.c ****     my_motor_value[1] = CONSTRAIN((0.6 * Thro - Pitch + Roll - Yaw),ANALOG_MIN,ANALOG_MAX);
+ 628              		.loc 1 240 5 is_stmt 1 discriminator 8 view .LVU172
+ 629              		.loc 1 240 25 is_stmt 0 discriminator 8 view .LVU173
+ 630 00e6 5246     		mov	r2, r10
+ 631 00e8 5B46     		mov	r3, fp
+ 632 00ea 4046     		mov	r0, r8
+ 633 00ec 4946     		mov	r1, r9
+ 634 00ee FFF7FEFF 		bl	__aeabi_dsub
+ 635              	.LVL30:
+ 636 00f2 8046     		mov	r8, r0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 17
+
+
+ 637 00f4 8946     		mov	r9, r1
+ 638 00f6 0246     		mov	r2, r0
+ 639 00f8 0B46     		mov	r3, r1
+ 640 00fa 3046     		mov	r0, r6
+ 641 00fc 3946     		mov	r1, r7
+ 642 00fe FFF7FEFF 		bl	__aeabi_dadd
+ 643              	.LVL31:
+ 644 0102 2246     		mov	r2, r4
+ 645 0104 2B46     		mov	r3, r5
+ 646 0106 FFF7FEFF 		bl	__aeabi_dsub
+ 647              	.LVL32:
+ 648 010a 8246     		mov	r10, r0
+ 649 010c 8B46     		mov	fp, r1
+ 650              		.loc 1 240 23 discriminator 8 view .LVU174
+ 651 010e 0022     		movs	r2, #0
+ 652 0110 404B     		ldr	r3, .L50+44
+ 653 0112 FFF7FEFF 		bl	__aeabi_dcmplt
+ 654              	.LVL33:
+ 655 0116 80B9     		cbnz	r0, .L41
+ 656              		.loc 1 240 23 discriminator 2 view .LVU175
+ 657 0118 35A3     		adr	r3, .L50+8
+ 658 011a D3E90023 		ldrd	r2, [r3]
+ 659 011e 5046     		mov	r0, r10
+ 660 0120 5946     		mov	r1, fp
+ 661 0122 FFF7FEFF 		bl	__aeabi_dcmpgt
+ 662              	.LVL34:
+ 663 0126 60BB     		cbnz	r0, .L42
+ 664              		.loc 1 240 23 discriminator 5 view .LVU176
+ 665 0128 5046     		mov	r0, r10
+ 666 012a 5946     		mov	r1, fp
+ 667 012c FFF7FEFF 		bl	__aeabi_d2uiz
+ 668              	.LVL35:
+ 669 0130 80B2     		uxth	r0, r0
+ 670 0132 03E0     		b	.L36
+ 671              	.L40:
+ 239:Core/Src/pidControl.c ****     my_motor_value[1] = CONSTRAIN((0.6 * Thro - Pitch + Roll - Yaw),ANALOG_MIN,ANALOG_MAX);
+ 672              		.loc 1 239 23 view .LVU177
+ 673 0134 40F2FF70 		movw	r0, #2047
+ 674 0138 D3E7     		b	.L35
+ 675              	.L41:
+ 676              		.loc 1 240 23 view .LVU178
+ 677 013a 3020     		movs	r0, #48
+ 678              	.L36:
+ 679              		.loc 1 240 23 discriminator 8 view .LVU179
+ 680 013c 2F4B     		ldr	r3, .L50+20
+ 681 013e 5880     		strh	r0, [r3, #2]	@ movhi
+ 241:Core/Src/pidControl.c ****     my_motor_value[2] = CONSTRAIN((0.6 * Thro - Pitch - Roll + Yaw),ANALOG_MIN,ANALOG_MAX);
+ 682              		.loc 1 241 5 is_stmt 1 discriminator 8 view .LVU180
+ 683              		.loc 1 241 25 is_stmt 0 discriminator 8 view .LVU181
+ 684 0140 3246     		mov	r2, r6
+ 685 0142 3B46     		mov	r3, r7
+ 686 0144 4046     		mov	r0, r8
+ 687 0146 4946     		mov	r1, r9
+ 688 0148 FFF7FEFF 		bl	__aeabi_dsub
+ 689              	.LVL36:
+ 690 014c 0246     		mov	r2, r0
+ 691 014e 0B46     		mov	r3, r1
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 18
+
+
+ 692 0150 2046     		mov	r0, r4
+ 693 0152 2946     		mov	r1, r5
+ 694 0154 FFF7FEFF 		bl	__aeabi_dadd
+ 695              	.LVL37:
+ 696 0158 8046     		mov	r8, r0
+ 697 015a 8946     		mov	r9, r1
+ 698              		.loc 1 241 23 discriminator 8 view .LVU182
+ 699 015c 0022     		movs	r2, #0
+ 700 015e 2D4B     		ldr	r3, .L50+44
+ 701 0160 FFF7FEFF 		bl	__aeabi_dcmplt
+ 702              	.LVL38:
+ 703 0164 80B9     		cbnz	r0, .L43
+ 704              		.loc 1 241 23 discriminator 2 view .LVU183
+ 705 0166 22A3     		adr	r3, .L50+8
+ 706 0168 D3E90023 		ldrd	r2, [r3]
+ 707 016c 4046     		mov	r0, r8
+ 708 016e 4946     		mov	r1, r9
+ 709 0170 FFF7FEFF 		bl	__aeabi_dcmpgt
+ 710              	.LVL39:
+ 711 0174 50BB     		cbnz	r0, .L44
+ 712              		.loc 1 241 23 discriminator 5 view .LVU184
+ 713 0176 4046     		mov	r0, r8
+ 714 0178 4946     		mov	r1, r9
+ 715 017a FFF7FEFF 		bl	__aeabi_d2uiz
+ 716              	.LVL40:
+ 717 017e 80B2     		uxth	r0, r0
+ 718 0180 03E0     		b	.L37
+ 719              	.L42:
+ 240:Core/Src/pidControl.c ****     my_motor_value[1] = CONSTRAIN((0.6 * Thro - Pitch + Roll - Yaw),ANALOG_MIN,ANALOG_MAX);
+ 720              		.loc 1 240 23 view .LVU185
+ 721 0182 40F2FF70 		movw	r0, #2047
+ 722 0186 D9E7     		b	.L36
+ 723              	.L43:
+ 724              		.loc 1 241 23 view .LVU186
+ 725 0188 3020     		movs	r0, #48
+ 726              	.L37:
+ 727              		.loc 1 241 23 discriminator 8 view .LVU187
+ 728 018a 1C4B     		ldr	r3, .L50+20
+ 729 018c 9880     		strh	r0, [r3, #4]	@ movhi
+ 242:Core/Src/pidControl.c ****     my_motor_value[3] = CONSTRAIN((0.6 * Thro + Pitch - Roll - Yaw),ANALOG_MIN,ANALOG_MAX);
+ 730              		.loc 1 242 5 is_stmt 1 discriminator 8 view .LVU188
+ 731              		.loc 1 242 25 is_stmt 0 discriminator 8 view .LVU189
+ 732 018e 3246     		mov	r2, r6
+ 733 0190 3B46     		mov	r3, r7
+ 734 0192 DDE90001 		ldrd	r0, [sp]
+ 735 0196 FFF7FEFF 		bl	__aeabi_dsub
+ 736              	.LVL41:
+ 737 019a 2246     		mov	r2, r4
+ 738 019c 2B46     		mov	r3, r5
+ 739 019e FFF7FEFF 		bl	__aeabi_dsub
+ 740              	.LVL42:
+ 741 01a2 0446     		mov	r4, r0
+ 742 01a4 0D46     		mov	r5, r1
+ 743              		.loc 1 242 23 discriminator 8 view .LVU190
+ 744 01a6 0022     		movs	r2, #0
+ 745 01a8 1A4B     		ldr	r3, .L50+44
+ 746 01aa FFF7FEFF 		bl	__aeabi_dcmplt
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 19
+
+
+ 747              	.LVL43:
+ 748 01ae 80B9     		cbnz	r0, .L45
+ 749              		.loc 1 242 23 discriminator 2 view .LVU191
+ 750 01b0 0FA3     		adr	r3, .L50+8
+ 751 01b2 D3E90023 		ldrd	r2, [r3]
+ 752 01b6 2046     		mov	r0, r4
+ 753 01b8 2946     		mov	r1, r5
+ 754 01ba FFF7FEFF 		bl	__aeabi_dcmpgt
+ 755              	.LVL44:
+ 756 01be 80B9     		cbnz	r0, .L46
+ 757              		.loc 1 242 23 discriminator 5 view .LVU192
+ 758 01c0 2046     		mov	r0, r4
+ 759 01c2 2946     		mov	r1, r5
+ 760 01c4 FFF7FEFF 		bl	__aeabi_d2uiz
+ 761              	.LVL45:
+ 762 01c8 83B2     		uxth	r3, r0
+ 763 01ca 03E0     		b	.L38
+ 764              	.L44:
+ 241:Core/Src/pidControl.c ****     my_motor_value[2] = CONSTRAIN((0.6 * Thro - Pitch - Roll + Yaw),ANALOG_MIN,ANALOG_MAX);
+ 765              		.loc 1 241 23 view .LVU193
+ 766 01cc 40F2FF70 		movw	r0, #2047
+ 767 01d0 DBE7     		b	.L37
+ 768              	.L45:
+ 769              		.loc 1 242 23 view .LVU194
+ 770 01d2 3023     		movs	r3, #48
+ 771              	.L38:
+ 772              		.loc 1 242 23 discriminator 8 view .LVU195
+ 773 01d4 0948     		ldr	r0, .L50+20
+ 774 01d6 C380     		strh	r3, [r0, #6]	@ movhi
+ 243:Core/Src/pidControl.c ****     dshot_write(my_motor_value);
+ 775              		.loc 1 243 5 is_stmt 1 discriminator 8 view .LVU196
+ 776 01d8 FFF7FEFF 		bl	dshot_write
+ 777              	.LVL46:
+ 244:Core/Src/pidControl.c ****     // printf("\nM4= %d,M3= %d,M2= %d,M1= %d\n,Pitch= %d Roll= %d,Yaw= %d\n",my_motor_value[0],my_m
+ 245:Core/Src/pidControl.c ****            // ,(int)Pitch,(int)Roll,(int)Yaw);
+ 246:Core/Src/pidControl.c ****       }
+ 247:Core/Src/pidControl.c **** }
+ 778              		.loc 1 247 1 is_stmt 0 discriminator 8 view .LVU197
+ 779 01dc 05B0     		add	sp, sp, #20
+ 780              	.LCFI5:
+ 781              		.cfi_remember_state
+ 782              		.cfi_def_cfa_offset 36
+ 783              		@ sp needed
+ 784 01de BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 785              	.L46:
+ 786              	.LCFI6:
+ 787              		.cfi_restore_state
+ 242:Core/Src/pidControl.c ****     dshot_write(my_motor_value);
+ 788              		.loc 1 242 23 view .LVU198
+ 789 01e2 40F2FF73 		movw	r3, #2047
+ 790 01e6 F5E7     		b	.L38
+ 791              	.L51:
+ 792              		.align	3
+ 793              	.L50:
+ 794 01e8 33333333 		.word	858993459
+ 795 01ec 3333E33F 		.word	1071854387
+ 796 01f0 00000000 		.word	0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 20
+
+
+ 797 01f4 00FC9F40 		.word	1084226560
+ 798 01f8 00000000 		.word	crsfChannelData
+ 799 01fc 00000000 		.word	my_motor_value
+ 800 0200 00000000 		.word	ThroValue
+ 801 0204 00000000 		.word	Thro
+ 802 0208 00000000 		.word	Pitch
+ 803 020c 00000000 		.word	Roll
+ 804 0210 00000000 		.word	Yaw
+ 805 0214 00004840 		.word	1078460416
+ 806              		.cfi_endproc
+ 807              	.LFE238:
+ 809              		.section	.text.pidControlGyro,"ax",%progbits
+ 810              		.align	1
+ 811              		.global	pidControlGyro
+ 812              		.syntax unified
+ 813              		.thumb
+ 814              		.thumb_func
+ 816              	pidControlGyro:
+ 817              	.LFB234:
+  59:Core/Src/pidControl.c ****   mpu6050_get_gyrodata();
+ 818              		.loc 1 59 26 is_stmt 1 view -0
+ 819              		.cfi_startproc
+ 820              		@ args = 0, pretend = 0, frame = 0
+ 821              		@ frame_needed = 0, uses_anonymous_args = 0
+ 822 0000 08B5     		push	{r3, lr}
+ 823              	.LCFI7:
+ 824              		.cfi_def_cfa_offset 8
+ 825              		.cfi_offset 3, -8
+ 826              		.cfi_offset 14, -4
+  60:Core/Src/pidControl.c **** if(IMU_Result.GyroX <600 && IMU_Result.GyroZ < 500 && IMU_Result.GyroY < 500 && 
+ 827              		.loc 1 60 3 view .LVU200
+ 828 0002 FFF7FEFF 		bl	mpu6050_get_gyrodata
+ 829              	.LVL47:
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 830              		.loc 1 61 1 view .LVU201
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 831              		.loc 1 61 14 is_stmt 0 view .LVU202
+ 832 0006 194B     		ldr	r3, .L68
+ 833 0008 D3ED067A 		vldr.32	s15, [r3, #24]
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 834              		.loc 1 61 3 view .LVU203
+ 835 000c 9FED187A 		vldr.32	s14, .L68+4
+ 836 0010 F4EEC77A 		vcmpe.f32	s15, s14
+ 837 0014 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 838 0018 22D5     		bpl	.L52
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 839              		.loc 1 61 39 discriminator 1 view .LVU204
+ 840 001a 93ED087A 		vldr.32	s14, [r3, #32]
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 841              		.loc 1 61 26 discriminator 1 view .LVU205
+ 842 001e DFED156A 		vldr.32	s13, .L68+8
+ 843 0022 B4EEE67A 		vcmpe.f32	s14, s13
+ 844 0026 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 845 002a 19D5     		bpl	.L52
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 846              		.loc 1 61 65 discriminator 2 view .LVU206
+ 847 002c D3ED076A 		vldr.32	s13, [r3, #28]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 21
+
+
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 848              		.loc 1 61 52 discriminator 2 view .LVU207
+ 849 0030 9FED106A 		vldr.32	s12, .L68+8
+ 850 0034 F4EEC66A 		vcmpe.f32	s13, s12
+ 851 0038 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 852 003c 10D5     		bpl	.L52
+  61:Core/Src/pidControl.c ****      IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 853              		.loc 1 61 78 discriminator 3 view .LVU208
+ 854 003e 9FED0E6A 		vldr.32	s12, .L68+12
+ 855 0042 F4EEC67A 		vcmpe.f32	s15, s12
+ 856 0046 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 857 004a 09DD     		ble	.L52
+  62:Core/Src/pidControl.c ****       attitudeRatePID();
+ 858              		.loc 1 62 30 view .LVU209
+ 859 004c F4EEC66A 		vcmpe.f32	s13, s12
+ 860 0050 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 861 0054 04DD     		ble	.L52
+  62:Core/Src/pidControl.c ****       attitudeRatePID();
+ 862              		.loc 1 62 57 discriminator 1 view .LVU210
+ 863 0056 B4EEC67A 		vcmpe.f32	s14, s12
+ 864 005a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 865 005e 00DC     		bgt	.L67
+ 866              	.L52:
+  66:Core/Src/pidControl.c **** 
+ 867              		.loc 1 66 1 view .LVU211
+ 868 0060 08BD     		pop	{r3, pc}
+ 869              	.L67:
+  63:Core/Src/pidControl.c ****       controlMotor();
+ 870              		.loc 1 63 7 is_stmt 1 view .LVU212
+ 871 0062 FFF7FEFF 		bl	attitudeRatePID
+ 872              	.LVL48:
+  64:Core/Src/pidControl.c ****   }
+ 873              		.loc 1 64 7 view .LVU213
+ 874 0066 FFF7FEFF 		bl	controlMotor
+ 875              	.LVL49:
+  66:Core/Src/pidControl.c **** 
+ 876              		.loc 1 66 1 is_stmt 0 view .LVU214
+ 877 006a F9E7     		b	.L52
+ 878              	.L69:
+ 879              		.align	2
+ 880              	.L68:
+ 881 006c 00000000 		.word	IMU_Result
+ 882 0070 00001644 		.word	1142292480
+ 883 0074 0000FA43 		.word	1140457472
+ 884 0078 000016C4 		.word	-1005191168
+ 885              		.cfi_endproc
+ 886              	.LFE234:
+ 888              		.section	.text.pidSetIntegralLimit,"ax",%progbits
+ 889              		.align	1
+ 890              		.global	pidSetIntegralLimit
+ 891              		.syntax unified
+ 892              		.thumb
+ 893              		.thumb_func
+ 895              	pidSetIntegralLimit:
+ 896              	.LVL50:
+ 897              	.LFB239:
+ 248:Core/Src/pidControl.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 22
+
+
+ 249:Core/Src/pidControl.c **** void pidSetIntegralLimit(pidStruct* pid, const float limit) 
+ 250:Core/Src/pidControl.c **** {
+ 898              		.loc 1 250 1 is_stmt 1 view -0
+ 899              		.cfi_startproc
+ 900              		@ args = 0, pretend = 0, frame = 0
+ 901              		@ frame_needed = 0, uses_anonymous_args = 0
+ 902              		@ link register save eliminated.
+ 251:Core/Src/pidControl.c ****     pid->iLimit = limit;
+ 903              		.loc 1 251 5 view .LVU216
+ 904              		.loc 1 251 17 is_stmt 0 view .LVU217
+ 905 0000 80ED0B0A 		vstr.32	s0, [r0, #44]
+ 252:Core/Src/pidControl.c **** }
+ 906              		.loc 1 252 1 view .LVU218
+ 907 0004 7047     		bx	lr
+ 908              		.cfi_endproc
+ 909              	.LFE239:
+ 911              		.section	.text.pidSetOutputLimit,"ax",%progbits
+ 912              		.align	1
+ 913              		.global	pidSetOutputLimit
+ 914              		.syntax unified
+ 915              		.thumb
+ 916              		.thumb_func
+ 918              	pidSetOutputLimit:
+ 919              	.LVL51:
+ 920              	.LFB240:
+ 253:Core/Src/pidControl.c **** 
+ 254:Core/Src/pidControl.c **** void pidSetOutputLimit(pidStruct* pid, const float limit) 
+ 255:Core/Src/pidControl.c **** {
+ 921              		.loc 1 255 1 is_stmt 1 view -0
+ 922              		.cfi_startproc
+ 923              		@ args = 0, pretend = 0, frame = 0
+ 924              		@ frame_needed = 0, uses_anonymous_args = 0
+ 925              		@ link register save eliminated.
+ 256:Core/Src/pidControl.c **** 	pid->outputLimit = limit;
+ 926              		.loc 1 256 2 view .LVU220
+ 927              		.loc 1 256 19 is_stmt 0 view .LVU221
+ 928 0000 80ED0E0A 		vstr.32	s0, [r0, #56]
+ 257:Core/Src/pidControl.c **** }
+ 929              		.loc 1 257 1 view .LVU222
+ 930 0004 7047     		bx	lr
+ 931              		.cfi_endproc
+ 932              	.LFE240:
+ 934              		.section	.text.pidSetError,"ax",%progbits
+ 935              		.align	1
+ 936              		.global	pidSetError
+ 937              		.syntax unified
+ 938              		.thumb
+ 939              		.thumb_func
+ 941              	pidSetError:
+ 942              	.LVL52:
+ 943              	.LFB241:
+ 258:Core/Src/pidControl.c **** 
+ 259:Core/Src/pidControl.c **** void pidSetError(pidStruct* pid, const float error)
+ 260:Core/Src/pidControl.c **** {
+ 944              		.loc 1 260 1 is_stmt 1 view -0
+ 945              		.cfi_startproc
+ 946              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 23
+
+
+ 947              		@ frame_needed = 0, uses_anonymous_args = 0
+ 948              		@ link register save eliminated.
+ 261:Core/Src/pidControl.c **** 	pid->error = error;
+ 949              		.loc 1 261 2 view .LVU224
+ 950              		.loc 1 261 13 is_stmt 0 view .LVU225
+ 951 0000 80ED010A 		vstr.32	s0, [r0, #4]
+ 262:Core/Src/pidControl.c **** }
+ 952              		.loc 1 262 1 view .LVU226
+ 953 0004 7047     		bx	lr
+ 954              		.cfi_endproc
+ 955              	.LFE241:
+ 957              		.section	.text.pidSetDesired,"ax",%progbits
+ 958              		.align	1
+ 959              		.global	pidSetDesired
+ 960              		.syntax unified
+ 961              		.thumb
+ 962              		.thumb_func
+ 964              	pidSetDesired:
+ 965              	.LVL53:
+ 966              	.LFB242:
+ 263:Core/Src/pidControl.c **** 
+ 264:Core/Src/pidControl.c **** void pidSetDesired(pidStruct* pid, const float desired)
+ 265:Core/Src/pidControl.c **** {
+ 967              		.loc 1 265 1 is_stmt 1 view -0
+ 968              		.cfi_startproc
+ 969              		@ args = 0, pretend = 0, frame = 0
+ 970              		@ frame_needed = 0, uses_anonymous_args = 0
+ 971              		@ link register save eliminated.
+ 266:Core/Src/pidControl.c **** 	pid->desired = desired;
+ 972              		.loc 1 266 2 view .LVU228
+ 973              		.loc 1 266 15 is_stmt 0 view .LVU229
+ 974 0000 80ED000A 		vstr.32	s0, [r0]
+ 267:Core/Src/pidControl.c **** }
+ 975              		.loc 1 267 1 view .LVU230
+ 976 0004 7047     		bx	lr
+ 977              		.cfi_endproc
+ 978              	.LFE242:
+ 980              		.section	.text.pidGetDesired,"ax",%progbits
+ 981              		.align	1
+ 982              		.global	pidGetDesired
+ 983              		.syntax unified
+ 984              		.thumb
+ 985              		.thumb_func
+ 987              	pidGetDesired:
+ 988              	.LVL54:
+ 989              	.LFB243:
+ 268:Core/Src/pidControl.c **** 
+ 269:Core/Src/pidControl.c **** float pidGetDesired(pidStruct* pid)
+ 270:Core/Src/pidControl.c **** {
+ 990              		.loc 1 270 1 is_stmt 1 view -0
+ 991              		.cfi_startproc
+ 992              		@ args = 0, pretend = 0, frame = 0
+ 993              		@ frame_needed = 0, uses_anonymous_args = 0
+ 994              		@ link register save eliminated.
+ 271:Core/Src/pidControl.c **** 	return pid->desired;
+ 995              		.loc 1 271 2 view .LVU232
+ 272:Core/Src/pidControl.c **** }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 24
+
+
+ 996              		.loc 1 272 1 is_stmt 0 view .LVU233
+ 997 0000 90ED000A 		vldr.32	s0, [r0]
+ 998 0004 7047     		bx	lr
+ 999              		.cfi_endproc
+ 1000              	.LFE243:
+ 1002              		.section	.text.pidSetKp,"ax",%progbits
+ 1003              		.align	1
+ 1004              		.global	pidSetKp
+ 1005              		.syntax unified
+ 1006              		.thumb
+ 1007              		.thumb_func
+ 1009              	pidSetKp:
+ 1010              	.LVL55:
+ 1011              	.LFB244:
+ 273:Core/Src/pidControl.c **** 
+ 274:Core/Src/pidControl.c **** void pidSetKp(pidStruct* pid, const float kp)
+ 275:Core/Src/pidControl.c **** {
+ 1012              		.loc 1 275 1 is_stmt 1 view -0
+ 1013              		.cfi_startproc
+ 1014              		@ args = 0, pretend = 0, frame = 0
+ 1015              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1016              		@ link register save eliminated.
+ 276:Core/Src/pidControl.c **** 	pid->Kp = kp;
+ 1017              		.loc 1 276 2 view .LVU235
+ 1018              		.loc 1 276 10 is_stmt 0 view .LVU236
+ 1019 0000 80ED050A 		vstr.32	s0, [r0, #20]
+ 277:Core/Src/pidControl.c **** }
+ 1020              		.loc 1 277 1 view .LVU237
+ 1021 0004 7047     		bx	lr
+ 1022              		.cfi_endproc
+ 1023              	.LFE244:
+ 1025              		.section	.text.pidSetKi,"ax",%progbits
+ 1026              		.align	1
+ 1027              		.global	pidSetKi
+ 1028              		.syntax unified
+ 1029              		.thumb
+ 1030              		.thumb_func
+ 1032              	pidSetKi:
+ 1033              	.LVL56:
+ 1034              	.LFB245:
+ 278:Core/Src/pidControl.c **** 
+ 279:Core/Src/pidControl.c **** void pidSetKi(pidStruct* pid, const float ki)
+ 280:Core/Src/pidControl.c **** {
+ 1035              		.loc 1 280 1 is_stmt 1 view -0
+ 1036              		.cfi_startproc
+ 1037              		@ args = 0, pretend = 0, frame = 0
+ 1038              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1039              		@ link register save eliminated.
+ 281:Core/Src/pidControl.c **** 	pid->Ki = ki;
+ 1040              		.loc 1 281 2 view .LVU239
+ 1041              		.loc 1 281 10 is_stmt 0 view .LVU240
+ 1042 0000 80ED060A 		vstr.32	s0, [r0, #24]
+ 282:Core/Src/pidControl.c **** }
+ 1043              		.loc 1 282 1 view .LVU241
+ 1044 0004 7047     		bx	lr
+ 1045              		.cfi_endproc
+ 1046              	.LFE245:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 25
+
+
+ 1048              		.section	.text.pidSetKd,"ax",%progbits
+ 1049              		.align	1
+ 1050              		.global	pidSetKd
+ 1051              		.syntax unified
+ 1052              		.thumb
+ 1053              		.thumb_func
+ 1055              	pidSetKd:
+ 1056              	.LVL57:
+ 1057              	.LFB246:
+ 283:Core/Src/pidControl.c **** 
+ 284:Core/Src/pidControl.c **** void pidSetKd(pidStruct* pid, const float kd)
+ 285:Core/Src/pidControl.c **** {
+ 1058              		.loc 1 285 1 is_stmt 1 view -0
+ 1059              		.cfi_startproc
+ 1060              		@ args = 0, pretend = 0, frame = 0
+ 1061              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1062              		@ link register save eliminated.
+ 286:Core/Src/pidControl.c **** 	pid->Kd = kd;
+ 1063              		.loc 1 286 2 view .LVU243
+ 1064              		.loc 1 286 10 is_stmt 0 view .LVU244
+ 1065 0000 80ED070A 		vstr.32	s0, [r0, #28]
+ 287:Core/Src/pidControl.c **** }
+ 1066              		.loc 1 287 1 view .LVU245
+ 1067 0004 7047     		bx	lr
+ 1068              		.cfi_endproc
+ 1069              	.LFE246:
+ 1071              		.section	.text.pidSetDt,"ax",%progbits
+ 1072              		.align	1
+ 1073              		.global	pidSetDt
+ 1074              		.syntax unified
+ 1075              		.thumb
+ 1076              		.thumb_func
+ 1078              	pidSetDt:
+ 1079              	.LVL58:
+ 1080              	.LFB247:
+ 288:Core/Src/pidControl.c **** 
+ 289:Core/Src/pidControl.c **** void pidSetDt(pidStruct* pid, const float dt) 
+ 290:Core/Src/pidControl.c **** {
+ 1081              		.loc 1 290 1 is_stmt 1 view -0
+ 1082              		.cfi_startproc
+ 1083              		@ args = 0, pretend = 0, frame = 0
+ 1084              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1085              		@ link register save eliminated.
+ 291:Core/Src/pidControl.c ****     pid->dt = dt;
+ 1086              		.loc 1 291 5 view .LVU247
+ 1087              		.loc 1 291 13 is_stmt 0 view .LVU248
+ 1088 0000 80ED0D0A 		vstr.32	s0, [r0, #52]
+ 292:Core/Src/pidControl.c **** }
+ 1089              		.loc 1 292 1 view .LVU249
+ 1090 0004 7047     		bx	lr
+ 1091              		.cfi_endproc
+ 1092              	.LFE247:
+ 1094              		.section	.text.pidReset,"ax",%progbits
+ 1095              		.align	1
+ 1096              		.global	pidReset
+ 1097              		.syntax unified
+ 1098              		.thumb
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 26
+
+
+ 1099              		.thumb_func
+ 1101              	pidReset:
+ 1102              	.LVL59:
+ 1103              	.LFB248:
+ 293:Core/Src/pidControl.c **** 
+ 294:Core/Src/pidControl.c **** void pidReset(pidStruct* pid)
+ 295:Core/Src/pidControl.c **** {
+ 1104              		.loc 1 295 1 is_stmt 1 view -0
+ 1105              		.cfi_startproc
+ 1106              		@ args = 0, pretend = 0, frame = 0
+ 1107              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1108              		@ link register save eliminated.
+ 296:Core/Src/pidControl.c **** 	pid->error     = 0;
+ 1109              		.loc 1 296 2 view .LVU251
+ 1110              		.loc 1 296 17 is_stmt 0 view .LVU252
+ 1111 0000 0023     		movs	r3, #0
+ 1112 0002 4360     		str	r3, [r0, #4]	@ float
+ 297:Core/Src/pidControl.c **** 	pid->preError = 0;
+ 1113              		.loc 1 297 2 is_stmt 1 view .LVU253
+ 1114              		.loc 1 297 16 is_stmt 0 view .LVU254
+ 1115 0004 8360     		str	r3, [r0, #8]	@ float
+ 298:Core/Src/pidControl.c **** 	pid->integration     = 0;
+ 1116              		.loc 1 298 2 is_stmt 1 view .LVU255
+ 1117              		.loc 1 298 23 is_stmt 0 view .LVU256
+ 1118 0006 C360     		str	r3, [r0, #12]	@ float
+ 299:Core/Src/pidControl.c **** 	pid->derivation     = 0;
+ 1119              		.loc 1 299 2 is_stmt 1 view .LVU257
+ 1120              		.loc 1 299 22 is_stmt 0 view .LVU258
+ 1121 0008 0361     		str	r3, [r0, #16]	@ float
+ 300:Core/Src/pidControl.c **** }
+ 1122              		.loc 1 300 1 view .LVU259
+ 1123 000a 7047     		bx	lr
+ 1124              		.cfi_endproc
+ 1125              	.LFE248:
+ 1127              		.global	rateDesired
+ 1128              		.section	.bss.rateDesired,"aw",%nobits
+ 1129              		.align	2
+ 1132              	rateDesired:
+ 1133 0000 00000000 		.space	16
+ 1133      00000000 
+ 1133      00000000 
+ 1133      00000000 
+ 1134              		.global	ZEulerPid
+ 1135              		.section	.bss.ZEulerPid,"aw",%nobits
+ 1136              		.align	2
+ 1139              	ZEulerPid:
+ 1140 0000 00000000 		.space	60
+ 1140      00000000 
+ 1140      00000000 
+ 1140      00000000 
+ 1140      00000000 
+ 1141              		.global	YEulerPid
+ 1142              		.section	.bss.YEulerPid,"aw",%nobits
+ 1143              		.align	2
+ 1146              	YEulerPid:
+ 1147 0000 00000000 		.space	60
+ 1147      00000000 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 27
+
+
+ 1147      00000000 
+ 1147      00000000 
+ 1147      00000000 
+ 1148              		.global	XEulerPid
+ 1149              		.section	.bss.XEulerPid,"aw",%nobits
+ 1150              		.align	2
+ 1153              	XEulerPid:
+ 1154 0000 00000000 		.space	60
+ 1154      00000000 
+ 1154      00000000 
+ 1154      00000000 
+ 1154      00000000 
+ 1155              		.global	ZGyroPid
+ 1156              		.section	.bss.ZGyroPid,"aw",%nobits
+ 1157              		.align	2
+ 1160              	ZGyroPid:
+ 1161 0000 00000000 		.space	60
+ 1161      00000000 
+ 1161      00000000 
+ 1161      00000000 
+ 1161      00000000 
+ 1162              		.global	YGyroPid
+ 1163              		.section	.bss.YGyroPid,"aw",%nobits
+ 1164              		.align	2
+ 1167              	YGyroPid:
+ 1168 0000 00000000 		.space	60
+ 1168      00000000 
+ 1168      00000000 
+ 1168      00000000 
+ 1168      00000000 
+ 1169              		.global	XGyroPid
+ 1170              		.section	.bss.XGyroPid,"aw",%nobits
+ 1171              		.align	2
+ 1174              	XGyroPid:
+ 1175 0000 00000000 		.space	60
+ 1175      00000000 
+ 1175      00000000 
+ 1175      00000000 
+ 1175      00000000 
+ 1176              		.section	.bss.Yaw,"aw",%nobits
+ 1177              		.align	2
+ 1180              	Yaw:
+ 1181 0000 00000000 		.space	4
+ 1182              		.section	.bss.Pitch,"aw",%nobits
+ 1183              		.align	2
+ 1186              	Pitch:
+ 1187 0000 00000000 		.space	4
+ 1188              		.section	.bss.Roll,"aw",%nobits
+ 1189              		.align	2
+ 1192              	Roll:
+ 1193 0000 00000000 		.space	4
+ 1194              		.section	.bss.Thro,"aw",%nobits
+ 1195              		.align	2
+ 1198              	Thro:
+ 1199 0000 00000000 		.space	4
+ 1200              		.global	my_motor_value
+ 1201              		.section	.bss.my_motor_value,"aw",%nobits
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 28
+
+
+ 1202              		.align	2
+ 1205              	my_motor_value:
+ 1206 0000 00000000 		.space	8
+ 1206      00000000 
+ 1207              		.text
+ 1208              	.Letext0:
+ 1209              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 1210              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 1211              		.file 4 "Core/Inc/pidControl.h"
+ 1212              		.file 5 "Core/Inc/rx/crsf_protocol.h"
+ 1213              		.file 6 "Core/Inc/rx/crsf.h"
+ 1214              		.file 7 "Middlewares/MPU6050_Motion_Driver/porting/mpu6050_init.h"
+ 1215              		.file 8 "Core/Inc/Dshot.h"
+ 1216              		.file 9 "Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.h"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 29
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 pidControl.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:21     .text.pidInit:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:27     .text.pidInit:00000000 pidInit
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:63     .text.pidUpdate:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:69     .text.pidUpdate:00000000 pidUpdate
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:198    .text.attitudeAnglePID:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:204    .text.attitudeAnglePID:00000000 attitudeAnglePID
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:261    .text.attitudeAnglePID:0000004c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1160   .bss.ZGyroPid:00000000 ZGyroPid
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1132   .bss.rateDesired:00000000 rateDesired
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1153   .bss.XEulerPid:00000000 XEulerPid
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1146   .bss.YEulerPid:00000000 YEulerPid
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:271    .text.pidControl:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:277    .text.pidControl:00000000 pidControl
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:314    .text.pidControl:0000001c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:319    .text.attitudeRatePID:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:325    .text.attitudeRatePID:00000000 attitudeRatePID
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:443    .text.attitudeRatePID:000000b4 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1180   .bss.Yaw:00000000 Yaw
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1186   .bss.Pitch:00000000 Pitch
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1192   .bss.Roll:00000000 Roll
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1174   .bss.XGyroPid:00000000 XGyroPid
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1167   .bss.YGyroPid:00000000 YGyroPid
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:466    .text.controlMotor:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:472    .text.controlMotor:00000000 controlMotor
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:794    .text.controlMotor:000001e8 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1205   .bss.my_motor_value:00000000 my_motor_value
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1198   .bss.Thro:00000000 Thro
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:810    .text.pidControlGyro:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:816    .text.pidControlGyro:00000000 pidControlGyro
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:881    .text.pidControlGyro:0000006c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:889    .text.pidSetIntegralLimit:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:895    .text.pidSetIntegralLimit:00000000 pidSetIntegralLimit
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:912    .text.pidSetOutputLimit:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:918    .text.pidSetOutputLimit:00000000 pidSetOutputLimit
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:935    .text.pidSetError:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:941    .text.pidSetError:00000000 pidSetError
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:958    .text.pidSetDesired:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:964    .text.pidSetDesired:00000000 pidSetDesired
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:981    .text.pidGetDesired:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:987    .text.pidGetDesired:00000000 pidGetDesired
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1003   .text.pidSetKp:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1009   .text.pidSetKp:00000000 pidSetKp
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1026   .text.pidSetKi:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1032   .text.pidSetKi:00000000 pidSetKi
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1049   .text.pidSetKd:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1055   .text.pidSetKd:00000000 pidSetKd
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1072   .text.pidSetDt:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1078   .text.pidSetDt:00000000 pidSetDt
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1095   .text.pidReset:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1101   .text.pidReset:00000000 pidReset
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1129   .bss.rateDesired:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1139   .bss.ZEulerPid:00000000 ZEulerPid
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1136   .bss.ZEulerPid:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1143   .bss.YEulerPid:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1150   .bss.XEulerPid:00000000 $d
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s 			page 30
+
+
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1157   .bss.ZGyroPid:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1164   .bss.YGyroPid:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1171   .bss.XGyroPid:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1177   .bss.Yaw:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1183   .bss.Pitch:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1189   .bss.Roll:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1195   .bss.Thro:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc9Be9zp.s:1202   .bss.my_motor_value:00000000 $d
+
+UNDEFINED SYMBOLS
+AngleEXPRateData
+IMU_Result
+MPU6050_getValue
+crsfChannelData
+__aeabi_f2d
+__aeabi_dmul
+__aeabi_dadd
+__aeabi_dcmplt
+__aeabi_dcmpgt
+__aeabi_d2uiz
+__aeabi_dsub
+dshot_write
+ThroValue
+mpu6050_get_gyrodata

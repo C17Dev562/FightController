@@ -1,0 +1,1880 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"eMPL_outputs.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c"
+  20              		.section	.text.inv_start_eMPL_outputs,"ax",%progbits
+  21              		.align	1
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	inv_start_eMPL_outputs:
+  27              	.LFB13:
+   1:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  $
+   6:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+   8:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+   9:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *   @defgroup  HAL_Outputs hal_outputs
+  10:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *   @brief     Motion Library - HAL Outputs
+  11:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *              Sets up common outputs for HAL
+  12:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *
+  13:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *   @{
+  14:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *       @file eMPL_outputs.c
+  15:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *       @brief Embedded MPL outputs.
+  16:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+  17:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** #include "eMPL_outputs.h"
+  18:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** #include "ml_math_func.h"
+  19:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** #include "mlmath.h"
+  20:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** #include "start_manager.h"
+  21:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** #include "data_builder.h"
+  22:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** #include "results_holder.h"
+  23:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+  24:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** struct eMPL_output_s {
+  25:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long quat[4];
+  26:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int quat_accuracy;
+  27:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int gyro_status;
+  28:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int accel_status;
+  29:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int compass_status;
+  30:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int nine_axis_status;
+  31:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_time_t nine_axis_timestamp;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 2
+
+
+  32:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** };
+  33:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+  34:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** static struct eMPL_output_s eMPL_out;
+  35:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+  36:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+  37:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Acceleration (g's) in body frame.
+  38:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  Embedded MPL defines gravity as positive acceleration pointing away from
+  39:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  the Earth.
+  40:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Acceleration in g's, q16 fixed point.
+  41:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+  42:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+  43:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+  44:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated.
+  45:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+  46:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_accel(long *data, int8_t *accuracy, inv_time_t *timestamp)
+  47:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+  48:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_accel_set(data, accuracy, timestamp);
+  49:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (eMPL_out.accel_status & INV_NEW_DATA)
+  50:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+  51:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     else
+  52:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 0;
+  53:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+  54:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+  55:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+  56:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Angular velocity (degrees per second) in body frame.
+  57:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Angular velocity in dps, q16 fixed point.
+  58:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+  59:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+  60:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+  61:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated. 
+  62:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+  63:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_gyro(long *data, int8_t *accuracy, inv_time_t *timestamp)
+  64:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+  65:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_gyro_set(data, accuracy, timestamp);
+  66:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (eMPL_out.gyro_status & INV_NEW_DATA)
+  67:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+  68:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     else
+  69:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 0;
+  70:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+  71:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+  72:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+  73:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Magnetic field strength in body frame.
+  74:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Field strength in microteslas, q16 fixed point.
+  75:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+  76:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+  77:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+  78:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated. 
+  79:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+  80:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_compass(long *data, int8_t *accuracy, inv_time_t *timestamp)
+  81:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+  82:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_compass_set(data, accuracy, timestamp);
+  83:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (eMPL_out.compass_status & INV_NEW_DATA)
+  84:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+  85:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     else
+  86:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 0;
+  87:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+  88:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 3
+
+
+  89:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+  90:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Body-to-world frame quaternion.
+  91:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  The elements are output in the following order: W, X, Y, Z.
+  92:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Quaternion, q30 fixed point.
+  93:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+  94:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+  95:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+  96:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated. 
+  97:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+  98:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_quat(long *data, int8_t *accuracy, inv_time_t *timestamp)
+  99:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 100:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     memcpy(data, eMPL_out.quat, sizeof(eMPL_out.quat));
+ 101:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 102:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 103:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 104:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 105:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 106:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+ 107:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Quaternion-derived heading.
+ 108:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Heading in degrees, q16 fixed point.
+ 109:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+ 110:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+ 111:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+ 112:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated. 
+ 113:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+ 114:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_heading(long *data, int8_t *accuracy, inv_time_t *timestamp)
+ 115:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 116:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long t1, t2, q00, q03, q12, q22;
+ 117:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     float fdata;
+ 118:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 119:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q00 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[0]);
+ 120:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 121:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 122:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 123:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 124:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* X component of the Ybody axis in World frame */
+ 125:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t1 = q12 - q03;
+ 126:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 127:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Y component of the Ybody axis in World frame */
+ 128:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t2 = q22 + q00 - (1L << 30);
+ 129:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     fdata = atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 130:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (fdata < 0.f)
+ 131:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         fdata += 360.f;
+ 132:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(fdata * 65536.f);
+ 133:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 134:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 135:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 136:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 137:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 138:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 139:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+ 140:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Body-to-world frame euler angles.
+ 141:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  The euler angles are output with the following convention:
+ 142:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  Pitch: -180 to 180
+ 143:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  Roll: -90 to 90
+ 144:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  Yaw: -180 to 180
+ 145:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Euler angles in degrees, q16 fixed point.
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 4
+
+
+ 146:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+ 147:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+ 148:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+ 149:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated.
+ 150:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+ 151:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_euler(long *data, int8_t *accuracy, inv_time_t *timestamp)
+ 152:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 153:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long t1, t2, t3;
+ 154:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long q00, q01, q02, q03, q11, q12, q13, q22, q23, q33;
+ 155:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     float values[3];
+ 156:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 157:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q00 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[0]);
+ 158:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q01 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[1]);
+ 159:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q02 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[2]);
+ 160:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 161:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q11 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[1]);
+ 162:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 163:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q13 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[3]);
+ 164:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 165:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q23 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[3]);
+ 166:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q33 = inv_q29_mult(eMPL_out.quat[3], eMPL_out.quat[3]);
+ 167:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 168:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* X component of the Ybody axis in World frame */
+ 169:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t1 = q12 - q03;
+ 170:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 171:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Y component of the Ybody axis in World frame */
+ 172:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t2 = q22 + q00 - (1L << 30);
+ 173:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[2] = -atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 174:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 175:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Ybody axis in World frame */
+ 176:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t3 = q23 + q01;
+ 177:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[0] =
+ 178:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         atan2f((float) t3,
+ 179:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****                 sqrtf((float) t1 * t1 +
+ 180:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****                       (float) t2 * t2)) * 180.f / (float) M_PI;
+ 181:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Zbody axis in World frame */
+ 182:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t2 = q33 + q00 - (1L << 30);
+ 183:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (t2 < 0) {
+ 184:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         if (values[0] >= 0)
+ 185:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****             values[0] = 180.f - values[0];
+ 186:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         else
+ 187:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****             values[0] = -180.f - values[0];
+ 188:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 189:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 190:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* X component of the Xbody axis in World frame */
+ 191:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t1 = q11 + q00 - (1L << 30);
+ 192:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Y component of the Xbody axis in World frame */
+ 193:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t2 = q12 + q03;
+ 194:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Xbody axis in World frame */
+ 195:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     t3 = q13 - q02;
+ 196:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 197:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[1] =
+ 198:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         (atan2f((float)(q33 + q00 - (1L << 30)), (float)(q13 - q02)) *
+ 199:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****           180.f / (float) M_PI - 90);
+ 200:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (values[1] >= 90)
+ 201:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = 180 - values[1];
+ 202:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 5
+
+
+ 203:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (values[1] < -90)
+ 204:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = -180 - values[1];
+ 205:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(values[0] * 65536.f);
+ 206:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[1] = (long)(values[1] * 65536.f);
+ 207:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[2] = (long)(values[2] * 65536.f);
+ 208:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 209:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 210:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 211:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 212:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 213:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 214:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+ 215:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief      Body-to-world frame rotation matrix.
+ 216:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] data        Rotation matrix, q30 fixed point.
+ 217:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] accuracy    Accuracy of the measurement from 0 (least accurate)
+ 218:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *                          to 3 (most accurate).
+ 219:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @param[out] timestamp   The time in milliseconds when this sensor was read.
+ 220:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @return     1 if data was updated.
+ 221:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+ 222:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** int inv_get_sensor_type_rot_mat(long *data, int8_t *accuracy, inv_time_t *timestamp)
+ 223:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 224:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_quaternion_to_rotation(eMPL_out.quat, data);
+ 225:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 226:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 227:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 228:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 229:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 230:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** static inv_error_t inv_generate_eMPL_outputs
+ 231:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     (struct inv_sensor_cal_t *sensor_cal)
+ 232:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 233:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int use_sensor;
+ 234:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long sr = 1000;
+ 235:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_quaternion_set(eMPL_out.quat, &eMPL_out.quat_accuracy, &eMPL_out.nine_axis_timestamp);
+ 236:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.gyro_status = sensor_cal->gyro.status;
+ 237:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.accel_status = sensor_cal->accel.status;
+ 238:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.compass_status = sensor_cal->compass.status;
+ 239:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     
+ 240:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Find the highest sample rate and tie sensor fusion timestamps to that one. */
+ 241:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (sensor_cal->gyro.status & INV_SENSOR_ON) {
+ 242:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->gyro.sample_rate_ms;
+ 243:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 0;
+ 244:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 245:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if ((sensor_cal->accel.status & INV_SENSOR_ON) && (sr > sensor_cal->accel.sample_rate_ms)) {
+ 246:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 247:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 1;
+ 248:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 249:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if ((sensor_cal->compass.status & INV_SENSOR_ON) && (sr > sensor_cal->compass.sample_rate_ms)) 
+ 250:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->compass.sample_rate_ms;
+ 251:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 2;
+ 252:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 253:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if ((sensor_cal->quat.status & INV_SENSOR_ON) && (sr > sensor_cal->quat.sample_rate_ms)) {
+ 254:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->quat.sample_rate_ms;
+ 255:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 3;
+ 256:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 257:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 258:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     switch (use_sensor) {
+ 259:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     default:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 6
+
+
+ 260:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 0:
+ 261:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_status = (sensor_cal->gyro.status & INV_NEW_DATA) ? 1 : 0;
+ 262:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->gyro.timestamp;
+ 263:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 264:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 1:
+ 265:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_status = (sensor_cal->accel.status & INV_NEW_DATA) ? 1 : 0;
+ 266:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->accel.timestamp;
+ 267:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 268:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 2:
+ 269:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_status = (sensor_cal->compass.status & INV_NEW_DATA) ? 1 : 0;
+ 270:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->compass.timestamp;
+ 271:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 272:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 3:
+ 273:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_status = (sensor_cal->quat.status & INV_NEW_DATA) ? 1 : 0;
+ 274:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->quat.timestamp;
+ 275:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 276:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 277:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     
+ 278:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     
+ 279:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return INV_SUCCESS;
+ 280:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 281:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 282:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** static inv_error_t inv_start_eMPL_outputs(void)
+ 283:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+  28              		.loc 1 283 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 08B5     		push	{r3, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 8
+  35              		.cfi_offset 3, -8
+  36              		.cfi_offset 14, -4
+ 284:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return inv_register_data_cb(inv_generate_eMPL_outputs,
+  37              		.loc 1 284 5 view .LVU1
+  38              		.loc 1 284 12 is_stmt 0 view .LVU2
+  39 0002 0722     		movs	r2, #7
+  40 0004 4FF46171 		mov	r1, #900
+  41 0008 0148     		ldr	r0, .L3
+  42 000a FFF7FEFF 		bl	inv_register_data_cb
+  43              	.LVL0:
+ 285:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         INV_PRIORITY_HAL_OUTPUTS, INV_GYRO_NEW | INV_ACCEL_NEW | INV_MAG_NEW);
+ 286:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+  44              		.loc 1 286 1 view .LVU3
+  45 000e 08BD     		pop	{r3, pc}
+  46              	.L4:
+  47              		.align	2
+  48              	.L3:
+  49 0010 00000000 		.word	inv_generate_eMPL_outputs
+  50              		.cfi_endproc
+  51              	.LFE13:
+  53              		.section	.text.inv_generate_eMPL_outputs,"ax",%progbits
+  54              		.align	1
+  55              		.syntax unified
+  56              		.thumb
+  57              		.thumb_func
+  59              	inv_generate_eMPL_outputs:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 7
+
+
+  60              	.LVL1:
+  61              	.LFB12:
+ 232:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int use_sensor;
+  62              		.loc 1 232 1 is_stmt 1 view -0
+  63              		.cfi_startproc
+  64              		@ args = 0, pretend = 0, frame = 0
+  65              		@ frame_needed = 0, uses_anonymous_args = 0
+ 232:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     int use_sensor;
+  66              		.loc 1 232 1 is_stmt 0 view .LVU5
+  67 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+  68              	.LCFI1:
+  69              		.cfi_def_cfa_offset 24
+  70              		.cfi_offset 3, -24
+  71              		.cfi_offset 4, -20
+  72              		.cfi_offset 5, -16
+  73              		.cfi_offset 6, -12
+  74              		.cfi_offset 7, -8
+  75              		.cfi_offset 14, -4
+  76 0002 0446     		mov	r4, r0
+ 233:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long sr = 1000;
+  77              		.loc 1 233 5 is_stmt 1 view .LVU6
+ 234:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_quaternion_set(eMPL_out.quat, &eMPL_out.quat_accuracy, &eMPL_out.nine_axis_timestamp);
+  78              		.loc 1 234 5 view .LVU7
+  79              	.LVL2:
+ 235:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.gyro_status = sensor_cal->gyro.status;
+  80              		.loc 1 235 5 view .LVU8
+  81 0004 2B4A     		ldr	r2, .L18
+  82 0006 A2F12405 		sub	r5, r2, #36
+  83 000a A2F11401 		sub	r1, r2, #20
+  84 000e 2846     		mov	r0, r5
+  85              	.LVL3:
+ 235:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.gyro_status = sensor_cal->gyro.status;
+  86              		.loc 1 235 5 is_stmt 0 view .LVU9
+  87 0010 FFF7FEFF 		bl	inv_get_quaternion_set
+  88              	.LVL4:
+ 236:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.accel_status = sensor_cal->accel.status;
+  89              		.loc 1 236 5 is_stmt 1 view .LVU10
+ 236:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.accel_status = sensor_cal->accel.status;
+  90              		.loc 1 236 44 is_stmt 0 view .LVU11
+  91 0014 206B     		ldr	r0, [r4, #48]
+ 236:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.accel_status = sensor_cal->accel.status;
+  92              		.loc 1 236 26 view .LVU12
+  93 0016 6861     		str	r0, [r5, #20]
+ 237:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.compass_status = sensor_cal->compass.status;
+  94              		.loc 1 237 5 is_stmt 1 view .LVU13
+ 237:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.compass_status = sensor_cal->compass.status;
+  95              		.loc 1 237 46 is_stmt 0 view .LVU14
+  96 0018 636F     		ldr	r3, [r4, #116]
+ 237:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     eMPL_out.compass_status = sensor_cal->compass.status;
+  97              		.loc 1 237 27 view .LVU15
+  98 001a AB61     		str	r3, [r5, #24]
+ 238:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     
+  99              		.loc 1 238 5 is_stmt 1 view .LVU16
+ 238:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     
+ 100              		.loc 1 238 50 is_stmt 0 view .LVU17
+ 101 001c D4F8B810 		ldr	r1, [r4, #184]
+ 238:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 8
+
+
+ 102              		.loc 1 238 29 view .LVU18
+ 103 0020 E961     		str	r1, [r5, #28]
+ 241:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->gyro.sample_rate_ms;
+ 104              		.loc 1 241 5 is_stmt 1 view .LVU19
+ 241:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->gyro.sample_rate_ms;
+ 105              		.loc 1 241 8 is_stmt 0 view .LVU20
+ 106 0022 10F4807F 		tst	r0, #256
+ 107 0026 26D0     		beq	.L14
+ 242:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 0;
+ 108              		.loc 1 242 9 is_stmt 1 view .LVU21
+ 242:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 0;
+ 109              		.loc 1 242 12 is_stmt 0 view .LVU22
+ 110 0028 E66A     		ldr	r6, [r4, #44]
+ 111              	.LVL5:
+ 243:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 112              		.loc 1 243 9 is_stmt 1 view .LVU23
+ 113              	.L6:
+ 245:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 114              		.loc 1 245 5 view .LVU24
+ 245:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 115              		.loc 1 245 8 is_stmt 0 view .LVU25
+ 116 002a 13F48072 		ands	r2, r3, #256
+ 117 002e 03D0     		beq	.L7
+ 245:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 118              		.loc 1 245 78 discriminator 1 view .LVU26
+ 119 0030 226F     		ldr	r2, [r4, #112]
+ 245:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 120              		.loc 1 245 52 discriminator 1 view .LVU27
+ 121 0032 B242     		cmp	r2, r6
+ 122 0034 22DB     		blt	.L15
+ 245:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->accel.sample_rate_ms;
+ 123              		.loc 1 245 52 view .LVU28
+ 124 0036 0022     		movs	r2, #0
+ 125              	.LVL6:
+ 126              	.L7:
+ 249:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->compass.sample_rate_ms;
+ 127              		.loc 1 249 5 is_stmt 1 view .LVU29
+ 249:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->compass.sample_rate_ms;
+ 128              		.loc 1 249 8 is_stmt 0 view .LVU30
+ 129 0038 11F4807F 		tst	r1, #256
+ 130 003c 05D0     		beq	.L8
+ 249:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->compass.sample_rate_ms;
+ 131              		.loc 1 249 82 discriminator 1 view .LVU31
+ 132 003e D4F8B450 		ldr	r5, [r4, #180]
+ 249:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->compass.sample_rate_ms;
+ 133              		.loc 1 249 54 discriminator 1 view .LVU32
+ 134 0042 B542     		cmp	r5, r6
+ 135 0044 01DA     		bge	.L8
+ 250:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 2;
+ 136              		.loc 1 250 12 view .LVU33
+ 137 0046 2E46     		mov	r6, r5
+ 138              	.LVL7:
+ 251:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 139              		.loc 1 251 20 view .LVU34
+ 140 0048 0222     		movs	r2, #2
+ 141              	.LVL8:
+ 142              	.L8:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 9
+
+
+ 253:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->quat.sample_rate_ms;
+ 143              		.loc 1 253 5 is_stmt 1 view .LVU35
+ 253:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->quat.sample_rate_ms;
+ 144              		.loc 1 253 26 is_stmt 0 view .LVU36
+ 145 004a D4F82051 		ldr	r5, [r4, #288]
+ 253:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->quat.sample_rate_ms;
+ 146              		.loc 1 253 8 view .LVU37
+ 147 004e 15F4807F 		tst	r5, #256
+ 148 0052 03D0     		beq	.L9
+ 253:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         sr = sensor_cal->quat.sample_rate_ms;
+ 149              		.loc 1 253 51 discriminator 1 view .LVU38
+ 150 0054 D4F82C71 		ldr	r7, [r4, #300]
+ 151 0058 B742     		cmp	r7, r6
+ 152 005a 21DB     		blt	.L10
+ 153              	.L9:
+ 258:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     default:
+ 154              		.loc 1 258 5 is_stmt 1 view .LVU39
+ 155 005c 022A     		cmp	r2, #2
+ 156 005e 17D0     		beq	.L11
+ 157 0060 032A     		cmp	r2, #3
+ 158 0062 1DD0     		beq	.L10
+ 159 0064 012A     		cmp	r2, #1
+ 160 0066 0CD0     		beq	.L12
+ 261:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->gyro.timestamp;
+ 161              		.loc 1 261 9 view .LVU40
+ 261:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->gyro.timestamp;
+ 162              		.loc 1 261 82 is_stmt 0 view .LVU41
+ 163 0068 C0F38010 		ubfx	r0, r0, #6, #1
+ 261:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->gyro.timestamp;
+ 164              		.loc 1 261 35 view .LVU42
+ 165 006c 124B     		ldr	r3, .L18+4
+ 166 006e 1862     		str	r0, [r3, #32]
+ 262:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 167              		.loc 1 262 9 is_stmt 1 view .LVU43
+ 262:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 168              		.loc 1 262 56 is_stmt 0 view .LVU44
+ 169 0070 A26B     		ldr	r2, [r4, #56]
+ 170              	.LVL9:
+ 262:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 171              		.loc 1 262 38 view .LVU45
+ 172 0072 5A62     		str	r2, [r3, #36]
+ 263:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 1:
+ 173              		.loc 1 263 9 is_stmt 1 view .LVU46
+ 174 0074 1BE0     		b	.L13
+ 175              	.LVL10:
+ 176              	.L14:
+ 234:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_quaternion_set(eMPL_out.quat, &eMPL_out.quat_accuracy, &eMPL_out.nine_axis_timestamp);
+ 177              		.loc 1 234 10 is_stmt 0 view .LVU47
+ 178 0076 4FF47A76 		mov	r6, #1000
+ 179 007a D6E7     		b	.L6
+ 180              	.LVL11:
+ 181              	.L15:
+ 246:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         use_sensor = 1;
+ 182              		.loc 1 246 12 view .LVU48
+ 183 007c 1646     		mov	r6, r2
+ 184              	.LVL12:
+ 247:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 10
+
+
+ 185              		.loc 1 247 20 view .LVU49
+ 186 007e 0122     		movs	r2, #1
+ 187 0080 DAE7     		b	.L7
+ 188              	.LVL13:
+ 189              	.L12:
+ 265:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->accel.timestamp;
+ 190              		.loc 1 265 9 is_stmt 1 view .LVU50
+ 265:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->accel.timestamp;
+ 191              		.loc 1 265 83 is_stmt 0 view .LVU51
+ 192 0082 C3F38013 		ubfx	r3, r3, #6, #1
+ 265:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->accel.timestamp;
+ 193              		.loc 1 265 35 view .LVU52
+ 194 0086 0C4A     		ldr	r2, .L18+4
+ 195              	.LVL14:
+ 265:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->accel.timestamp;
+ 196              		.loc 1 265 35 view .LVU53
+ 197 0088 1362     		str	r3, [r2, #32]
+ 266:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 198              		.loc 1 266 9 is_stmt 1 view .LVU54
+ 266:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 199              		.loc 1 266 57 is_stmt 0 view .LVU55
+ 200 008a E36F     		ldr	r3, [r4, #124]
+ 266:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 201              		.loc 1 266 38 view .LVU56
+ 202 008c 5362     		str	r3, [r2, #36]
+ 267:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 2:
+ 203              		.loc 1 267 9 is_stmt 1 view .LVU57
+ 204 008e 0EE0     		b	.L13
+ 205              	.LVL15:
+ 206              	.L11:
+ 269:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->compass.timestamp;
+ 207              		.loc 1 269 9 view .LVU58
+ 269:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->compass.timestamp;
+ 208              		.loc 1 269 85 is_stmt 0 view .LVU59
+ 209 0090 C1F38011 		ubfx	r1, r1, #6, #1
+ 269:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->compass.timestamp;
+ 210              		.loc 1 269 35 view .LVU60
+ 211 0094 084B     		ldr	r3, .L18+4
+ 212 0096 1962     		str	r1, [r3, #32]
+ 270:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 213              		.loc 1 270 9 is_stmt 1 view .LVU61
+ 270:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 214              		.loc 1 270 59 is_stmt 0 view .LVU62
+ 215 0098 D4F8C020 		ldr	r2, [r4, #192]
+ 216              	.LVL16:
+ 270:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 217              		.loc 1 270 38 view .LVU63
+ 218 009c 5A62     		str	r2, [r3, #36]
+ 271:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     case 3:
+ 219              		.loc 1 271 9 is_stmt 1 view .LVU64
+ 220 009e 06E0     		b	.L13
+ 221              	.LVL17:
+ 222              	.L10:
+ 273:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->quat.timestamp;
+ 223              		.loc 1 273 9 view .LVU65
+ 273:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->quat.timestamp;
+ 224              		.loc 1 273 82 is_stmt 0 view .LVU66
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 11
+
+
+ 225 00a0 C5F38015 		ubfx	r5, r5, #6, #1
+ 273:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         eMPL_out.nine_axis_timestamp = sensor_cal->quat.timestamp;
+ 226              		.loc 1 273 35 view .LVU67
+ 227 00a4 044B     		ldr	r3, .L18+4
+ 228 00a6 1D62     		str	r5, [r3, #32]
+ 274:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 229              		.loc 1 274 9 is_stmt 1 view .LVU68
+ 274:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 230              		.loc 1 274 56 is_stmt 0 view .LVU69
+ 231 00a8 D4F82421 		ldr	r2, [r4, #292]
+ 274:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         break;
+ 232              		.loc 1 274 38 view .LVU70
+ 233 00ac 5A62     		str	r2, [r3, #36]
+ 275:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 234              		.loc 1 275 9 is_stmt 1 view .LVU71
+ 235              	.L13:
+ 279:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 236              		.loc 1 279 5 view .LVU72
+ 280:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 237              		.loc 1 280 1 is_stmt 0 view .LVU73
+ 238 00ae 0020     		movs	r0, #0
+ 239 00b0 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 240              	.LVL18:
+ 241              	.L19:
+ 280:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 242              		.loc 1 280 1 view .LVU74
+ 243 00b2 00BF     		.align	2
+ 244              	.L18:
+ 245 00b4 24000000 		.word	eMPL_out+36
+ 246 00b8 00000000 		.word	eMPL_out
+ 247              		.cfi_endproc
+ 248              	.LFE12:
+ 250              		.section	.text.inv_init_eMPL_outputs,"ax",%progbits
+ 251              		.align	1
+ 252              		.syntax unified
+ 253              		.thumb
+ 254              		.thumb_func
+ 256              	inv_init_eMPL_outputs:
+ 257              	.LFB15:
+ 287:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 288:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** static inv_error_t inv_stop_eMPL_outputs(void)
+ 289:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 290:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return inv_unregister_data_cb(inv_generate_eMPL_outputs);
+ 291:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 292:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 293:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** static inv_error_t inv_init_eMPL_outputs(void)
+ 294:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 258              		.loc 1 294 1 is_stmt 1 view -0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 0
+ 261              		@ frame_needed = 0, uses_anonymous_args = 0
+ 262 0000 08B5     		push	{r3, lr}
+ 263              	.LCFI2:
+ 264              		.cfi_def_cfa_offset 8
+ 265              		.cfi_offset 3, -8
+ 266              		.cfi_offset 14, -4
+ 295:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     memset(&eMPL_out, 0, sizeof(eMPL_out));
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 12
+
+
+ 267              		.loc 1 295 5 view .LVU76
+ 268 0002 2822     		movs	r2, #40
+ 269 0004 0021     		movs	r1, #0
+ 270 0006 0248     		ldr	r0, .L22
+ 271 0008 FFF7FEFF 		bl	memset
+ 272              	.LVL19:
+ 296:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return INV_SUCCESS;
+ 273              		.loc 1 296 5 view .LVU77
+ 297:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 274              		.loc 1 297 1 is_stmt 0 view .LVU78
+ 275 000c 0020     		movs	r0, #0
+ 276 000e 08BD     		pop	{r3, pc}
+ 277              	.L23:
+ 278              		.align	2
+ 279              	.L22:
+ 280 0010 00000000 		.word	eMPL_out
+ 281              		.cfi_endproc
+ 282              	.LFE15:
+ 284              		.section	.text.inv_stop_eMPL_outputs,"ax",%progbits
+ 285              		.align	1
+ 286              		.syntax unified
+ 287              		.thumb
+ 288              		.thumb_func
+ 290              	inv_stop_eMPL_outputs:
+ 291              	.LFB14:
+ 289:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return inv_unregister_data_cb(inv_generate_eMPL_outputs);
+ 292              		.loc 1 289 1 is_stmt 1 view -0
+ 293              		.cfi_startproc
+ 294              		@ args = 0, pretend = 0, frame = 0
+ 295              		@ frame_needed = 0, uses_anonymous_args = 0
+ 296 0000 08B5     		push	{r3, lr}
+ 297              	.LCFI3:
+ 298              		.cfi_def_cfa_offset 8
+ 299              		.cfi_offset 3, -8
+ 300              		.cfi_offset 14, -4
+ 290:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 301              		.loc 1 290 5 view .LVU80
+ 290:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 302              		.loc 1 290 12 is_stmt 0 view .LVU81
+ 303 0002 0248     		ldr	r0, .L26
+ 304 0004 FFF7FEFF 		bl	inv_unregister_data_cb
+ 305              	.LVL20:
+ 291:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 306              		.loc 1 291 1 view .LVU82
+ 307 0008 08BD     		pop	{r3, pc}
+ 308              	.L27:
+ 309 000a 00BF     		.align	2
+ 310              	.L26:
+ 311 000c 00000000 		.word	inv_generate_eMPL_outputs
+ 312              		.cfi_endproc
+ 313              	.LFE14:
+ 315              		.section	.text.inv_get_sensor_type_accel,"ax",%progbits
+ 316              		.align	1
+ 317              		.global	inv_get_sensor_type_accel
+ 318              		.syntax unified
+ 319              		.thumb
+ 320              		.thumb_func
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 13
+
+
+ 322              	inv_get_sensor_type_accel:
+ 323              	.LVL21:
+ 324              	.LFB5:
+  47:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_accel_set(data, accuracy, timestamp);
+ 325              		.loc 1 47 1 is_stmt 1 view -0
+ 326              		.cfi_startproc
+ 327              		@ args = 0, pretend = 0, frame = 0
+ 328              		@ frame_needed = 0, uses_anonymous_args = 0
+  47:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_accel_set(data, accuracy, timestamp);
+ 329              		.loc 1 47 1 is_stmt 0 view .LVU84
+ 330 0000 08B5     		push	{r3, lr}
+ 331              	.LCFI4:
+ 332              		.cfi_def_cfa_offset 8
+ 333              		.cfi_offset 3, -8
+ 334              		.cfi_offset 14, -4
+  48:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (eMPL_out.accel_status & INV_NEW_DATA)
+ 335              		.loc 1 48 5 is_stmt 1 view .LVU85
+ 336 0002 FFF7FEFF 		bl	inv_get_accel_set
+ 337              	.LVL22:
+  49:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 338              		.loc 1 49 5 view .LVU86
+  49:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 339              		.loc 1 49 17 is_stmt 0 view .LVU87
+ 340 0006 034B     		ldr	r3, .L31
+ 341 0008 9869     		ldr	r0, [r3, #24]
+  49:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 342              		.loc 1 49 8 view .LVU88
+ 343 000a 10F04000 		ands	r0, r0, #64
+ 344 000e 00D0     		beq	.L28
+  50:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     else
+ 345              		.loc 1 50 16 view .LVU89
+ 346 0010 0120     		movs	r0, #1
+ 347              	.L28:
+  53:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 348              		.loc 1 53 1 view .LVU90
+ 349 0012 08BD     		pop	{r3, pc}
+ 350              	.L32:
+ 351              		.align	2
+ 352              	.L31:
+ 353 0014 00000000 		.word	eMPL_out
+ 354              		.cfi_endproc
+ 355              	.LFE5:
+ 357              		.section	.text.inv_get_sensor_type_gyro,"ax",%progbits
+ 358              		.align	1
+ 359              		.global	inv_get_sensor_type_gyro
+ 360              		.syntax unified
+ 361              		.thumb
+ 362              		.thumb_func
+ 364              	inv_get_sensor_type_gyro:
+ 365              	.LVL23:
+ 366              	.LFB6:
+  64:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_gyro_set(data, accuracy, timestamp);
+ 367              		.loc 1 64 1 is_stmt 1 view -0
+ 368              		.cfi_startproc
+ 369              		@ args = 0, pretend = 0, frame = 0
+ 370              		@ frame_needed = 0, uses_anonymous_args = 0
+  64:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_gyro_set(data, accuracy, timestamp);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 14
+
+
+ 371              		.loc 1 64 1 is_stmt 0 view .LVU92
+ 372 0000 08B5     		push	{r3, lr}
+ 373              	.LCFI5:
+ 374              		.cfi_def_cfa_offset 8
+ 375              		.cfi_offset 3, -8
+ 376              		.cfi_offset 14, -4
+  65:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (eMPL_out.gyro_status & INV_NEW_DATA)
+ 377              		.loc 1 65 5 is_stmt 1 view .LVU93
+ 378 0002 FFF7FEFF 		bl	inv_get_gyro_set
+ 379              	.LVL24:
+  66:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 380              		.loc 1 66 5 view .LVU94
+  66:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 381              		.loc 1 66 17 is_stmt 0 view .LVU95
+ 382 0006 034B     		ldr	r3, .L36
+ 383 0008 5869     		ldr	r0, [r3, #20]
+  66:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 384              		.loc 1 66 8 view .LVU96
+ 385 000a 10F04000 		ands	r0, r0, #64
+ 386 000e 00D0     		beq	.L33
+  67:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     else
+ 387              		.loc 1 67 16 view .LVU97
+ 388 0010 0120     		movs	r0, #1
+ 389              	.L33:
+  70:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 390              		.loc 1 70 1 view .LVU98
+ 391 0012 08BD     		pop	{r3, pc}
+ 392              	.L37:
+ 393              		.align	2
+ 394              	.L36:
+ 395 0014 00000000 		.word	eMPL_out
+ 396              		.cfi_endproc
+ 397              	.LFE6:
+ 399              		.section	.text.inv_get_sensor_type_compass,"ax",%progbits
+ 400              		.align	1
+ 401              		.global	inv_get_sensor_type_compass
+ 402              		.syntax unified
+ 403              		.thumb
+ 404              		.thumb_func
+ 406              	inv_get_sensor_type_compass:
+ 407              	.LVL25:
+ 408              	.LFB7:
+  81:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_compass_set(data, accuracy, timestamp);
+ 409              		.loc 1 81 1 is_stmt 1 view -0
+ 410              		.cfi_startproc
+ 411              		@ args = 0, pretend = 0, frame = 0
+ 412              		@ frame_needed = 0, uses_anonymous_args = 0
+  81:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_get_compass_set(data, accuracy, timestamp);
+ 413              		.loc 1 81 1 is_stmt 0 view .LVU100
+ 414 0000 08B5     		push	{r3, lr}
+ 415              	.LCFI6:
+ 416              		.cfi_def_cfa_offset 8
+ 417              		.cfi_offset 3, -8
+ 418              		.cfi_offset 14, -4
+  82:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (eMPL_out.compass_status & INV_NEW_DATA)
+ 419              		.loc 1 82 5 is_stmt 1 view .LVU101
+ 420 0002 FFF7FEFF 		bl	inv_get_compass_set
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 15
+
+
+ 421              	.LVL26:
+  83:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 422              		.loc 1 83 5 view .LVU102
+  83:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 423              		.loc 1 83 17 is_stmt 0 view .LVU103
+ 424 0006 034B     		ldr	r3, .L41
+ 425 0008 D869     		ldr	r0, [r3, #28]
+  83:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return 1;
+ 426              		.loc 1 83 8 view .LVU104
+ 427 000a 10F04000 		ands	r0, r0, #64
+ 428 000e 00D0     		beq	.L38
+  84:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     else
+ 429              		.loc 1 84 16 view .LVU105
+ 430 0010 0120     		movs	r0, #1
+ 431              	.L38:
+  87:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 432              		.loc 1 87 1 view .LVU106
+ 433 0012 08BD     		pop	{r3, pc}
+ 434              	.L42:
+ 435              		.align	2
+ 436              	.L41:
+ 437 0014 00000000 		.word	eMPL_out
+ 438              		.cfi_endproc
+ 439              	.LFE7:
+ 441              		.section	.text.inv_get_sensor_type_quat,"ax",%progbits
+ 442              		.align	1
+ 443              		.global	inv_get_sensor_type_quat
+ 444              		.syntax unified
+ 445              		.thumb
+ 446              		.thumb_func
+ 448              	inv_get_sensor_type_quat:
+ 449              	.LVL27:
+ 450              	.LFB8:
+  99:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     memcpy(data, eMPL_out.quat, sizeof(eMPL_out.quat));
+ 451              		.loc 1 99 1 is_stmt 1 view -0
+ 452              		.cfi_startproc
+ 453              		@ args = 0, pretend = 0, frame = 0
+ 454              		@ frame_needed = 0, uses_anonymous_args = 0
+  99:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     memcpy(data, eMPL_out.quat, sizeof(eMPL_out.quat));
+ 455              		.loc 1 99 1 is_stmt 0 view .LVU108
+ 456 0000 70B5     		push	{r4, r5, r6, lr}
+ 457              	.LCFI7:
+ 458              		.cfi_def_cfa_offset 16
+ 459              		.cfi_offset 4, -16
+ 460              		.cfi_offset 5, -12
+ 461              		.cfi_offset 6, -8
+ 462              		.cfi_offset 14, -4
+ 463 0002 8446     		mov	ip, r0
+ 464 0004 0E46     		mov	r6, r1
+ 465 0006 1546     		mov	r5, r2
+ 100:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 466              		.loc 1 100 5 is_stmt 1 view .LVU109
+ 467 0008 084C     		ldr	r4, .L45
+ 468 000a A646     		mov	lr, r4
+ 469 000c BEE80F00 		ldmia	lr!, {r0, r1, r2, r3}
+ 470              	.LVL28:
+ 100:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 16
+
+
+ 471              		.loc 1 100 5 is_stmt 0 view .LVU110
+ 472 0010 CCF80000 		str	r0, [ip]	@ unaligned
+ 473 0014 CCF80410 		str	r1, [ip, #4]	@ unaligned
+ 474 0018 CCF80820 		str	r2, [ip, #8]	@ unaligned
+ 475 001c CCF80C30 		str	r3, [ip, #12]	@ unaligned
+ 101:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 476              		.loc 1 101 5 is_stmt 1 view .LVU111
+ 101:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 477              		.loc 1 101 27 is_stmt 0 view .LVU112
+ 478 0020 2369     		ldr	r3, [r4, #16]
+ 101:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 479              		.loc 1 101 17 view .LVU113
+ 480 0022 3370     		strb	r3, [r6]
+ 102:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 481              		.loc 1 102 5 is_stmt 1 view .LVU114
+ 102:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 482              		.loc 1 102 28 is_stmt 0 view .LVU115
+ 483 0024 636A     		ldr	r3, [r4, #36]
+ 102:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 484              		.loc 1 102 18 view .LVU116
+ 485 0026 2B60     		str	r3, [r5]
+ 103:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 486              		.loc 1 103 5 is_stmt 1 view .LVU117
+ 104:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 487              		.loc 1 104 1 is_stmt 0 view .LVU118
+ 488 0028 206A     		ldr	r0, [r4, #32]
+ 489 002a 70BD     		pop	{r4, r5, r6, pc}
+ 490              	.LVL29:
+ 491              	.L46:
+ 104:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 492              		.loc 1 104 1 view .LVU119
+ 493              		.align	2
+ 494              	.L45:
+ 495 002c 00000000 		.word	eMPL_out
+ 496              		.cfi_endproc
+ 497              	.LFE8:
+ 499              		.section	.text.inv_get_sensor_type_heading,"ax",%progbits
+ 500              		.align	1
+ 501              		.global	inv_get_sensor_type_heading
+ 502              		.syntax unified
+ 503              		.thumb
+ 504              		.thumb_func
+ 506              	inv_get_sensor_type_heading:
+ 507              	.LVL30:
+ 508              	.LFB9:
+ 115:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long t1, t2, q00, q03, q12, q22;
+ 509              		.loc 1 115 1 is_stmt 1 view -0
+ 510              		.cfi_startproc
+ 511              		@ args = 0, pretend = 0, frame = 0
+ 512              		@ frame_needed = 0, uses_anonymous_args = 0
+ 115:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long t1, t2, q00, q03, q12, q22;
+ 513              		.loc 1 115 1 is_stmt 0 view .LVU121
+ 514 0000 2DE9F047 		push	{r4, r5, r6, r7, r8, r9, r10, lr}
+ 515              	.LCFI8:
+ 516              		.cfi_def_cfa_offset 32
+ 517              		.cfi_offset 4, -32
+ 518              		.cfi_offset 5, -28
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 17
+
+
+ 519              		.cfi_offset 6, -24
+ 520              		.cfi_offset 7, -20
+ 521              		.cfi_offset 8, -16
+ 522              		.cfi_offset 9, -12
+ 523              		.cfi_offset 10, -8
+ 524              		.cfi_offset 14, -4
+ 525 0004 8146     		mov	r9, r0
+ 526 0006 8846     		mov	r8, r1
+ 527 0008 1746     		mov	r7, r2
+ 116:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     float fdata;
+ 528              		.loc 1 116 5 is_stmt 1 view .LVU122
+ 117:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 529              		.loc 1 117 5 view .LVU123
+ 119:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 530              		.loc 1 119 5 view .LVU124
+ 119:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 531              		.loc 1 119 11 is_stmt 0 view .LVU125
+ 532 000a 214D     		ldr	r5, .L53
+ 533 000c 2868     		ldr	r0, [r5]
+ 534              	.LVL31:
+ 119:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 535              		.loc 1 119 11 view .LVU126
+ 536 000e 0146     		mov	r1, r0
+ 537              	.LVL32:
+ 119:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 538              		.loc 1 119 11 view .LVU127
+ 539 0010 FFF7FEFF 		bl	inv_q29_mult
+ 540              	.LVL33:
+ 119:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 541              		.loc 1 119 11 view .LVU128
+ 542 0014 0446     		mov	r4, r0
+ 543              	.LVL34:
+ 120:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 544              		.loc 1 120 5 is_stmt 1 view .LVU129
+ 120:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 545              		.loc 1 120 11 is_stmt 0 view .LVU130
+ 546 0016 E968     		ldr	r1, [r5, #12]
+ 547 0018 2868     		ldr	r0, [r5]
+ 548              	.LVL35:
+ 120:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 549              		.loc 1 120 11 view .LVU131
+ 550 001a FFF7FEFF 		bl	inv_q29_mult
+ 551              	.LVL36:
+ 552 001e 8246     		mov	r10, r0
+ 553              	.LVL37:
+ 121:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 554              		.loc 1 121 5 is_stmt 1 view .LVU132
+ 121:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 555              		.loc 1 121 11 is_stmt 0 view .LVU133
+ 556 0020 A968     		ldr	r1, [r5, #8]
+ 557 0022 6868     		ldr	r0, [r5, #4]
+ 558              	.LVL38:
+ 121:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 559              		.loc 1 121 11 view .LVU134
+ 560 0024 FFF7FEFF 		bl	inv_q29_mult
+ 561              	.LVL39:
+ 562 0028 0646     		mov	r6, r0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 18
+
+
+ 563              	.LVL40:
+ 122:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 564              		.loc 1 122 5 is_stmt 1 view .LVU135
+ 122:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 565              		.loc 1 122 11 is_stmt 0 view .LVU136
+ 566 002a A868     		ldr	r0, [r5, #8]
+ 567              	.LVL41:
+ 122:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 568              		.loc 1 122 11 view .LVU137
+ 569 002c 0146     		mov	r1, r0
+ 570 002e FFF7FEFF 		bl	inv_q29_mult
+ 571              	.LVL42:
+ 125:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 572              		.loc 1 125 5 is_stmt 1 view .LVU138
+ 125:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 573              		.loc 1 125 8 is_stmt 0 view .LVU139
+ 574 0032 A6EB0A03 		sub	r3, r6, r10
+ 575 0036 00EE103A 		vmov	s0, r3	@ int
+ 576              	.LVL43:
+ 128:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     fdata = atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 577              		.loc 1 128 5 is_stmt 1 view .LVU140
+ 128:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     fdata = atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 578              		.loc 1 128 14 is_stmt 0 view .LVU141
+ 579 003a 0444     		add	r4, r4, r0
+ 580              	.LVL44:
+ 128:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     fdata = atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 581              		.loc 1 128 8 view .LVU142
+ 582 003c 04F14043 		add	r3, r4, #-1073741824
+ 583              	.LVL45:
+ 128:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     fdata = atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 584              		.loc 1 128 8 view .LVU143
+ 585 0040 00EE903A 		vmov	s1, r3	@ int
+ 586              	.LVL46:
+ 129:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (fdata < 0.f)
+ 587              		.loc 1 129 5 is_stmt 1 view .LVU144
+ 129:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (fdata < 0.f)
+ 588              		.loc 1 129 13 is_stmt 0 view .LVU145
+ 589 0044 F8EEE00A 		vcvt.f32.s32	s1, s1
+ 590 0048 B8EEC00A 		vcvt.f32.s32	s0, s0
+ 591              	.LVL47:
+ 129:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (fdata < 0.f)
+ 592              		.loc 1 129 13 view .LVU146
+ 593 004c FFF7FEFF 		bl	atan2f
+ 594              	.LVL48:
+ 129:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (fdata < 0.f)
+ 595              		.loc 1 129 44 view .LVU147
+ 596 0050 DFED107A 		vldr.32	s15, .L53+4
+ 597 0054 20EE270A 		vmul.f32	s0, s0, s15
+ 129:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (fdata < 0.f)
+ 598              		.loc 1 129 11 view .LVU148
+ 599 0058 9FED0F7A 		vldr.32	s14, .L53+8
+ 600 005c C0EE077A 		vdiv.f32	s15, s0, s14
+ 601              	.LVL49:
+ 130:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         fdata += 360.f;
+ 602              		.loc 1 130 5 is_stmt 1 view .LVU149
+ 130:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         fdata += 360.f;
+ 603              		.loc 1 130 8 is_stmt 0 view .LVU150
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 19
+
+
+ 604 0060 F5EEC07A 		vcmpe.f32	s15, #0
+ 605 0064 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 606 0068 0CD4     		bmi	.L52
+ 607              	.L48:
+ 132:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 608              		.loc 1 132 5 is_stmt 1 view .LVU151
+ 132:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 609              		.loc 1 132 15 is_stmt 0 view .LVU152
+ 610 006a FEEEC87A 		vcvt.s32.f32	s15, s15, #16
+ 611              	.LVL50:
+ 132:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 612              		.loc 1 132 13 view .LVU153
+ 613 006e C9ED007A 		vstr.32	s15, [r9]	@ int
+ 134:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 614              		.loc 1 134 5 is_stmt 1 view .LVU154
+ 134:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 615              		.loc 1 134 27 is_stmt 0 view .LVU155
+ 616 0072 074B     		ldr	r3, .L53
+ 617 0074 1A69     		ldr	r2, [r3, #16]
+ 134:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 618              		.loc 1 134 17 view .LVU156
+ 619 0076 88F80020 		strb	r2, [r8]
+ 135:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 620              		.loc 1 135 5 is_stmt 1 view .LVU157
+ 135:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 621              		.loc 1 135 28 is_stmt 0 view .LVU158
+ 622 007a 5A6A     		ldr	r2, [r3, #36]
+ 135:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 623              		.loc 1 135 18 view .LVU159
+ 624 007c 3A60     		str	r2, [r7]
+ 136:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 625              		.loc 1 136 5 is_stmt 1 view .LVU160
+ 137:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 626              		.loc 1 137 1 is_stmt 0 view .LVU161
+ 627 007e 186A     		ldr	r0, [r3, #32]
+ 628 0080 BDE8F087 		pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+ 629              	.LVL51:
+ 630              	.L52:
+ 131:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(fdata * 65536.f);
+ 631              		.loc 1 131 9 is_stmt 1 view .LVU162
+ 131:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(fdata * 65536.f);
+ 632              		.loc 1 131 15 is_stmt 0 view .LVU163
+ 633 0084 9FED057A 		vldr.32	s14, .L53+12
+ 634 0088 77EE877A 		vadd.f32	s15, s15, s14
+ 635              	.LVL52:
+ 131:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(fdata * 65536.f);
+ 636              		.loc 1 131 15 view .LVU164
+ 637 008c EDE7     		b	.L48
+ 638              	.L54:
+ 639 008e 00BF     		.align	2
+ 640              	.L53:
+ 641 0090 00000000 		.word	eMPL_out
+ 642 0094 00003443 		.word	1127481344
+ 643 0098 DB0F4940 		.word	1078530011
+ 644 009c 0000B443 		.word	1135869952
+ 645              		.cfi_endproc
+ 646              	.LFE9:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 20
+
+
+ 648              		.section	.text.inv_get_sensor_type_euler,"ax",%progbits
+ 649              		.align	1
+ 650              		.global	inv_get_sensor_type_euler
+ 651              		.syntax unified
+ 652              		.thumb
+ 653              		.thumb_func
+ 655              	inv_get_sensor_type_euler:
+ 656              	.LVL53:
+ 657              	.LFB10:
+ 152:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long t1, t2, t3;
+ 658              		.loc 1 152 1 is_stmt 1 view -0
+ 659              		.cfi_startproc
+ 660              		@ args = 0, pretend = 0, frame = 32
+ 661              		@ frame_needed = 0, uses_anonymous_args = 0
+ 152:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long t1, t2, t3;
+ 662              		.loc 1 152 1 is_stmt 0 view .LVU166
+ 663 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 664              	.LCFI9:
+ 665              		.cfi_def_cfa_offset 36
+ 666              		.cfi_offset 4, -36
+ 667              		.cfi_offset 5, -32
+ 668              		.cfi_offset 6, -28
+ 669              		.cfi_offset 7, -24
+ 670              		.cfi_offset 8, -20
+ 671              		.cfi_offset 9, -16
+ 672              		.cfi_offset 10, -12
+ 673              		.cfi_offset 11, -8
+ 674              		.cfi_offset 14, -4
+ 675 0004 2DED068B 		vpush.64	{d8, d9, d10}
+ 676              	.LCFI10:
+ 677              		.cfi_def_cfa_offset 60
+ 678              		.cfi_offset 80, -60
+ 679              		.cfi_offset 81, -56
+ 680              		.cfi_offset 82, -52
+ 681              		.cfi_offset 83, -48
+ 682              		.cfi_offset 84, -44
+ 683              		.cfi_offset 85, -40
+ 684 0008 89B0     		sub	sp, sp, #36
+ 685              	.LCFI11:
+ 686              		.cfi_def_cfa_offset 96
+ 687 000a 8046     		mov	r8, r0
+ 688 000c 0291     		str	r1, [sp, #8]
+ 689 000e 0392     		str	r2, [sp, #12]
+ 153:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     long q00, q01, q02, q03, q11, q12, q13, q22, q23, q33;
+ 690              		.loc 1 153 5 is_stmt 1 view .LVU167
+ 154:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     float values[3];
+ 691              		.loc 1 154 5 view .LVU168
+ 155:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 692              		.loc 1 155 5 view .LVU169
+ 157:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q01 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[1]);
+ 693              		.loc 1 157 5 view .LVU170
+ 157:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q01 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[1]);
+ 694              		.loc 1 157 11 is_stmt 0 view .LVU171
+ 695 0010 664C     		ldr	r4, .L68
+ 696 0012 2068     		ldr	r0, [r4]
+ 697              	.LVL54:
+ 157:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q01 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[1]);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 21
+
+
+ 698              		.loc 1 157 11 view .LVU172
+ 699 0014 0146     		mov	r1, r0
+ 700              	.LVL55:
+ 157:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q01 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[1]);
+ 701              		.loc 1 157 11 view .LVU173
+ 702 0016 FFF7FEFF 		bl	inv_q29_mult
+ 703              	.LVL56:
+ 157:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q01 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[1]);
+ 704              		.loc 1 157 11 view .LVU174
+ 705 001a 0746     		mov	r7, r0
+ 706              	.LVL57:
+ 158:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q02 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[2]);
+ 707              		.loc 1 158 5 is_stmt 1 view .LVU175
+ 158:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q02 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[2]);
+ 708              		.loc 1 158 11 is_stmt 0 view .LVU176
+ 709 001c 6168     		ldr	r1, [r4, #4]
+ 710 001e 2068     		ldr	r0, [r4]
+ 711              	.LVL58:
+ 158:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q02 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[2]);
+ 712              		.loc 1 158 11 view .LVU177
+ 713 0020 FFF7FEFF 		bl	inv_q29_mult
+ 714              	.LVL59:
+ 715 0024 8146     		mov	r9, r0
+ 716              	.LVL60:
+ 159:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 717              		.loc 1 159 5 is_stmt 1 view .LVU178
+ 159:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 718              		.loc 1 159 11 is_stmt 0 view .LVU179
+ 719 0026 A168     		ldr	r1, [r4, #8]
+ 720 0028 2068     		ldr	r0, [r4]
+ 721              	.LVL61:
+ 159:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q03 = inv_q29_mult(eMPL_out.quat[0], eMPL_out.quat[3]);
+ 722              		.loc 1 159 11 view .LVU180
+ 723 002a FFF7FEFF 		bl	inv_q29_mult
+ 724              	.LVL62:
+ 725 002e 0090     		str	r0, [sp]
+ 726              	.LVL63:
+ 160:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q11 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[1]);
+ 727              		.loc 1 160 5 is_stmt 1 view .LVU181
+ 160:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q11 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[1]);
+ 728              		.loc 1 160 11 is_stmt 0 view .LVU182
+ 729 0030 E168     		ldr	r1, [r4, #12]
+ 730 0032 2068     		ldr	r0, [r4]
+ 731              	.LVL64:
+ 160:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q11 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[1]);
+ 732              		.loc 1 160 11 view .LVU183
+ 733 0034 FFF7FEFF 		bl	inv_q29_mult
+ 734              	.LVL65:
+ 735 0038 8346     		mov	fp, r0
+ 736              	.LVL66:
+ 161:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 737              		.loc 1 161 5 is_stmt 1 view .LVU184
+ 161:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ 738              		.loc 1 161 11 is_stmt 0 view .LVU185
+ 739 003a 6068     		ldr	r0, [r4, #4]
+ 740              	.LVL67:
+ 161:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q12 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[2]);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 22
+
+
+ 741              		.loc 1 161 11 view .LVU186
+ 742 003c 0146     		mov	r1, r0
+ 743 003e FFF7FEFF 		bl	inv_q29_mult
+ 744              	.LVL68:
+ 162:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q13 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[3]);
+ 745              		.loc 1 162 5 is_stmt 1 view .LVU187
+ 162:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q13 = inv_q29_mult(eMPL_out.quat[1], eMPL_out.quat[3]);
+ 746              		.loc 1 162 11 is_stmt 0 view .LVU188
+ 747 0042 A168     		ldr	r1, [r4, #8]
+ 748 0044 6068     		ldr	r0, [r4, #4]
+ 749 0046 FFF7FEFF 		bl	inv_q29_mult
+ 750              	.LVL69:
+ 751 004a 0646     		mov	r6, r0
+ 752              	.LVL70:
+ 163:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 753              		.loc 1 163 5 is_stmt 1 view .LVU189
+ 163:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 754              		.loc 1 163 11 is_stmt 0 view .LVU190
+ 755 004c E168     		ldr	r1, [r4, #12]
+ 756 004e 6068     		ldr	r0, [r4, #4]
+ 757              	.LVL71:
+ 163:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q22 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[2]);
+ 758              		.loc 1 163 11 view .LVU191
+ 759 0050 FFF7FEFF 		bl	inv_q29_mult
+ 760              	.LVL72:
+ 761 0054 0190     		str	r0, [sp, #4]
+ 762              	.LVL73:
+ 164:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q23 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[3]);
+ 763              		.loc 1 164 5 is_stmt 1 view .LVU192
+ 164:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q23 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[3]);
+ 764              		.loc 1 164 11 is_stmt 0 view .LVU193
+ 765 0056 A068     		ldr	r0, [r4, #8]
+ 766              	.LVL74:
+ 164:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q23 = inv_q29_mult(eMPL_out.quat[2], eMPL_out.quat[3]);
+ 767              		.loc 1 164 11 view .LVU194
+ 768 0058 0146     		mov	r1, r0
+ 769 005a FFF7FEFF 		bl	inv_q29_mult
+ 770              	.LVL75:
+ 771 005e 0546     		mov	r5, r0
+ 772              	.LVL76:
+ 165:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q33 = inv_q29_mult(eMPL_out.quat[3], eMPL_out.quat[3]);
+ 773              		.loc 1 165 5 is_stmt 1 view .LVU195
+ 165:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q33 = inv_q29_mult(eMPL_out.quat[3], eMPL_out.quat[3]);
+ 774              		.loc 1 165 11 is_stmt 0 view .LVU196
+ 775 0060 E168     		ldr	r1, [r4, #12]
+ 776 0062 A068     		ldr	r0, [r4, #8]
+ 777              	.LVL77:
+ 165:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     q33 = inv_q29_mult(eMPL_out.quat[3], eMPL_out.quat[3]);
+ 778              		.loc 1 165 11 view .LVU197
+ 779 0064 FFF7FEFF 		bl	inv_q29_mult
+ 780              	.LVL78:
+ 781 0068 8246     		mov	r10, r0
+ 782              	.LVL79:
+ 166:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 783              		.loc 1 166 5 is_stmt 1 view .LVU198
+ 166:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 784              		.loc 1 166 11 is_stmt 0 view .LVU199
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 23
+
+
+ 785 006a E068     		ldr	r0, [r4, #12]
+ 786              	.LVL80:
+ 166:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 787              		.loc 1 166 11 view .LVU200
+ 788 006c 0146     		mov	r1, r0
+ 789 006e FFF7FEFF 		bl	inv_q29_mult
+ 790              	.LVL81:
+ 791 0072 0446     		mov	r4, r0
+ 792              	.LVL82:
+ 169:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 793              		.loc 1 169 5 is_stmt 1 view .LVU201
+ 169:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 794              		.loc 1 169 8 is_stmt 0 view .LVU202
+ 795 0074 A6EB0B06 		sub	r6, r6, fp
+ 796              	.LVL83:
+ 172:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[2] = -atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 797              		.loc 1 172 5 is_stmt 1 view .LVU203
+ 172:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[2] = -atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 798              		.loc 1 172 14 is_stmt 0 view .LVU204
+ 799 0078 3D44     		add	r5, r5, r7
+ 800              	.LVL84:
+ 172:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[2] = -atan2f((float) t1, (float) t2) * 180.f / (float) M_PI;
+ 801              		.loc 1 172 8 view .LVU205
+ 802 007a 05F14045 		add	r5, r5, #-1073741824
+ 803              	.LVL85:
+ 173:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 804              		.loc 1 173 5 is_stmt 1 view .LVU206
+ 173:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 805              		.loc 1 173 18 is_stmt 0 view .LVU207
+ 806 007e 07EE906A 		vmov	s15, r6	@ int
+ 807 0082 F8EEE78A 		vcvt.f32.s32	s17, s15
+ 808 0086 07EE905A 		vmov	s15, r5	@ int
+ 809 008a B8EEE78A 		vcvt.f32.s32	s16, s15
+ 810 008e F0EE480A 		vmov.f32	s1, s16
+ 811 0092 B0EE680A 		vmov.f32	s0, s17
+ 812 0096 FFF7FEFF 		bl	atan2f
+ 813              	.LVL86:
+ 173:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 814              		.loc 1 173 49 view .LVU208
+ 815 009a 9FED45AA 		vldr.32	s20, .L68+4
+ 816 009e 20EE4A0A 		vnmul.f32	s0, s0, s20
+ 173:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 817              		.loc 1 173 57 view .LVU209
+ 818 00a2 DFED449A 		vldr.32	s19, .L68+8
+ 819 00a6 80EE299A 		vdiv.f32	s18, s0, s19
+ 173:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 820              		.loc 1 173 15 view .LVU210
+ 821 00aa 8DED079A 		vstr.32	s18, [sp, #28]
+ 176:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[0] =
+ 822              		.loc 1 176 5 is_stmt 1 view .LVU211
+ 176:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     values[0] =
+ 823              		.loc 1 176 8 is_stmt 0 view .LVU212
+ 824 00ae D144     		add	r9, r9, r10
+ 825              	.LVL87:
+ 177:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         atan2f((float) t3,
+ 826              		.loc 1 177 5 is_stmt 1 view .LVU213
+ 179:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****                       (float) t2 * t2)) * 180.f / (float) M_PI;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 24
+
+
+ 827              		.loc 1 179 34 is_stmt 0 view .LVU214
+ 828 00b0 68EEA88A 		vmul.f32	s17, s17, s17
+ 180:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Zbody axis in World frame */
+ 829              		.loc 1 180 34 view .LVU215
+ 830 00b4 28EE088A 		vmul.f32	s16, s16, s16
+ 178:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****                 sqrtf((float) t1 * t1 +
+ 831              		.loc 1 178 9 view .LVU216
+ 832 00b8 38EE880A 		vadd.f32	s0, s17, s16
+ 833 00bc FFF7FEFF 		bl	sqrtf
+ 834              	.LVL88:
+ 835 00c0 F0EE400A 		vmov.f32	s1, s0
+ 836 00c4 07EE909A 		vmov	s15, r9	@ int
+ 837 00c8 B8EEE70A 		vcvt.f32.s32	s0, s15
+ 838 00cc FFF7FEFF 		bl	atan2f
+ 839              	.LVL89:
+ 180:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Zbody axis in World frame */
+ 840              		.loc 1 180 41 view .LVU217
+ 841 00d0 20EE0A0A 		vmul.f32	s0, s0, s20
+ 180:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Zbody axis in World frame */
+ 842              		.loc 1 180 49 view .LVU218
+ 843 00d4 C0EE297A 		vdiv.f32	s15, s0, s19
+ 177:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         atan2f((float) t3,
+ 844              		.loc 1 177 15 view .LVU219
+ 845 00d8 CDED057A 		vstr.32	s15, [sp, #20]
+ 182:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (t2 < 0) {
+ 846              		.loc 1 182 5 is_stmt 1 view .LVU220
+ 182:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (t2 < 0) {
+ 847              		.loc 1 182 14 is_stmt 0 view .LVU221
+ 848 00dc 2744     		add	r7, r7, r4
+ 849              	.LVL90:
+ 182:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (t2 < 0) {
+ 850              		.loc 1 182 8 view .LVU222
+ 851 00de 07F14043 		add	r3, r7, #-1073741824
+ 852 00e2 00EE103A 		vmov	s0, r3	@ int
+ 853              	.LVL91:
+ 183:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         if (values[0] >= 0)
+ 854              		.loc 1 183 5 is_stmt 1 view .LVU223
+ 183:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         if (values[0] >= 0)
+ 855              		.loc 1 183 8 is_stmt 0 view .LVU224
+ 856 00e6 B7F1804F 		cmp	r7, #1073741824
+ 857 00ea 08DA     		bge	.L56
+ 184:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****             values[0] = 180.f - values[0];
+ 858              		.loc 1 184 9 is_stmt 1 view .LVU225
+ 184:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****             values[0] = 180.f - values[0];
+ 859              		.loc 1 184 12 is_stmt 0 view .LVU226
+ 860 00ec F5EEC07A 		vcmpe.f32	s15, #0
+ 861 00f0 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 862 00f4 53DB     		blt	.L66
+ 185:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         else
+ 863              		.loc 1 185 13 is_stmt 1 view .LVU227
+ 185:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         else
+ 864              		.loc 1 185 31 is_stmt 0 view .LVU228
+ 865 00f6 7AEE677A 		vsub.f32	s15, s20, s15
+ 185:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         else
+ 866              		.loc 1 185 23 view .LVU229
+ 867 00fa CDED057A 		vstr.32	s15, [sp, #20]
+ 868              	.L56:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 25
+
+
+ 191:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Y component of the Xbody axis in World frame */
+ 869              		.loc 1 191 5 is_stmt 1 view .LVU230
+ 870              	.LVL92:
+ 193:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     /* Z component of the Xbody axis in World frame */
+ 871              		.loc 1 193 5 view .LVU231
+ 195:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 872              		.loc 1 195 5 view .LVU232
+ 195:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 873              		.loc 1 195 8 is_stmt 0 view .LVU233
+ 874 00fe 019B     		ldr	r3, [sp, #4]
+ 875 0100 009A     		ldr	r2, [sp]
+ 876 0102 9B1A     		subs	r3, r3, r2
+ 877 0104 00EE903A 		vmov	s1, r3	@ int
+ 878              	.LVL93:
+ 197:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         (atan2f((float)(q33 + q00 - (1L << 30)), (float)(q13 - q02)) *
+ 879              		.loc 1 197 5 is_stmt 1 view .LVU234
+ 198:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****           180.f / (float) M_PI - 90);
+ 880              		.loc 1 198 10 is_stmt 0 view .LVU235
+ 881 0108 F8EEE00A 		vcvt.f32.s32	s1, s1
+ 882 010c B8EEC00A 		vcvt.f32.s32	s0, s0
+ 883 0110 FFF7FEFF 		bl	atan2f
+ 884              	.LVL94:
+ 198:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****           180.f / (float) M_PI - 90);
+ 885              		.loc 1 198 70 view .LVU236
+ 886 0114 DFED267A 		vldr.32	s15, .L68+4
+ 887 0118 20EE270A 		vmul.f32	s0, s0, s15
+ 199:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (values[1] >= 90)
+ 888              		.loc 1 199 17 view .LVU237
+ 889 011c 9FED257A 		vldr.32	s14, .L68+8
+ 890 0120 C0EE077A 		vdiv.f32	s15, s0, s14
+ 199:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (values[1] >= 90)
+ 891              		.loc 1 199 32 view .LVU238
+ 892 0124 9FED247A 		vldr.32	s14, .L68+12
+ 893 0128 77EEC77A 		vsub.f32	s15, s15, s14
+ 197:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         (atan2f((float)(q33 + q00 - (1L << 30)), (float)(q13 - q02)) *
+ 894              		.loc 1 197 15 view .LVU239
+ 895 012c CDED067A 		vstr.32	s15, [sp, #24]
+ 200:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = 180 - values[1];
+ 896              		.loc 1 200 5 is_stmt 1 view .LVU240
+ 200:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = 180 - values[1];
+ 897              		.loc 1 200 8 is_stmt 0 view .LVU241
+ 898 0130 F4EEC77A 		vcmpe.f32	s15, s14
+ 899 0134 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 900 0138 05DB     		blt	.L59
+ 201:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 901              		.loc 1 201 9 is_stmt 1 view .LVU242
+ 201:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 902              		.loc 1 201 25 is_stmt 0 view .LVU243
+ 903 013a 9FED1D7A 		vldr.32	s14, .L68+4
+ 904 013e 77EE677A 		vsub.f32	s15, s14, s15
+ 201:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 905              		.loc 1 201 19 view .LVU244
+ 906 0142 CDED067A 		vstr.32	s15, [sp, #24]
+ 907              	.L59:
+ 203:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = -180 - values[1];
+ 908              		.loc 1 203 5 is_stmt 1 view .LVU245
+ 203:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = -180 - values[1];
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 26
+
+
+ 909              		.loc 1 203 15 is_stmt 0 view .LVU246
+ 910 0146 DDED067A 		vldr.32	s15, [sp, #24]
+ 203:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         values[1] = -180 - values[1];
+ 911              		.loc 1 203 8 view .LVU247
+ 912 014a 9FED1C7A 		vldr.32	s14, .L68+16
+ 913 014e F4EEC77A 		vcmpe.f32	s15, s14
+ 914 0152 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 915 0156 05D5     		bpl	.L61
+ 204:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(values[0] * 65536.f);
+ 916              		.loc 1 204 9 is_stmt 1 view .LVU248
+ 204:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(values[0] * 65536.f);
+ 917              		.loc 1 204 26 is_stmt 0 view .LVU249
+ 918 0158 9FED197A 		vldr.32	s14, .L68+20
+ 919 015c 77EE677A 		vsub.f32	s15, s14, s15
+ 204:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[0] = (long)(values[0] * 65536.f);
+ 920              		.loc 1 204 19 view .LVU250
+ 921 0160 CDED067A 		vstr.32	s15, [sp, #24]
+ 922              	.L61:
+ 205:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[1] = (long)(values[1] * 65536.f);
+ 923              		.loc 1 205 5 is_stmt 1 view .LVU251
+ 205:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[1] = (long)(values[1] * 65536.f);
+ 924              		.loc 1 205 15 is_stmt 0 view .LVU252
+ 925 0164 DDED057A 		vldr.32	s15, [sp, #20]
+ 926 0168 FEEEC87A 		vcvt.s32.f32	s15, s15, #16
+ 205:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[1] = (long)(values[1] * 65536.f);
+ 927              		.loc 1 205 13 view .LVU253
+ 928 016c C8ED007A 		vstr.32	s15, [r8]	@ int
+ 206:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[2] = (long)(values[2] * 65536.f);
+ 929              		.loc 1 206 5 is_stmt 1 view .LVU254
+ 206:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[2] = (long)(values[2] * 65536.f);
+ 930              		.loc 1 206 15 is_stmt 0 view .LVU255
+ 931 0170 DDED067A 		vldr.32	s15, [sp, #24]
+ 932 0174 FEEEC87A 		vcvt.s32.f32	s15, s15, #16
+ 206:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     data[2] = (long)(values[2] * 65536.f);
+ 933              		.loc 1 206 13 view .LVU256
+ 934 0178 C8ED017A 		vstr.32	s15, [r8, #4]	@ int
+ 207:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 935              		.loc 1 207 5 is_stmt 1 view .LVU257
+ 207:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 936              		.loc 1 207 15 is_stmt 0 view .LVU258
+ 937 017c BEEEC89A 		vcvt.s32.f32	s18, s18, #16
+ 207:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 938              		.loc 1 207 13 view .LVU259
+ 939 0180 88ED029A 		vstr.32	s18, [r8, #8]	@ int
+ 209:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 940              		.loc 1 209 5 is_stmt 1 view .LVU260
+ 209:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 941              		.loc 1 209 27 is_stmt 0 view .LVU261
+ 942 0184 094B     		ldr	r3, .L68
+ 943 0186 1A69     		ldr	r2, [r3, #16]
+ 209:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 944              		.loc 1 209 17 view .LVU262
+ 945 0188 0299     		ldr	r1, [sp, #8]
+ 946 018a 0A70     		strb	r2, [r1]
+ 210:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 947              		.loc 1 210 5 is_stmt 1 view .LVU263
+ 210:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 27
+
+
+ 948              		.loc 1 210 28 is_stmt 0 view .LVU264
+ 949 018c 5A6A     		ldr	r2, [r3, #36]
+ 210:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 950              		.loc 1 210 18 view .LVU265
+ 951 018e 0399     		ldr	r1, [sp, #12]
+ 952 0190 0A60     		str	r2, [r1]
+ 211:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 953              		.loc 1 211 5 is_stmt 1 view .LVU266
+ 212:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 954              		.loc 1 212 1 is_stmt 0 view .LVU267
+ 955 0192 186A     		ldr	r0, [r3, #32]
+ 956 0194 09B0     		add	sp, sp, #36
+ 957              	.LCFI12:
+ 958              		.cfi_remember_state
+ 959              		.cfi_def_cfa_offset 60
+ 960              	.LVL95:
+ 212:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 961              		.loc 1 212 1 view .LVU268
+ 962              		@ sp needed
+ 963 0196 BDEC068B 		vldm	sp!, {d8-d10}
+ 964              	.LCFI13:
+ 965              		.cfi_restore 84
+ 966              		.cfi_restore 85
+ 967              		.cfi_restore 82
+ 968              		.cfi_restore 83
+ 969              		.cfi_restore 80
+ 970              		.cfi_restore 81
+ 971              		.cfi_def_cfa_offset 36
+ 972 019a BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 973              	.LVL96:
+ 974              	.L66:
+ 975              	.LCFI14:
+ 976              		.cfi_restore_state
+ 187:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 977              		.loc 1 187 13 is_stmt 1 view .LVU269
+ 187:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 978              		.loc 1 187 32 is_stmt 0 view .LVU270
+ 979 019e 9FED087A 		vldr.32	s14, .L68+20
+ 980 01a2 77EE677A 		vsub.f32	s15, s14, s15
+ 187:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     }
+ 981              		.loc 1 187 23 view .LVU271
+ 982 01a6 CDED057A 		vstr.32	s15, [sp, #20]
+ 983 01aa A8E7     		b	.L56
+ 984              	.L69:
+ 985              		.align	2
+ 986              	.L68:
+ 987 01ac 00000000 		.word	eMPL_out
+ 988 01b0 00003443 		.word	1127481344
+ 989 01b4 DB0F4940 		.word	1078530011
+ 990 01b8 0000B442 		.word	1119092736
+ 991 01bc 0000B4C2 		.word	-1028390912
+ 992 01c0 000034C3 		.word	-1020002304
+ 993              		.cfi_endproc
+ 994              	.LFE10:
+ 996              		.section	.text.inv_get_sensor_type_rot_mat,"ax",%progbits
+ 997              		.align	1
+ 998              		.global	inv_get_sensor_type_rot_mat
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 28
+
+
+ 999              		.syntax unified
+ 1000              		.thumb
+ 1001              		.thumb_func
+ 1003              	inv_get_sensor_type_rot_mat:
+ 1004              	.LVL97:
+ 1005              	.LFB11:
+ 223:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_quaternion_to_rotation(eMPL_out.quat, data);
+ 1006              		.loc 1 223 1 is_stmt 1 view -0
+ 1007              		.cfi_startproc
+ 1008              		@ args = 0, pretend = 0, frame = 0
+ 1009              		@ frame_needed = 0, uses_anonymous_args = 0
+ 223:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_quaternion_to_rotation(eMPL_out.quat, data);
+ 1010              		.loc 1 223 1 is_stmt 0 view .LVU273
+ 1011 0000 70B5     		push	{r4, r5, r6, lr}
+ 1012              	.LCFI15:
+ 1013              		.cfi_def_cfa_offset 16
+ 1014              		.cfi_offset 4, -16
+ 1015              		.cfi_offset 5, -12
+ 1016              		.cfi_offset 6, -8
+ 1017              		.cfi_offset 14, -4
+ 1018 0002 0E46     		mov	r6, r1
+ 1019 0004 1546     		mov	r5, r2
+ 224:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 1020              		.loc 1 224 5 is_stmt 1 view .LVU274
+ 1021 0006 054C     		ldr	r4, .L72
+ 1022 0008 0146     		mov	r1, r0
+ 1023              	.LVL98:
+ 224:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 1024              		.loc 1 224 5 is_stmt 0 view .LVU275
+ 1025 000a 2046     		mov	r0, r4
+ 1026              	.LVL99:
+ 224:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     accuracy[0] = eMPL_out.quat_accuracy;
+ 1027              		.loc 1 224 5 view .LVU276
+ 1028 000c FFF7FEFF 		bl	inv_quaternion_to_rotation
+ 1029              	.LVL100:
+ 225:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 1030              		.loc 1 225 5 is_stmt 1 view .LVU277
+ 225:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 1031              		.loc 1 225 27 is_stmt 0 view .LVU278
+ 1032 0010 2369     		ldr	r3, [r4, #16]
+ 225:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     timestamp[0] = eMPL_out.nine_axis_timestamp;
+ 1033              		.loc 1 225 17 view .LVU279
+ 1034 0012 3370     		strb	r3, [r6]
+ 226:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 1035              		.loc 1 226 5 is_stmt 1 view .LVU280
+ 226:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 1036              		.loc 1 226 28 is_stmt 0 view .LVU281
+ 1037 0014 636A     		ldr	r3, [r4, #36]
+ 226:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return eMPL_out.nine_axis_status;
+ 1038              		.loc 1 226 18 view .LVU282
+ 1039 0016 2B60     		str	r3, [r5]
+ 227:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 1040              		.loc 1 227 5 is_stmt 1 view .LVU283
+ 228:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 1041              		.loc 1 228 1 is_stmt 0 view .LVU284
+ 1042 0018 206A     		ldr	r0, [r4, #32]
+ 1043 001a 70BD     		pop	{r4, r5, r6, pc}
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 29
+
+
+ 1044              	.LVL101:
+ 1045              	.L73:
+ 228:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 1046              		.loc 1 228 1 view .LVU285
+ 1047              		.align	2
+ 1048              	.L72:
+ 1049 001c 00000000 		.word	eMPL_out
+ 1050              		.cfi_endproc
+ 1051              	.LFE11:
+ 1053              		.section	.text.inv_enable_eMPL_outputs,"ax",%progbits
+ 1054              		.align	1
+ 1055              		.global	inv_enable_eMPL_outputs
+ 1056              		.syntax unified
+ 1057              		.thumb
+ 1058              		.thumb_func
+ 1060              	inv_enable_eMPL_outputs:
+ 1061              	.LFB16:
+ 298:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 299:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+ 300:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief  Turns on creation and storage of HAL type results.
+ 301:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+ 302:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** inv_error_t inv_enable_eMPL_outputs(void)
+ 303:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 1062              		.loc 1 303 1 is_stmt 1 view -0
+ 1063              		.cfi_startproc
+ 1064              		@ args = 0, pretend = 0, frame = 0
+ 1065              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1066 0000 08B5     		push	{r3, lr}
+ 1067              	.LCFI16:
+ 1068              		.cfi_def_cfa_offset 8
+ 1069              		.cfi_offset 3, -8
+ 1070              		.cfi_offset 14, -4
+ 304:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_error_t result;
+ 1071              		.loc 1 304 5 view .LVU287
+ 305:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     result = inv_init_eMPL_outputs();
+ 1072              		.loc 1 305 5 view .LVU288
+ 1073              		.loc 1 305 14 is_stmt 0 view .LVU289
+ 1074 0002 FFF7FEFF 		bl	inv_init_eMPL_outputs
+ 1075              	.LVL102:
+ 306:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     if (result)
+ 1076              		.loc 1 306 5 is_stmt 1 view .LVU290
+ 1077              		.loc 1 306 8 is_stmt 0 view .LVU291
+ 1078 0006 00B1     		cbz	r0, .L77
+ 1079              	.L74:
+ 307:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****         return result;
+ 308:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return inv_register_mpl_start_notification(inv_start_eMPL_outputs);
+ 309:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 1080              		.loc 1 309 1 view .LVU292
+ 1081 0008 08BD     		pop	{r3, pc}
+ 1082              	.L77:
+ 308:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 1083              		.loc 1 308 5 is_stmt 1 view .LVU293
+ 308:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 1084              		.loc 1 308 12 is_stmt 0 view .LVU294
+ 1085 000a 0248     		ldr	r0, .L78
+ 1086 000c FFF7FEFF 		bl	inv_register_mpl_start_notification
+ 1087              	.LVL103:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 30
+
+
+ 1088 0010 FAE7     		b	.L74
+ 1089              	.L79:
+ 1090 0012 00BF     		.align	2
+ 1091              	.L78:
+ 1092 0014 00000000 		.word	inv_start_eMPL_outputs
+ 1093              		.cfi_endproc
+ 1094              	.LFE16:
+ 1096              		.section	.text.inv_disable_eMPL_outputs,"ax",%progbits
+ 1097              		.align	1
+ 1098              		.global	inv_disable_eMPL_outputs
+ 1099              		.syntax unified
+ 1100              		.thumb
+ 1101              		.thumb_func
+ 1103              	inv_disable_eMPL_outputs:
+ 1104              	.LFB17:
+ 310:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** 
+ 311:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** /**
+ 312:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  *  @brief  Turns off creation and storage of HAL type results.
+ 313:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****  */
+ 314:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** inv_error_t inv_disable_eMPL_outputs(void)
+ 315:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** {
+ 1105              		.loc 1 315 1 is_stmt 1 view -0
+ 1106              		.cfi_startproc
+ 1107              		@ args = 0, pretend = 0, frame = 0
+ 1108              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1109 0000 08B5     		push	{r3, lr}
+ 1110              	.LCFI17:
+ 1111              		.cfi_def_cfa_offset 8
+ 1112              		.cfi_offset 3, -8
+ 1113              		.cfi_offset 14, -4
+ 316:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     inv_stop_eMPL_outputs();
+ 1114              		.loc 1 316 5 view .LVU296
+ 1115 0002 FFF7FEFF 		bl	inv_stop_eMPL_outputs
+ 1116              	.LVL104:
+ 317:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c ****     return inv_unregister_mpl_start_notification(inv_start_eMPL_outputs);
+ 1117              		.loc 1 317 5 view .LVU297
+ 1118              		.loc 1 317 12 is_stmt 0 view .LVU298
+ 1119 0006 0248     		ldr	r0, .L82
+ 1120 0008 FFF7FEFF 		bl	inv_unregister_mpl_start_notification
+ 1121              	.LVL105:
+ 318:Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.c **** }
+ 1122              		.loc 1 318 1 view .LVU299
+ 1123 000c 08BD     		pop	{r3, pc}
+ 1124              	.L83:
+ 1125 000e 00BF     		.align	2
+ 1126              	.L82:
+ 1127 0010 00000000 		.word	inv_start_eMPL_outputs
+ 1128              		.cfi_endproc
+ 1129              	.LFE17:
+ 1131              		.section	.bss.eMPL_out,"aw",%nobits
+ 1132              		.align	2
+ 1135              	eMPL_out:
+ 1136 0000 00000000 		.space	40
+ 1136      00000000 
+ 1136      00000000 
+ 1136      00000000 
+ 1136      00000000 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 31
+
+
+ 1137              		.text
+ 1138              	.Letext0:
+ 1139              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 1140              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 1141              		.file 4 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/lib/gcc/arm-none-eabi/12.
+ 1142              		.file 5 "Middlewares/MPU6050_Motion_Driver/driver/include/mltypes.h"
+ 1143              		.file 6 "Middlewares/MPU6050_Motion_Driver/mllite/data_builder.h"
+ 1144              		.file 7 "Middlewares/MPU6050_Motion_Driver/mllite/start_manager.h"
+ 1145              		.file 8 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/str
+ 1146              		.file 9 "Middlewares/MPU6050_Motion_Driver/mllite/results_holder.h"
+ 1147              		.file 10 "Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h"
+ 1148              		.file 11 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/ma
+ 1149              		.file 12 "<built-in>"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 32
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 eMPL_outputs.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:21     .text.inv_start_eMPL_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:26     .text.inv_start_eMPL_outputs:00000000 inv_start_eMPL_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:49     .text.inv_start_eMPL_outputs:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:59     .text.inv_generate_eMPL_outputs:00000000 inv_generate_eMPL_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:54     .text.inv_generate_eMPL_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:245    .text.inv_generate_eMPL_outputs:000000b4 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1135   .bss.eMPL_out:00000000 eMPL_out
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:251    .text.inv_init_eMPL_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:256    .text.inv_init_eMPL_outputs:00000000 inv_init_eMPL_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:280    .text.inv_init_eMPL_outputs:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:285    .text.inv_stop_eMPL_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:290    .text.inv_stop_eMPL_outputs:00000000 inv_stop_eMPL_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:311    .text.inv_stop_eMPL_outputs:0000000c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:316    .text.inv_get_sensor_type_accel:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:322    .text.inv_get_sensor_type_accel:00000000 inv_get_sensor_type_accel
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:353    .text.inv_get_sensor_type_accel:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:358    .text.inv_get_sensor_type_gyro:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:364    .text.inv_get_sensor_type_gyro:00000000 inv_get_sensor_type_gyro
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:395    .text.inv_get_sensor_type_gyro:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:400    .text.inv_get_sensor_type_compass:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:406    .text.inv_get_sensor_type_compass:00000000 inv_get_sensor_type_compass
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:437    .text.inv_get_sensor_type_compass:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:442    .text.inv_get_sensor_type_quat:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:448    .text.inv_get_sensor_type_quat:00000000 inv_get_sensor_type_quat
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:495    .text.inv_get_sensor_type_quat:0000002c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:500    .text.inv_get_sensor_type_heading:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:506    .text.inv_get_sensor_type_heading:00000000 inv_get_sensor_type_heading
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:641    .text.inv_get_sensor_type_heading:00000090 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:649    .text.inv_get_sensor_type_euler:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:655    .text.inv_get_sensor_type_euler:00000000 inv_get_sensor_type_euler
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:987    .text.inv_get_sensor_type_euler:000001ac $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:997    .text.inv_get_sensor_type_rot_mat:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1003   .text.inv_get_sensor_type_rot_mat:00000000 inv_get_sensor_type_rot_mat
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1049   .text.inv_get_sensor_type_rot_mat:0000001c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1054   .text.inv_enable_eMPL_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1060   .text.inv_enable_eMPL_outputs:00000000 inv_enable_eMPL_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1092   .text.inv_enable_eMPL_outputs:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1097   .text.inv_disable_eMPL_outputs:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1103   .text.inv_disable_eMPL_outputs:00000000 inv_disable_eMPL_outputs
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1127   .text.inv_disable_eMPL_outputs:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s:1132   .bss.eMPL_out:00000000 $d
+
+UNDEFINED SYMBOLS
+inv_register_data_cb
+inv_get_quaternion_set
+memset
+inv_unregister_data_cb
+inv_get_accel_set
+inv_get_gyro_set
+inv_get_compass_set
+inv_q29_mult
+atan2f
+sqrtf
+inv_quaternion_to_rotation
+inv_register_mpl_start_notification
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccxmKpll.s 			page 33
+
+
+inv_unregister_mpl_start_notification

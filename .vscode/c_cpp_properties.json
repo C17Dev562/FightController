@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "STM32F411xE",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "PLATFORMIO=60109",
+                "STM32F411xE",
+                "STM32F4xx",
+                "F_CPU=100000000L",
+                ""
+            ],
+            "compileCommands": "${workspaceFolder}/compile_commands.json",
+            "compilerPath": "/home/c17/FightControl_Linux_01/FlightController-master/Toolchain/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gcc",
+            "compilerArgs": [
+                "-mthumb",
+                "-mcpu=cortex-m4",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
+

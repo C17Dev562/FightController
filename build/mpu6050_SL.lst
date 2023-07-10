@@ -1,0 +1,2970 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"mpu6050_SL.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c"
+  20              		.section	.rodata.MPU6050_mpu_init.str1.4,"aMS",%progbits,1
+  21              		.align	2
+  22              	.LC0:
+  23 0000 436F756C 		.ascii	"Could not initialize gyro.result =  %d\012\000"
+  23      64206E6F 
+  23      7420696E 
+  23      69746961 
+  23      6C697A65 
+  24              		.align	2
+  25              	.LC1:
+  26 0028 496E6974 		.ascii	"Initialize gyro.result =  %d\012 succeeded\012\000"
+  26      69616C69 
+  26      7A652067 
+  26      79726F2E 
+  26      72657375 
+  27              		.section	.text.MPU6050_mpu_init,"ax",%progbits
+  28              		.align	1
+  29              		.global	MPU6050_mpu_init
+  30              		.syntax unified
+  31              		.thumb
+  32              		.thumb_func
+  34              	MPU6050_mpu_init:
+  35              	.LFB231:
+   1:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  * mpu6050_SL.c
+   3:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  *
+   4:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  *  Created on: Feb 13, 2022
+   5:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  *      Author: Huffer
+   6:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+   8:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "mpu6050_SL.h"
+   9:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  10:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "STM32F4_porting.h"
+  11:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "eMPL_outputs.h"
+  12:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "inv_mpu.h"
+  13:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "inv_mpu_dmp_motion_driver.h"
+  14:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "invensense.h"
+  15:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "invensense_adv.h"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 2
+
+
+  16:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "log.h"
+  17:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "mltypes.h"
+  18:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "mpl.h"
+  19:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "mpu.h"
+  20:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "packet.h"
+  21:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "stdio.h"
+  22:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include <string.h>
+  23:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "FreeRTOS.h"
+  24:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "stm32f4xx_hal.h"
+  25:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "sys/_intsup.h"
+  26:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "task.h"
+  27:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #include "mpu6050_init.h"
+  28:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  29:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #define get_tick_count get_ms_user
+  30:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** unsigned char *mpl_key = (unsigned char *)"eMPL 5.1";
+  31:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** struct hal_s hal = {0};
+  32:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** extern IMU_Result_data IMU_Result;
+  33:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #define q30         (1073741824.0f)
+  34:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  35:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** struct platform_data_s gyro_pdata = {
+  36:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     .orientation = {1, 0, 0, 0, 1, 0, 0, 0, 1}};
+  37:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** float gyro_bias[3];
+  38:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** float sum_bias[3];
+  39:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  40:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if defined MPU9150 || defined MPU9250  // 三轴磁场
+  41:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** static struct platform_data_s compass_pdata = {
+  42:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     .orientation = {0, 1, 0, 1, 0, 0, 0, 0, -1}};
+  43:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #define COMPASS_ENABLED 1
+  44:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #elif defined AK8975_SECONDARY
+  45:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** static struct platform_data_s compass_pdata = {
+  46:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     .orientation = {-1, 0, 0, 0, 1, 0, 0, 0, -1}};
+  47:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #define COMPASS_ENABLED 1
+  48:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #elif defined AK8963_SECONDARY
+  49:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** static struct platform_data_s compass_pdata = {
+  50:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     .orientation = {-1, 0, 0, 0, -1, 0, 0, 0, 1}};
+  51:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #define COMPASS_ENABLED 1
+  52:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  53:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  54:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** uint8_t MPU6050_mpu_init(void) {
+  36              		.loc 1 54 32 view -0
+  37              		.cfi_startproc
+  38              		@ args = 0, pretend = 0, frame = 8
+  39              		@ frame_needed = 0, uses_anonymous_args = 0
+  40 0000 00B5     		push	{lr}
+  41              	.LCFI0:
+  42              		.cfi_def_cfa_offset 4
+  43              		.cfi_offset 14, -4
+  44 0002 83B0     		sub	sp, sp, #12
+  45              	.LCFI1:
+  46              		.cfi_def_cfa_offset 16
+  55:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_error_t result;
+  47              		.loc 1 55 3 view .LVU1
+  56:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   struct int_param_s int_param;
+  48              		.loc 1 56 3 view .LVU2
+  57:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   result = mpu_init(&int_param);
+  49              		.loc 1 57 3 view .LVU3
+  50              		.loc 1 57 12 is_stmt 0 view .LVU4
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 3
+
+
+  51 0004 01A8     		add	r0, sp, #4
+  52 0006 FFF7FEFF 		bl	mpu_init
+  53              	.LVL0:
+  58:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (result) {
+  54              		.loc 1 58 3 is_stmt 1 view .LVU5
+  55              		.loc 1 58 6 is_stmt 0 view .LVU6
+  56 000a 0146     		mov	r1, r0
+  57 000c 30B1     		cbz	r0, .L2
+  59:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if USE_PRINTF_DEBUG
+  60:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     printf("Could not initialize gyro.result =  %d\n", result);
+  58              		.loc 1 60 5 is_stmt 1 view .LVU7
+  59 000e 0648     		ldr	r0, .L5
+  60              	.LVL1:
+  61              		.loc 1 60 5 is_stmt 0 view .LVU8
+  62 0010 FFF7FEFF 		bl	printf
+  63              	.LVL2:
+  61:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  62:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     return 0;
+  64              		.loc 1 62 5 is_stmt 1 view .LVU9
+  65              		.loc 1 62 12 is_stmt 0 view .LVU10
+  66 0014 0020     		movs	r0, #0
+  67              	.L3:
+  63:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   } else {
+  64:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if USE_PRINTF_DEBUG
+  65:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     printf("Initialize gyro.result =  %d\n succeeded\n", result);
+  66:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  67:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     return 1;
+  68:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+  69:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+  68              		.loc 1 69 1 view .LVU11
+  69 0016 03B0     		add	sp, sp, #12
+  70              	.LCFI2:
+  71              		.cfi_remember_state
+  72              		.cfi_def_cfa_offset 4
+  73              		@ sp needed
+  74 0018 5DF804FB 		ldr	pc, [sp], #4
+  75              	.LVL3:
+  76              	.L2:
+  77              	.LCFI3:
+  78              		.cfi_restore_state
+  65:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  79              		.loc 1 65 5 is_stmt 1 view .LVU12
+  80 001c 0348     		ldr	r0, .L5+4
+  81              	.LVL4:
+  65:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  82              		.loc 1 65 5 is_stmt 0 view .LVU13
+  83 001e FFF7FEFF 		bl	printf
+  84              	.LVL5:
+  67:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+  85              		.loc 1 67 5 is_stmt 1 view .LVU14
+  67:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+  86              		.loc 1 67 12 is_stmt 0 view .LVU15
+  87 0022 0120     		movs	r0, #1
+  88 0024 F7E7     		b	.L3
+  89              	.L6:
+  90 0026 00BF     		.align	2
+  91              	.L5:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 4
+
+
+  92 0028 00000000 		.word	.LC0
+  93 002c 28000000 		.word	.LC1
+  94              		.cfi_endproc
+  95              	.LFE231:
+  97              		.section	.rodata.MPU6050_mpl_init.str1.4,"aMS",%progbits,1
+  98              		.align	2
+  99              	.LC2:
+ 100 0000 436F756C 		.ascii	"Could not initialize MPL.\000"
+ 100      64206E6F 
+ 100      7420696E 
+ 100      69746961 
+ 100      6C697A65 
+ 101 001a 0000     		.align	2
+ 102              	.LC3:
+ 103 001c 696E6974 		.ascii	"initialize MPL suceeded.\000"
+ 103      69616C69 
+ 103      7A65204D 
+ 103      504C2073 
+ 103      75636565 
+ 104              		.section	.text.MPU6050_mpl_init,"ax",%progbits
+ 105              		.align	1
+ 106              		.global	MPU6050_mpl_init
+ 107              		.syntax unified
+ 108              		.thumb
+ 109              		.thumb_func
+ 111              	MPU6050_mpl_init:
+ 112              	.LFB232:
+  70:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  71:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** uint8_t MPU6050_mpl_init(void) {
+ 113              		.loc 1 71 32 is_stmt 1 view -0
+ 114              		.cfi_startproc
+ 115              		@ args = 0, pretend = 0, frame = 0
+ 116              		@ frame_needed = 0, uses_anonymous_args = 0
+ 117 0000 08B5     		push	{r3, lr}
+ 118              	.LCFI4:
+ 119              		.cfi_def_cfa_offset 8
+ 120              		.cfi_offset 3, -8
+ 121              		.cfi_offset 14, -4
+  72:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_error_t result;
+ 122              		.loc 1 72 3 view .LVU17
+  73:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   result = inv_init_mpl();
+ 123              		.loc 1 73 3 view .LVU18
+ 124              		.loc 1 73 12 is_stmt 0 view .LVU19
+ 125 0002 FFF7FEFF 		bl	inv_init_mpl
+ 126              	.LVL6:
+  74:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (result) {
+ 127              		.loc 1 74 3 is_stmt 1 view .LVU20
+ 128              		.loc 1 74 6 is_stmt 0 view .LVU21
+ 129 0006 20B1     		cbz	r0, .L8
+  75:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if USE_PRINTF_DEBUG
+  76:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     printf("Could not initialize MPL.\n");
+ 130              		.loc 1 76 5 is_stmt 1 view .LVU22
+ 131 0008 0448     		ldr	r0, .L11
+ 132              	.LVL7:
+ 133              		.loc 1 76 5 is_stmt 0 view .LVU23
+ 134 000a FFF7FEFF 		bl	puts
+ 135              	.LVL8:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 5
+
+
+  77:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  78:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     return 0;
+ 136              		.loc 1 78 5 is_stmt 1 view .LVU24
+ 137              		.loc 1 78 12 is_stmt 0 view .LVU25
+ 138 000e 0020     		movs	r0, #0
+ 139              	.L9:
+  79:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   } else {
+  80:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if USE_PRINTF_DEBUG
+  81:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     printf("initialize MPL suceeded.\n");
+  82:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  83:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     return 1;
+  84:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+  85:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 140              		.loc 1 85 1 view .LVU26
+ 141 0010 08BD     		pop	{r3, pc}
+ 142              	.LVL9:
+ 143              	.L8:
+  81:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 144              		.loc 1 81 5 is_stmt 1 view .LVU27
+ 145 0012 0348     		ldr	r0, .L11+4
+ 146              	.LVL10:
+  81:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 147              		.loc 1 81 5 is_stmt 0 view .LVU28
+ 148 0014 FFF7FEFF 		bl	puts
+ 149              	.LVL11:
+  83:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 150              		.loc 1 83 5 is_stmt 1 view .LVU29
+  83:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 151              		.loc 1 83 12 is_stmt 0 view .LVU30
+ 152 0018 0120     		movs	r0, #1
+ 153 001a F9E7     		b	.L9
+ 154              	.L12:
+ 155              		.align	2
+ 156              	.L11:
+ 157 001c 00000000 		.word	.LC2
+ 158 0020 1C000000 		.word	.LC3
+ 159              		.cfi_endproc
+ 160              	.LFE232:
+ 162              		.section	.rodata.MPU6050_config.str1.4,"aMS",%progbits,1
+ 163              		.align	2
+ 164              	.LC4:
+ 165 0000 4E6F7420 		.ascii	"Not authorized.\000"
+ 165      61757468 
+ 165      6F72697A 
+ 165      65642E00 
+ 166              		.align	2
+ 167              	.LC5:
+ 168 0010 436F756C 		.ascii	"Could not start the MPL.\000"
+ 168      64206E6F 
+ 168      74207374 
+ 168      61727420 
+ 168      74686520 
+ 169              		.global	__aeabi_f2d
+ 170              		.global	__aeabi_i2d
+ 171              		.global	__aeabi_ddiv
+ 172              		.global	__aeabi_dadd
+ 173              		.global	__aeabi_d2f
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 6
+
+
+ 174              		.section	.text.MPU6050_config,"ax",%progbits
+ 175              		.align	1
+ 176              		.global	MPU6050_config
+ 177              		.syntax unified
+ 178              		.thumb
+ 179              		.thumb_func
+ 181              	MPU6050_config:
+ 182              	.LFB233:
+  86:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  87:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** uint8_t MPU6050_config(void) {
+ 183              		.loc 1 87 30 is_stmt 1 view -0
+ 184              		.cfi_startproc
+ 185              		@ args = 0, pretend = 0, frame = 24
+ 186              		@ frame_needed = 0, uses_anonymous_args = 0
+ 187 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 188              	.LCFI5:
+ 189              		.cfi_def_cfa_offset 20
+ 190              		.cfi_offset 4, -20
+ 191              		.cfi_offset 5, -16
+ 192              		.cfi_offset 6, -12
+ 193              		.cfi_offset 7, -8
+ 194              		.cfi_offset 14, -4
+ 195 0002 87B0     		sub	sp, sp, #28
+ 196              	.LCFI6:
+ 197              		.cfi_def_cfa_offset 48
+  88:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_error_t result;
+ 198              		.loc 1 88 3 view .LVU32
+  89:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned char accel_fsr;
+ 199              		.loc 1 89 3 view .LVU33
+  90:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned short gyro_rate, gyro_fsr;
+ 200              		.loc 1 90 3 view .LVU34
+  91:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+  92:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+  93:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned char new_compass = 0;
+  94:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned short compass_fsr;
+  95:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+  96:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Compute 6-axis and 9-axis quaternions. */
+  97:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_quaternion();
+ 201              		.loc 1 97 3 view .LVU35
+ 202 0004 FFF7FEFF 		bl	inv_enable_quaternion
+ 203              	.LVL12:
+  98:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_9x_sensor_fusion();
+ 204              		.loc 1 98 3 view .LVU36
+ 205 0008 FFF7FEFF 		bl	inv_enable_9x_sensor_fusion
+ 206              	.LVL13:
+  99:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 100:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* The MPL expects compass data at a constant rate (matching the rate
+ 101:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * passed to inv_set_compass_sample_rate). If this is an issue for your
+ 102:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * application, call this function, and the MPL will depend on the
+ 103:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * timestamps passed to inv_build_compass instead.
+ 104:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *
+ 105:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * inv_9x_fusion_use_timestamps(1);
+ 106:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 107:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 108:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* This function has been deprecated.
+ 109:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * inv_enable_no_gyro_fusion();
+ 110:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 7
+
+
+ 111:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 112:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Update gyro biases when not in motion.
+ 113:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * WARNING: These algorithms are mutually exclusive.
+ 114:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 115:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_fast_nomot();
+ 207              		.loc 1 115 3 view .LVU37
+ 208 000c FFF7FEFF 		bl	inv_enable_fast_nomot
+ 209              	.LVL14:
+ 116:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* inv_enable_motion_no_motion(); */
+ 117:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* inv_set_no_motion_time(1000); */
+ 118:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 119:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Update gyro biases when temperature changes. */
+ 120:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_gyro_tc();
+ 210              		.loc 1 120 3 view .LVU38
+ 211 0010 FFF7FEFF 		bl	inv_enable_gyro_tc
+ 212              	.LVL15:
+ 121:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 122:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* This algorithm updates the accel biases when in motion. A more accurate
+ 123:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * bias measurement can be made when running the self-test (see case 't' in
+ 124:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * handle_input), but this algorithm can be enabled if the self-test can't
+ 125:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * be executed in your application.
+ 126:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *
+ 127:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * inv_enable_in_use_auto_calibration();
+ 128:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 129:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 130:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Compass calibration algorithms. */
+ 131:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_vector_compass_cal();
+ 132:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_magnetic_disturbance();
+ 133:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 134:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* If you need to estimate your heading before the compass is calibrated,
+ 135:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * enable this algorithm. It becomes useless after a good figure-eight is
+ 136:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * detected, so we'll just leave it out to save memory.
+ 137:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * inv_enable_heading_from_gyro();
+ 138:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 139:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Allows use of the MPL APIs in read_from_mpl. */
+ 140:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_enable_eMPL_outputs();
+ 213              		.loc 1 140 3 view .LVU39
+ 214 0014 FFF7FEFF 		bl	inv_enable_eMPL_outputs
+ 215              	.LVL16:
+ 141:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // inv_enable_hal_outputs();
+ 142:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // if (result)
+ 143:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // {
+ 144:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       // MPL_LOGE("Could not start the MPL.\n");
+ 145:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       // printf("inv_enable_hal_outputs()\n");
+ 146:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // }
+ 147:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   result = inv_start_mpl();
+ 216              		.loc 1 147 3 view .LVU40
+ 217              		.loc 1 147 12 is_stmt 0 view .LVU41
+ 218 0018 FFF7FEFF 		bl	inv_start_mpl
+ 219              	.LVL17:
+ 148:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (result == INV_ERROR_NOT_AUTHORIZED) {
+ 220              		.loc 1 148 3 is_stmt 1 view .LVU42
+ 221              		.loc 1 148 6 is_stmt 0 view .LVU43
+ 222 001c 3228     		cmp	r0, #50
+ 223 001e 56D0     		beq	.L15
+ 149:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     while (1) {
+ 150:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGE("Not authorized.\n");
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 8
+
+
+ 151:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       printf("Not authorized.\n");
+ 152:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 153:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 154:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (result) {
+ 224              		.loc 1 154 3 is_stmt 1 view .LVU44
+ 225              		.loc 1 154 6 is_stmt 0 view .LVU45
+ 226 0020 0028     		cmp	r0, #0
+ 227 0022 58D1     		bne	.L21
+ 228              	.LVL18:
+ 229              	.L16:
+ 155:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // MPL_LOGE("Could not start the MPL.\n");
+ 156:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     printf("Could not start the MPL.\n");
+ 157:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 158:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 159:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Get/set hardware configuration. Start gyro. */
+ 160:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Wake up all sensors. */
+ 161:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 162:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL | INV_XYZ_COMPASS);
+ 163:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #else
+ 164:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+ 230              		.loc 1 164 3 is_stmt 1 view .LVU46
+ 231 0024 7820     		movs	r0, #120
+ 232 0026 FFF7FEFF 		bl	mpu_set_sensors
+ 233              	.LVL19:
+ 165:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 166:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Push both gyro and accel data into the FIFO. */
+ 167:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);
+ 234              		.loc 1 167 3 view .LVU47
+ 235 002a 7820     		movs	r0, #120
+ 236 002c FFF7FEFF 		bl	mpu_configure_fifo
+ 237              	.LVL20:
+ 168:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // mpu_set_sample_rate(DEFAULT_MPU_HZ);
+ 169:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_set_sample_rate(500);
+ 238              		.loc 1 169 3 view .LVU48
+ 239 0030 4FF4FA70 		mov	r0, #500
+ 240 0034 FFF7FEFF 		bl	mpu_set_sample_rate
+ 241              	.LVL21:
+ 170:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 171:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* The compass sampling rate can be less than the gyro/accel sampling rate.
+ 172:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * Use this function for proper power management.
+ 173:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 174:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_set_compass_sample_rate(1000 / COMPASS_READ_MS);
+ 175:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 176:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Read back configuration in case it was set improperly. */
+ 177:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_get_sample_rate(&gyro_rate);
+ 242              		.loc 1 177 3 view .LVU49
+ 243 0038 05A8     		add	r0, sp, #20
+ 244 003a FFF7FEFF 		bl	mpu_get_sample_rate
+ 245              	.LVL22:
+ 178:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_get_gyro_fsr(&gyro_fsr);
+ 246              		.loc 1 178 3 view .LVU50
+ 247 003e 0DF11200 		add	r0, sp, #18
+ 248 0042 FFF7FEFF 		bl	mpu_get_gyro_fsr
+ 249              	.LVL23:
+ 179:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_get_accel_fsr(&accel_fsr);
+ 250              		.loc 1 179 3 view .LVU51
+ 251 0046 0DF11700 		add	r0, sp, #23
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 9
+
+
+ 252 004a FFF7FEFF 		bl	mpu_get_accel_fsr
+ 253              	.LVL24:
+ 180:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 181:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_get_compass_fsr(&compass_fsr);
+ 182:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 183:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Sync driver configuration with MPL. */
+ 184:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Sample rate expected in microseconds. */
+ 185:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_gyro_sample_rate(1000000L / gyro_rate);
+ 254              		.loc 1 185 3 view .LVU52
+ 255 004e BDF81400 		ldrh	r0, [sp, #20]
+ 256 0052 5B4C     		ldr	r4, .L23+8
+ 257 0054 94FBF0F0 		sdiv	r0, r4, r0
+ 258 0058 FFF7FEFF 		bl	inv_set_gyro_sample_rate
+ 259              	.LVL25:
+ 186:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_accel_sample_rate(1000000L / gyro_rate);
+ 260              		.loc 1 186 3 view .LVU53
+ 261 005c BDF81400 		ldrh	r0, [sp, #20]
+ 262 0060 94FBF0F0 		sdiv	r0, r4, r0
+ 263 0064 FFF7FEFF 		bl	inv_set_accel_sample_rate
+ 264              	.LVL26:
+ 187:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 188:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* The compass rate is independent of the gyro and accel rates. As long as
+ 189:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * inv_set_compass_sample_rate is called with the correct value, the 9-axis
+ 190:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * fusion algorithm's compass correction gain will work properly.
+ 191:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 192:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_compass_sample_rate(COMPASS_READ_MS * 1000L);
+ 193:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 194:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Set chip-to-body orientation matrix.
+ 195:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * Set hardware units to dps/g's/degrees scaling factor.
+ 196:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 197:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_gyro_orientation_and_scale(
+ 265              		.loc 1 197 3 view .LVU54
+ 198:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_orientation_matrix_to_scalar(gyro_pdata.orientation),
+ 266              		.loc 1 198 7 is_stmt 0 view .LVU55
+ 267 0068 564D     		ldr	r5, .L23+12
+ 268 006a 2846     		mov	r0, r5
+ 269 006c FFF7FEFF 		bl	inv_orientation_matrix_to_scalar
+ 270              	.LVL27:
+ 199:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       (long)gyro_fsr << 15);
+ 271              		.loc 1 199 7 view .LVU56
+ 272 0070 BDF81210 		ldrh	r1, [sp, #18]
+ 197:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_orientation_matrix_to_scalar(gyro_pdata.orientation),
+ 273              		.loc 1 197 3 view .LVU57
+ 274 0074 C903     		lsls	r1, r1, #15
+ 275 0076 FFF7FEFF 		bl	inv_set_gyro_orientation_and_scale
+ 276              	.LVL28:
+ 200:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_accel_orientation_and_scale(
+ 277              		.loc 1 200 3 is_stmt 1 view .LVU58
+ 201:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_orientation_matrix_to_scalar(gyro_pdata.orientation),
+ 278              		.loc 1 201 7 is_stmt 0 view .LVU59
+ 279 007a 2846     		mov	r0, r5
+ 280 007c FFF7FEFF 		bl	inv_orientation_matrix_to_scalar
+ 281              	.LVL29:
+ 202:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       (long)accel_fsr << 15);
+ 282              		.loc 1 202 7 view .LVU60
+ 283 0080 9DF81710 		ldrb	r1, [sp, #23]	@ zero_extendqisi2
+ 200:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_accel_orientation_and_scale(
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 10
+
+
+ 284              		.loc 1 200 3 view .LVU61
+ 285 0084 C903     		lsls	r1, r1, #15
+ 286 0086 FFF7FEFF 		bl	inv_set_accel_orientation_and_scale
+ 287              	.LVL30:
+ 203:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 204:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_set_compass_orientation_and_scale(
+ 205:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_orientation_matrix_to_scalar(compass_pdata.orientation),
+ 206:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       (long)compass_fsr << 15);
+ 207:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 208:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Initialize HAL state variables. */
+ 209:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 210:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.sensors = ACCEL_ON | GYRO_ON | COMPASS_ON;
+ 211:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #else
+ 212:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.sensors = ACCEL_ON | GYRO_ON;
+ 288              		.loc 1 212 3 is_stmt 1 view .LVU62
+ 289              		.loc 1 212 15 is_stmt 0 view .LVU63
+ 290 008a 4F4B     		ldr	r3, .L23+16
+ 291 008c 0322     		movs	r2, #3
+ 292 008e 5A70     		strb	r2, [r3, #1]
+ 213:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 214:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.dmp_on = 0;
+ 293              		.loc 1 214 3 is_stmt 1 view .LVU64
+ 294              		.loc 1 214 14 is_stmt 0 view .LVU65
+ 295 0090 0024     		movs	r4, #0
+ 296 0092 9C70     		strb	r4, [r3, #2]
+ 215:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.report = 0;
+ 297              		.loc 1 215 3 is_stmt 1 view .LVU66
+ 298              		.loc 1 215 14 is_stmt 0 view .LVU67
+ 299 0094 9C61     		str	r4, [r3, #24]
+ 216:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.rx.cmd = 0;
+ 300              		.loc 1 216 3 is_stmt 1 view .LVU68
+ 301              		.loc 1 216 14 is_stmt 0 view .LVU69
+ 302 0096 83F82140 		strb	r4, [r3, #33]
+ 217:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.next_pedo_ms = 0;
+ 303              		.loc 1 217 3 is_stmt 1 view .LVU70
+ 304              		.loc 1 217 20 is_stmt 0 view .LVU71
+ 305 009a DC60     		str	r4, [r3, #12]
+ 218:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.next_compass_ms = 0;
+ 306              		.loc 1 218 3 is_stmt 1 view .LVU72
+ 307              		.loc 1 218 23 is_stmt 0 view .LVU73
+ 308 009c 5C61     		str	r4, [r3, #20]
+ 219:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.next_temp_ms = 0;
+ 309              		.loc 1 219 3 is_stmt 1 view .LVU74
+ 310              		.loc 1 219 20 is_stmt 0 view .LVU75
+ 311 009e 1C61     		str	r4, [r3, #16]
+ 220:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 221:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* Compass reads are handled by scheduler. */
+ 222:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 223:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* To initialize the DMP:
+ 224:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 1. Call dmp_load_motion_driver_firmware(). This pushes the DMP image in
+ 225:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *    inv_mpu_dmp_motion_driver.h into the MPU memory.
+ 226:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 2. Push the gyro and accel orientation matrix to the DMP.
+ 227:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 3. Register gesture callbacks. Don't worry, these callbacks won't be
+ 228:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *    executed unless the corresponding feature is enabled.
+ 229:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 4. Call dmp_enable_feature(mask) to enable different features.
+ 230:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 5. Call dmp_set_fifo_rate(freq) to select a DMP output rate.
+ 231:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 6. Call any feature-specific control functions.
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 11
+
+
+ 232:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *
+ 233:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * To enable the DMP, just call mpu_set_dmp_state(1). This function can
+ 234:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * be called repeatedly to enable and disable the DMP at runtime.
+ 235:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *
+ 236:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * The following is a short summary of the features supported in the DMP
+ 237:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * image provided in inv_mpu_dmp_motion_driver.c:
+ 238:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_LP_QUAT: Generate a gyro-only quaternion on the DMP at
+ 239:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 200Hz. Integrating the gyro data at higher rates reduces numerical
+ 240:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * errors (compared to integration on the MCU at a lower sampling rate).
+ 241:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_6X_LP_QUAT: Generate a gyro/accel quaternion on the DMP at
+ 242:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * 200Hz. Cannot be used in combination with DMP_FEATURE_LP_QUAT.
+ 243:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_TAP: Detect taps along the X, Y, and Z axes.
+ 244:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_ANDROID_ORIENT: Google's screen rotation algorithm. Triggers
+ 245:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * an event at the four orientations where the screen should rotate.
+ 246:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_GYRO_CAL: Calibrates the gyro data after eight seconds of
+ 247:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * no motion.
+ 248:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_SEND_RAW_ACCEL: Add raw accelerometer data to the FIFO.
+ 249:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_SEND_RAW_GYRO: Add raw gyro data to the FIFO.
+ 250:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP_FEATURE_SEND_CAL_GYRO: Add calibrated gyro data to the FIFO. Cannot
+ 251:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * be used in combination with DMP_FEATURE_SEND_RAW_GYRO.
+ 252:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 253:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 254:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   dmp_load_motion_driver_firmware();
+ 312              		.loc 1 254 3 is_stmt 1 view .LVU76
+ 313 00a0 FFF7FEFF 		bl	dmp_load_motion_driver_firmware
+ 314              	.LVL31:
+ 255:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_pdata.orientation));
+ 315              		.loc 1 255 3 view .LVU77
+ 316 00a4 2846     		mov	r0, r5
+ 317 00a6 FFF7FEFF 		bl	inv_orientation_matrix_to_scalar
+ 318              	.LVL32:
+ 319 00aa FFF7FEFF 		bl	dmp_set_orientation
+ 320              	.LVL33:
+ 256:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 257:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    dmp_register_tap_cb(tap_cb);
+ 258:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 259:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // dmp_register_android_orient_cb(android_orient_cb);
+ 260:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /*
+ 261:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * Known Bug -
+ 262:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP when enabled will sample sensor data at 200Hz and output to FIFO at the
+ 263:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * rate specified in the dmp_set_fifo_rate API. The DMP will then sent an
+ 264:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * interrupt once a sample has been put into the FIFO. Therefore if the
+ 265:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * dmp_set_fifo_rate is at 25Hz there will be a 25Hz interrupt from the MPU
+ 266:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * device.
+ 267:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *
+ 268:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * There is a known issue in which if you do not enable DMP_FEATURE_TAP
+ 269:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * then the interrupts will be at 200Hz even if fifo rate
+ 270:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * is set at a different rate. To avoid this issue include the DMP_FEATURE_TAP
+ 271:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    *
+ 272:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * DMP sensor fusion works only with gyro at +-2000dps and accel +-2G
+ 273:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 274:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // hal.dmp_features = DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
+ 275:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****                      // DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL |
+ 276:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****                      // DMP_FEATURE_SEND_CAL_GYRO | DMP_FEATURE_GYRO_CAL;
+ 277:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // hal.dmp_features = DMP_FEATURE_LP_QUAT | DMP_FEATURE_TAP |
+ 278:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //                    DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL |
+ 279:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //                    DMP_FEATURE_SEND_CAL_GYRO | DMP_FEATURE_GYRO_CAL;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 12
+
+
+ 280:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // dmp_enable_feature(hal.dmp_features);
+ 281:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** dmp_enable_feature( DMP_FEATURE_6X_LP_QUAT|DMP_FEATURE_TAP|
+ 321              		.loc 1 281 1 view .LVU78
+ 322 00ae 40F27310 		movw	r0, #371
+ 323 00b2 FFF7FEFF 		bl	dmp_enable_feature
+ 324              	.LVL34:
+ 282:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****                                DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL |
+ 283:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****                                DMP_FEATURE_SEND_CAL_GYRO | DMP_FEATURE_GYRO_CAL);
+ 284:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 285:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // dmp_set_fifo_rate(DEFAULT_MPU_HZ);
+ 286:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   dmp_set_fifo_rate(200);
+ 325              		.loc 1 286 3 view .LVU79
+ 326 00b6 C820     		movs	r0, #200
+ 327 00b8 FFF7FEFF 		bl	dmp_set_fifo_rate
+ 328              	.LVL35:
+ 287:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_set_dmp_state(1);
+ 329              		.loc 1 287 3 view .LVU80
+ 330 00bc 0120     		movs	r0, #1
+ 331 00be FFF7FEFF 		bl	mpu_set_dmp_state
+ 332              	.LVL36:
+ 288:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   HAL_Delay(100);
+ 333              		.loc 1 288 3 view .LVU81
+ 334 00c2 6420     		movs	r0, #100
+ 335 00c4 FFF7FEFF 		bl	HAL_Delay
+ 336              	.LVL37:
+ 289:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   atk_ms6050_run_self_test();
+ 337              		.loc 1 289 3 view .LVU82
+ 338 00c8 FFF7FEFF 		bl	atk_ms6050_run_self_test
+ 339              	.LVL38:
+ 290:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned long timestamp;
+ 340              		.loc 1 290 3 view .LVU83
+ 291:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   short gyro[3];
+ 341              		.loc 1 291 3 view .LVU84
+ 292:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   for (int i = 0; i<10; i++) {
+ 342              		.loc 1 292 3 view .LVU85
+ 343              	.LBB2:
+ 344              		.loc 1 292 8 view .LVU86
+ 345              		.loc 1 292 3 is_stmt 0 view .LVU87
+ 346 00cc 08E0     		b	.L17
+ 347              	.LVL39:
+ 348              	.L15:
+ 349              		.loc 1 292 3 view .LVU88
+ 350              	.LBE2:
+ 149:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGE("Not authorized.\n");
+ 351              		.loc 1 149 5 is_stmt 1 discriminator 1 view .LVU89
+ 150:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       printf("Not authorized.\n");
+ 352              		.loc 1 150 7 discriminator 1 view .LVU90
+ 150:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       printf("Not authorized.\n");
+ 353              		.loc 1 150 7 discriminator 1 view .LVU91
+ 150:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       printf("Not authorized.\n");
+ 354              		.loc 1 150 7 discriminator 1 view .LVU92
+ 151:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 355              		.loc 1 151 7 discriminator 1 view .LVU93
+ 356 00ce 3F48     		ldr	r0, .L23+20
+ 357 00d0 FFF7FEFF 		bl	puts
+ 358              	.LVL40:
+ 149:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGE("Not authorized.\n");
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 13
+
+
+ 359              		.loc 1 149 11 discriminator 1 view .LVU94
+ 360 00d4 FBE7     		b	.L15
+ 361              	.LVL41:
+ 362              	.L21:
+ 156:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 363              		.loc 1 156 5 view .LVU95
+ 364 00d6 3E48     		ldr	r0, .L23+24
+ 365              	.LVL42:
+ 156:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 366              		.loc 1 156 5 is_stmt 0 view .LVU96
+ 367 00d8 FFF7FEFF 		bl	puts
+ 368              	.LVL43:
+ 369 00dc A2E7     		b	.L16
+ 370              	.LVL44:
+ 371              	.L18:
+ 372              	.LBB3:
+ 293:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 294:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[0] += gyro[0]/16.4;
+ 295:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[1] += gyro[1]/16.4;
+ 296:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[2] += gyro[2]/16.4;
+ 297:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     };
+ 373              		.loc 1 297 6 is_stmt 1 discriminator 2 view .LVU97
+ 292:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 374              		.loc 1 292 26 discriminator 2 view .LVU98
+ 375 00de 0134     		adds	r4, r4, #1
+ 376              	.LVL45:
+ 377              	.L17:
+ 292:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 378              		.loc 1 292 20 discriminator 1 view .LVU99
+ 379 00e0 092C     		cmp	r4, #9
+ 380 00e2 4CDC     		bgt	.L22
+ 293:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 381              		.loc 1 293 5 view .LVU100
+ 293:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 382              		.loc 1 293 13 is_stmt 0 view .LVU101
+ 383 00e4 03A9     		add	r1, sp, #12
+ 384 00e6 01A8     		add	r0, sp, #4
+ 385 00e8 FFF7FEFF 		bl	mpu_get_gyro_reg
+ 386              	.LVL46:
+ 293:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 387              		.loc 1 293 7 view .LVU102
+ 388 00ec 0028     		cmp	r0, #0
+ 389 00ee F6D1     		bne	.L18
+ 294:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[1] += gyro[1]/16.4;
+ 390              		.loc 1 294 7 is_stmt 1 view .LVU103
+ 294:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[1] += gyro[1]/16.4;
+ 391              		.loc 1 294 15 is_stmt 0 view .LVU104
+ 392 00f0 384D     		ldr	r5, .L23+28
+ 393 00f2 2868     		ldr	r0, [r5]	@ float
+ 394 00f4 FFF7FEFF 		bl	__aeabi_f2d
+ 395              	.LVL47:
+ 396 00f8 0646     		mov	r6, r0
+ 397 00fa 0F46     		mov	r7, r1
+ 294:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[1] += gyro[1]/16.4;
+ 398              		.loc 1 294 29 view .LVU105
+ 399 00fc BDF90400 		ldrsh	r0, [sp, #4]
+ 400 0100 FFF7FEFF 		bl	__aeabi_i2d
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 14
+
+
+ 401              	.LVL48:
+ 402 0104 2CA3     		adr	r3, .L23
+ 403 0106 D3E90023 		ldrd	r2, [r3]
+ 404 010a FFF7FEFF 		bl	__aeabi_ddiv
+ 405              	.LVL49:
+ 406 010e 0246     		mov	r2, r0
+ 407 0110 0B46     		mov	r3, r1
+ 294:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[1] += gyro[1]/16.4;
+ 408              		.loc 1 294 19 view .LVU106
+ 409 0112 3046     		mov	r0, r6
+ 410 0114 3946     		mov	r1, r7
+ 411 0116 FFF7FEFF 		bl	__aeabi_dadd
+ 412              	.LVL50:
+ 413 011a FFF7FEFF 		bl	__aeabi_d2f
+ 414              	.LVL51:
+ 415 011e 2860     		str	r0, [r5]	@ float
+ 295:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[2] += gyro[2]/16.4;
+ 416              		.loc 1 295 7 is_stmt 1 view .LVU107
+ 295:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[2] += gyro[2]/16.4;
+ 417              		.loc 1 295 15 is_stmt 0 view .LVU108
+ 418 0120 6868     		ldr	r0, [r5, #4]	@ float
+ 419 0122 FFF7FEFF 		bl	__aeabi_f2d
+ 420              	.LVL52:
+ 421 0126 0646     		mov	r6, r0
+ 422 0128 0F46     		mov	r7, r1
+ 295:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[2] += gyro[2]/16.4;
+ 423              		.loc 1 295 29 view .LVU109
+ 424 012a BDF90600 		ldrsh	r0, [sp, #6]
+ 425 012e FFF7FEFF 		bl	__aeabi_i2d
+ 426              	.LVL53:
+ 427 0132 21A3     		adr	r3, .L23
+ 428 0134 D3E90023 		ldrd	r2, [r3]
+ 429 0138 FFF7FEFF 		bl	__aeabi_ddiv
+ 430              	.LVL54:
+ 431 013c 0246     		mov	r2, r0
+ 432 013e 0B46     		mov	r3, r1
+ 295:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       sum_bias[2] += gyro[2]/16.4;
+ 433              		.loc 1 295 19 view .LVU110
+ 434 0140 3046     		mov	r0, r6
+ 435 0142 3946     		mov	r1, r7
+ 436 0144 FFF7FEFF 		bl	__aeabi_dadd
+ 437              	.LVL55:
+ 438 0148 FFF7FEFF 		bl	__aeabi_d2f
+ 439              	.LVL56:
+ 440 014c 6860     		str	r0, [r5, #4]	@ float
+ 296:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     };
+ 441              		.loc 1 296 7 is_stmt 1 view .LVU111
+ 296:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     };
+ 442              		.loc 1 296 15 is_stmt 0 view .LVU112
+ 443 014e A868     		ldr	r0, [r5, #8]	@ float
+ 444 0150 FFF7FEFF 		bl	__aeabi_f2d
+ 445              	.LVL57:
+ 446 0154 0646     		mov	r6, r0
+ 447 0156 0F46     		mov	r7, r1
+ 296:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     };
+ 448              		.loc 1 296 29 view .LVU113
+ 449 0158 BDF90800 		ldrsh	r0, [sp, #8]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 15
+
+
+ 450 015c FFF7FEFF 		bl	__aeabi_i2d
+ 451              	.LVL58:
+ 452 0160 15A3     		adr	r3, .L23
+ 453 0162 D3E90023 		ldrd	r2, [r3]
+ 454 0166 FFF7FEFF 		bl	__aeabi_ddiv
+ 455              	.LVL59:
+ 456 016a 0246     		mov	r2, r0
+ 457 016c 0B46     		mov	r3, r1
+ 296:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     };
+ 458              		.loc 1 296 19 view .LVU114
+ 459 016e 3046     		mov	r0, r6
+ 460 0170 3946     		mov	r1, r7
+ 461 0172 FFF7FEFF 		bl	__aeabi_dadd
+ 462              	.LVL60:
+ 463 0176 FFF7FEFF 		bl	__aeabi_d2f
+ 464              	.LVL61:
+ 465 017a A860     		str	r0, [r5, #8]	@ float
+ 466 017c AFE7     		b	.L18
+ 467              	.L22:
+ 468              	.LBE3:
+ 298:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 299:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   gyro_bias[0] = sum_bias[0]/10;
+ 469              		.loc 1 299 3 is_stmt 1 view .LVU115
+ 470              		.loc 1 299 26 is_stmt 0 view .LVU116
+ 471 017e 154A     		ldr	r2, .L23+28
+ 472 0180 D2ED006A 		vldr.32	s13, [r2]
+ 473              		.loc 1 299 29 view .LVU117
+ 474 0184 F2EE047A 		vmov.f32	s15, #1.0e+1
+ 475 0188 86EEA77A 		vdiv.f32	s14, s13, s15
+ 476              		.loc 1 299 16 view .LVU118
+ 477 018c 124B     		ldr	r3, .L23+32
+ 478 018e 83ED007A 		vstr.32	s14, [r3]
+ 300:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   gyro_bias[1] = sum_bias[1]/10;
+ 479              		.loc 1 300 3 is_stmt 1 view .LVU119
+ 480              		.loc 1 300 26 is_stmt 0 view .LVU120
+ 481 0192 D2ED016A 		vldr.32	s13, [r2, #4]
+ 482              		.loc 1 300 29 view .LVU121
+ 483 0196 86EEA77A 		vdiv.f32	s14, s13, s15
+ 484              		.loc 1 300 16 view .LVU122
+ 485 019a 83ED017A 		vstr.32	s14, [r3, #4]
+ 301:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   gyro_bias[2] = sum_bias[2]/10;
+ 486              		.loc 1 301 3 is_stmt 1 view .LVU123
+ 487              		.loc 1 301 26 is_stmt 0 view .LVU124
+ 488 019e D2ED026A 		vldr.32	s13, [r2, #8]
+ 489              		.loc 1 301 29 view .LVU125
+ 490 01a2 86EEA77A 		vdiv.f32	s14, s13, s15
+ 491              		.loc 1 301 16 view .LVU126
+ 492 01a6 83ED027A 		vstr.32	s14, [r3, #8]
+ 302:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.dmp_on = 1;
+ 493              		.loc 1 302 3 is_stmt 1 view .LVU127
+ 494              		.loc 1 302 14 is_stmt 0 view .LVU128
+ 495 01aa 0120     		movs	r0, #1
+ 496 01ac 064B     		ldr	r3, .L23+16
+ 497 01ae 9870     		strb	r0, [r3, #2]
+ 303:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   return 1;
+ 498              		.loc 1 303 3 is_stmt 1 view .LVU129
+ 304:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 16
+
+
+ 499              		.loc 1 304 1 is_stmt 0 view .LVU130
+ 500 01b0 07B0     		add	sp, sp, #28
+ 501              	.LCFI7:
+ 502              		.cfi_def_cfa_offset 20
+ 503              		@ sp needed
+ 504 01b2 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 505              	.LVL62:
+ 506              	.L24:
+ 507              		.loc 1 304 1 view .LVU131
+ 508 01b4 AFF30080 		.align	3
+ 509              	.L23:
+ 510 01b8 66666666 		.word	1717986918
+ 511 01bc 66663040 		.word	1076913766
+ 512 01c0 40420F00 		.word	1000000
+ 513 01c4 00000000 		.word	gyro_pdata
+ 514 01c8 00000000 		.word	hal
+ 515 01cc 00000000 		.word	.LC4
+ 516 01d0 10000000 		.word	.LC5
+ 517 01d4 00000000 		.word	sum_bias
+ 518 01d8 00000000 		.word	gyro_bias
+ 519              		.cfi_endproc
+ 520              	.LFE233:
+ 522              		.section	.text.MPU6050_data_ready_cb,"ax",%progbits
+ 523              		.align	1
+ 524              		.global	MPU6050_data_ready_cb
+ 525              		.syntax unified
+ 526              		.thumb
+ 527              		.thumb_func
+ 529              	MPU6050_data_ready_cb:
+ 530              	.LFB234:
+ 305:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 306:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void MPU6050_data_ready_cb(void)  // 中断回调函数
+ 307:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** {
+ 531              		.loc 1 307 1 is_stmt 1 view -0
+ 532              		.cfi_startproc
+ 533              		@ args = 0, pretend = 0, frame = 0
+ 534              		@ frame_needed = 0, uses_anonymous_args = 0
+ 535              		@ link register save eliminated.
+ 308:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.new_gyro = 1;
+ 536              		.loc 1 308 3 view .LVU133
+ 537              		.loc 1 308 16 is_stmt 0 view .LVU134
+ 538 0000 014B     		ldr	r3, .L26
+ 539 0002 0122     		movs	r2, #1
+ 540 0004 1A71     		strb	r2, [r3, #4]
+ 309:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 541              		.loc 1 309 1 view .LVU135
+ 542 0006 7047     		bx	lr
+ 543              	.L27:
+ 544              		.align	2
+ 545              	.L26:
+ 546 0008 00000000 		.word	hal
+ 547              		.cfi_endproc
+ 548              	.LFE234:
+ 550              		.section	.text.setup_gyro,"ax",%progbits
+ 551              		.align	1
+ 552              		.global	setup_gyro
+ 553              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 17
+
+
+ 554              		.thumb
+ 555              		.thumb_func
+ 557              	setup_gyro:
+ 558              	.LFB235:
+ 310:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 311:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** /* Handle sensor on/off combinations. */
+ 312:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void setup_gyro(void) {
+ 559              		.loc 1 312 23 is_stmt 1 view -0
+ 560              		.cfi_startproc
+ 561              		@ args = 0, pretend = 0, frame = 8
+ 562              		@ frame_needed = 0, uses_anonymous_args = 0
+ 563 0000 30B5     		push	{r4, r5, lr}
+ 564              	.LCFI8:
+ 565              		.cfi_def_cfa_offset 12
+ 566              		.cfi_offset 4, -12
+ 567              		.cfi_offset 5, -8
+ 568              		.cfi_offset 14, -4
+ 569 0002 83B0     		sub	sp, sp, #12
+ 570              	.LCFI9:
+ 571              		.cfi_def_cfa_offset 24
+ 313:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned char mask = 0, lp_accel_was_on = 0;
+ 572              		.loc 1 313 3 view .LVU137
+ 573              	.LVL63:
+ 314:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 315:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // MPU_DEBUG_FUNC();
+ 316:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (hal.sensors & ACCEL_ON) mask |= INV_XYZ_ACCEL;
+ 574              		.loc 1 316 3 view .LVU138
+ 575              		.loc 1 316 10 is_stmt 0 view .LVU139
+ 576 0004 124B     		ldr	r3, .L35
+ 577 0006 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+ 578              		.loc 1 316 6 view .LVU140
+ 579 0008 13F00105 		ands	r5, r3, #1
+ 580 000c 00D0     		beq	.L29
+ 581              		.loc 1 316 36 view .LVU141
+ 582 000e 0825     		movs	r5, #8
+ 583              	.L29:
+ 584              	.LVL64:
+ 317:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (hal.sensors & GYRO_ON) {
+ 585              		.loc 1 317 3 is_stmt 1 view .LVU142
+ 586              		.loc 1 317 6 is_stmt 0 view .LVU143
+ 587 0010 13F00204 		ands	r4, r3, #2
+ 588 0014 03D0     		beq	.L30
+ 318:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mask |= INV_XYZ_GYRO;
+ 589              		.loc 1 318 5 is_stmt 1 view .LVU144
+ 590              		.loc 1 318 10 is_stmt 0 view .LVU145
+ 591 0016 45F07005 		orr	r5, r5, #112
+ 592              	.LVL65:
+ 319:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     lp_accel_was_on |= hal.lp_accel_mode;
+ 593              		.loc 1 319 5 is_stmt 1 view .LVU146
+ 594              		.loc 1 319 27 is_stmt 0 view .LVU147
+ 595 001a 0D4B     		ldr	r3, .L35
+ 596 001c 1C78     		ldrb	r4, [r3]	@ zero_extendqisi2
+ 597              	.LVL66:
+ 598              	.L30:
+ 320:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 321:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 322:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (hal.sensors & COMPASS_ON) {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 18
+
+
+ 323:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mask |= INV_XYZ_COMPASS;
+ 324:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     lp_accel_was_on |= hal.lp_accel_mode;
+ 325:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 326:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 327:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   /* If you need a power transition, this function should be called with a
+ 328:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * mask of the sensors still enabled. The driver turns off any sensors
+ 329:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    * excluded from this mask.
+ 330:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    */
+ 331:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_set_sensors(mask);
+ 599              		.loc 1 331 3 is_stmt 1 view .LVU148
+ 600 001e 2846     		mov	r0, r5
+ 601 0020 FFF7FEFF 		bl	mpu_set_sensors
+ 602              	.LVL67:
+ 332:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_configure_fifo(mask);
+ 603              		.loc 1 332 3 view .LVU149
+ 604 0024 2846     		mov	r0, r5
+ 605 0026 FFF7FEFF 		bl	mpu_configure_fifo
+ 606              	.LVL68:
+ 333:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (lp_accel_was_on) {
+ 607              		.loc 1 333 3 view .LVU150
+ 608              		.loc 1 333 6 is_stmt 0 view .LVU151
+ 609 002a 0CB9     		cbnz	r4, .L34
+ 610              	.L28:
+ 334:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     unsigned short rate;
+ 335:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     hal.lp_accel_mode = 0;
+ 336:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Switching out of LP accel, notify MPL of new accel sampling rate. */
+ 337:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_get_sample_rate(&rate);
+ 338:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_accel_sample_rate(1000000L / rate);
+ 339:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 340:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 611              		.loc 1 340 1 view .LVU152
+ 612 002c 03B0     		add	sp, sp, #12
+ 613              	.LCFI10:
+ 614              		.cfi_remember_state
+ 615              		.cfi_def_cfa_offset 12
+ 616              		@ sp needed
+ 617 002e 30BD     		pop	{r4, r5, pc}
+ 618              	.LVL69:
+ 619              	.L34:
+ 620              	.LCFI11:
+ 621              		.cfi_restore_state
+ 622              	.LBB4:
+ 334:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     unsigned short rate;
+ 623              		.loc 1 334 5 is_stmt 1 view .LVU153
+ 335:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Switching out of LP accel, notify MPL of new accel sampling rate. */
+ 624              		.loc 1 335 5 view .LVU154
+ 335:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Switching out of LP accel, notify MPL of new accel sampling rate. */
+ 625              		.loc 1 335 23 is_stmt 0 view .LVU155
+ 626 0030 074B     		ldr	r3, .L35
+ 627 0032 0022     		movs	r2, #0
+ 628 0034 1A70     		strb	r2, [r3]
+ 337:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_accel_sample_rate(1000000L / rate);
+ 629              		.loc 1 337 5 is_stmt 1 view .LVU156
+ 630 0036 0DF10600 		add	r0, sp, #6
+ 631 003a FFF7FEFF 		bl	mpu_get_sample_rate
+ 632              	.LVL70:
+ 338:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 19
+
+
+ 633              		.loc 1 338 5 view .LVU157
+ 634 003e BDF80630 		ldrh	r3, [sp, #6]
+ 635 0042 0448     		ldr	r0, .L35+4
+ 636 0044 90FBF3F0 		sdiv	r0, r0, r3
+ 637 0048 FFF7FEFF 		bl	inv_set_accel_sample_rate
+ 638              	.LVL71:
+ 639              	.LBE4:
+ 640              		.loc 1 340 1 is_stmt 0 view .LVU158
+ 641 004c EEE7     		b	.L28
+ 642              	.L36:
+ 643 004e 00BF     		.align	2
+ 644              	.L35:
+ 645 0050 00000000 		.word	hal
+ 646 0054 40420F00 		.word	1000000
+ 647              		.cfi_endproc
+ 648              	.LFE235:
+ 650              		.section	.text.MPU6050_get_sensor,"ax",%progbits
+ 651              		.align	1
+ 652              		.global	MPU6050_get_sensor
+ 653              		.syntax unified
+ 654              		.thumb
+ 655              		.thumb_func
+ 657              	MPU6050_get_sensor:
+ 658              	.LVL72:
+ 659              	.LFB236:
+ 341:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** uint8_t MPU6050_get_sensor(float *Acceleration, float *Angular_velocity,
+ 342:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****                            float *Quaternion, float *Euler) {
+ 660              		.loc 1 342 61 is_stmt 1 view -0
+ 661              		.cfi_startproc
+ 662              		@ args = 0, pretend = 0, frame = 56
+ 663              		@ frame_needed = 0, uses_anonymous_args = 0
+ 664              		.loc 1 342 61 is_stmt 0 view .LVU160
+ 665 0000 00B5     		push	{lr}
+ 666              	.LCFI12:
+ 667              		.cfi_def_cfa_offset 4
+ 668              		.cfi_offset 14, -4
+ 669 0002 91B0     		sub	sp, sp, #68
+ 670              	.LCFI13:
+ 671              		.cfi_def_cfa_offset 72
+ 343:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   uint8_t return_value = 0;
+ 672              		.loc 1 343 3 is_stmt 1 view .LVU161
+ 673              	.LVL73:
+ 344:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   short gyro[3], accel_short[3], sensors;
+ 674              		.loc 1 344 3 view .LVU162
+ 345:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned char more, new_data = 0;
+ 675              		.loc 1 345 3 view .LVU163
+ 346:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   long accel[3], quat[4], temperature;
+ 676              		.loc 1 346 3 view .LVU164
+ 347:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned long sensor_timestamp;
+ 677              		.loc 1 347 3 view .LVU165
+ 348:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
+ 678              		.loc 1 348 3 view .LVU166
+ 679 0004 0DF12D03 		add	r3, sp, #45
+ 680              	.LVL74:
+ 681              		.loc 1 348 3 is_stmt 0 view .LVU167
+ 682 0008 0193     		str	r3, [sp, #4]
+ 683 000a 0DF12E03 		add	r3, sp, #46
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 20
+
+
+ 684 000e 0093     		str	r3, [sp]
+ 685 0010 02AB     		add	r3, sp, #8
+ 686 0012 04AA     		add	r2, sp, #16
+ 687              	.LVL75:
+ 688              		.loc 1 348 3 view .LVU168
+ 689 0014 0CA9     		add	r1, sp, #48
+ 690              	.LVL76:
+ 691              		.loc 1 348 3 view .LVU169
+ 692 0016 0EA8     		add	r0, sp, #56
+ 693              	.LVL77:
+ 694              		.loc 1 348 3 view .LVU170
+ 695 0018 FFF7FEFF 		bl	dmp_read_fifo
+ 696              	.LVL78:
+ 349:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (!more) hal.new_gyro = 0;
+ 697              		.loc 1 349 3 is_stmt 1 view .LVU171
+ 698              		.loc 1 349 7 is_stmt 0 view .LVU172
+ 699 001c 9DF82D30 		ldrb	r3, [sp, #45]	@ zero_extendqisi2
+ 700              		.loc 1 349 6 view .LVU173
+ 701 0020 13B9     		cbnz	r3, .L38
+ 702              		.loc 1 349 14 is_stmt 1 discriminator 1 view .LVU174
+ 703              		.loc 1 349 27 is_stmt 0 discriminator 1 view .LVU175
+ 704 0022 1D4B     		ldr	r3, .L46
+ 705 0024 0022     		movs	r2, #0
+ 706 0026 1A71     		strb	r2, [r3, #4]
+ 707              	.L38:
+ 350:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 351:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (sensors & INV_XYZ_GYRO) {
+ 708              		.loc 1 351 3 is_stmt 1 view .LVU176
+ 709              		.loc 1 351 15 is_stmt 0 view .LVU177
+ 710 0028 BDF92E30 		ldrsh	r3, [sp, #46]
+ 711              		.loc 1 351 6 view .LVU178
+ 712 002c 13F0700F 		tst	r3, #112
+ 713 0030 0FD1     		bne	.L43
+ 714              	.LVL79:
+ 715              	.L39:
+ 352:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Push the new data to the MPL. */
+ 353:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_gyro(gyro, sensor_timestamp);
+ 354:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_get_temperature(&temperature, &sensor_timestamp);
+ 355:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_temp(temperature, sensor_timestamp);
+ 356:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     new_data = 1;
+ 357:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 358:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (sensors & INV_XYZ_ACCEL) {
+ 716              		.loc 1 358 3 is_stmt 1 view .LVU179
+ 717              		.loc 1 358 15 is_stmt 0 view .LVU180
+ 718 0032 BDF92E30 		ldrsh	r3, [sp, #46]
+ 719              		.loc 1 358 6 view .LVU181
+ 720 0036 13F0080F 		tst	r3, #8
+ 721 003a 17D1     		bne	.L44
+ 722              	.L40:
+ 359:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[0] = (long)accel_short[0];
+ 360:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] = (long)accel_short[1];
+ 361:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] = (long)accel_short[2];
+ 362:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_accel(accel, 0, sensor_timestamp);
+ 363:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     new_data = 1;
+ 364:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 365:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (sensors & INV_WXYZ_QUAT) {
+ 723              		.loc 1 365 3 is_stmt 1 view .LVU182
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 21
+
+
+ 724              		.loc 1 365 15 is_stmt 0 view .LVU183
+ 725 003c BDF92E30 		ldrsh	r3, [sp, #46]
+ 726              		.loc 1 365 6 view .LVU184
+ 727 0040 13F4807F 		tst	r3, #256
+ 728 0044 21D1     		bne	.L45
+ 729              	.L41:
+ 366:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_quat(quat, 0, sensor_timestamp);
+ 367:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     new_data = 1;
+ 368:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 369:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 370:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_execute_on_data();
+ 730              		.loc 1 370 3 is_stmt 1 view .LVU185
+ 731 0046 FFF7FEFF 		bl	inv_execute_on_data
+ 732              	.LVL80:
+ 371:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   return return_value;
+ 733              		.loc 1 371 3 view .LVU186
+ 372:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 734              		.loc 1 372 1 is_stmt 0 view .LVU187
+ 735 004a 0020     		movs	r0, #0
+ 736 004c 11B0     		add	sp, sp, #68
+ 737              	.LCFI14:
+ 738              		.cfi_remember_state
+ 739              		.cfi_def_cfa_offset 4
+ 740              		@ sp needed
+ 741 004e 5DF804FB 		ldr	pc, [sp], #4
+ 742              	.LVL81:
+ 743              	.L43:
+ 744              	.LCFI15:
+ 745              		.cfi_restore_state
+ 353:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_get_temperature(&temperature, &sensor_timestamp);
+ 746              		.loc 1 353 5 is_stmt 1 view .LVU188
+ 747 0052 0299     		ldr	r1, [sp, #8]
+ 748 0054 0EA8     		add	r0, sp, #56
+ 749 0056 FFF7FEFF 		bl	inv_build_gyro
+ 750              	.LVL82:
+ 354:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_temp(temperature, sensor_timestamp);
+ 751              		.loc 1 354 5 view .LVU189
+ 752 005a 02A9     		add	r1, sp, #8
+ 753 005c 03A8     		add	r0, sp, #12
+ 754 005e FFF7FEFF 		bl	mpu_get_temperature
+ 755              	.LVL83:
+ 355:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     new_data = 1;
+ 756              		.loc 1 355 5 view .LVU190
+ 757 0062 0299     		ldr	r1, [sp, #8]
+ 758 0064 0398     		ldr	r0, [sp, #12]
+ 759 0066 FFF7FEFF 		bl	inv_build_temp
+ 760              	.LVL84:
+ 356:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 761              		.loc 1 356 5 view .LVU191
+ 356:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 762              		.loc 1 356 5 is_stmt 0 view .LVU192
+ 763 006a E2E7     		b	.L39
+ 764              	.LVL85:
+ 765              	.L44:
+ 359:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] = (long)accel_short[1];
+ 766              		.loc 1 359 5 is_stmt 1 view .LVU193
+ 359:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] = (long)accel_short[1];
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 22
+
+
+ 767              		.loc 1 359 33 is_stmt 0 view .LVU194
+ 768 006c BDF93030 		ldrsh	r3, [sp, #48]
+ 359:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] = (long)accel_short[1];
+ 769              		.loc 1 359 14 view .LVU195
+ 770 0070 0893     		str	r3, [sp, #32]
+ 360:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] = (long)accel_short[2];
+ 771              		.loc 1 360 5 is_stmt 1 view .LVU196
+ 360:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] = (long)accel_short[2];
+ 772              		.loc 1 360 33 is_stmt 0 view .LVU197
+ 773 0072 BDF93230 		ldrsh	r3, [sp, #50]
+ 360:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] = (long)accel_short[2];
+ 774              		.loc 1 360 14 view .LVU198
+ 775 0076 0993     		str	r3, [sp, #36]
+ 361:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_accel(accel, 0, sensor_timestamp);
+ 776              		.loc 1 361 5 is_stmt 1 view .LVU199
+ 361:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_accel(accel, 0, sensor_timestamp);
+ 777              		.loc 1 361 33 is_stmt 0 view .LVU200
+ 778 0078 BDF93430 		ldrsh	r3, [sp, #52]
+ 361:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_accel(accel, 0, sensor_timestamp);
+ 779              		.loc 1 361 14 view .LVU201
+ 780 007c 0A93     		str	r3, [sp, #40]
+ 362:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     new_data = 1;
+ 781              		.loc 1 362 5 is_stmt 1 view .LVU202
+ 782 007e 029A     		ldr	r2, [sp, #8]
+ 783 0080 0021     		movs	r1, #0
+ 784 0082 08A8     		add	r0, sp, #32
+ 785 0084 FFF7FEFF 		bl	inv_build_accel
+ 786              	.LVL86:
+ 363:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 787              		.loc 1 363 5 view .LVU203
+ 363:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 788              		.loc 1 363 5 is_stmt 0 view .LVU204
+ 789 0088 D8E7     		b	.L40
+ 790              	.LVL87:
+ 791              	.L45:
+ 366:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     new_data = 1;
+ 792              		.loc 1 366 5 is_stmt 1 view .LVU205
+ 793 008a 029A     		ldr	r2, [sp, #8]
+ 794 008c 0021     		movs	r1, #0
+ 795 008e 04A8     		add	r0, sp, #16
+ 796 0090 FFF7FEFF 		bl	inv_build_quat
+ 797              	.LVL88:
+ 367:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 798              		.loc 1 367 5 view .LVU206
+ 367:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 799              		.loc 1 367 5 is_stmt 0 view .LVU207
+ 800 0094 D7E7     		b	.L41
+ 801              	.L47:
+ 802 0096 00BF     		.align	2
+ 803              	.L46:
+ 804 0098 00000000 		.word	hal
+ 805              		.cfi_endproc
+ 806              	.LFE236:
+ 808              		.section	.text.run_self_test,"ax",%progbits
+ 809              		.align	1
+ 810              		.global	run_self_test
+ 811              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 23
+
+
+ 812              		.thumb
+ 813              		.thumb_func
+ 815              	run_self_test:
+ 816              	.LFB237:
+ 373:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 374:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void send_status_compass() {
+ 375:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   long data[3] = {0};
+ 376:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   int8_t accuracy = {0};
+ 377:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned long timestamp;
+ 378:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   inv_get_compass_set(data, &accuracy, (inv_time_t *)&timestamp);
+ 379:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   MPL_LOGI("Compass: %7.4f %7.4f %7.4f ", data[0] / 65536.f, data[1] / 65536.f,
+ 380:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****            data[2] / 65536.f);
+ 381:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   MPL_LOGI("Accuracy= %d\r\n", accuracy);
+ 382:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 383:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 384:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 385:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if MPU_SELF_TEST
+ 386:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void run_self_test(void) {
+ 817              		.loc 1 386 26 is_stmt 1 view -0
+ 818              		.cfi_startproc
+ 819              		@ args = 0, pretend = 0, frame = 32
+ 820              		@ frame_needed = 0, uses_anonymous_args = 0
+ 821 0000 00B5     		push	{lr}
+ 822              	.LCFI16:
+ 823              		.cfi_def_cfa_offset 4
+ 824              		.cfi_offset 14, -4
+ 825 0002 89B0     		sub	sp, sp, #36
+ 826              	.LCFI17:
+ 827              		.cfi_def_cfa_offset 40
+ 387:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   int result;
+ 828              		.loc 1 387 3 view .LVU209
+ 388:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   long gyro[3], accel[3];
+ 829              		.loc 1 388 3 view .LVU210
+ 389:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // MPU_DEBUG_FUNC();
+ 390:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if defined(MPU6500) || defined(MPU9250)
+ 391:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   result = mpu_run_6500_self_test(gyro, accel, 0);
+ 392:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #elif defined(MPU6050) || defined(MPU9150)
+ 393:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   result = mpu_run_self_test(gyro, accel);
+ 830              		.loc 1 393 3 view .LVU211
+ 831              		.loc 1 393 12 is_stmt 0 view .LVU212
+ 832 0004 02A9     		add	r1, sp, #8
+ 833 0006 05A8     		add	r0, sp, #20
+ 834 0008 FFF7FEFF 		bl	mpu_run_self_test
+ 835              	.LVL89:
+ 394:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 395:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   if (result == 0x7) {
+ 836              		.loc 1 395 3 is_stmt 1 view .LVU213
+ 837              		.loc 1 395 6 is_stmt 0 view .LVU214
+ 838 000c 0728     		cmp	r0, #7
+ 839 000e 02D0     		beq	.L51
+ 840              	.LVL90:
+ 841              	.L48:
+ 396:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     MPL_LOGI("Passed!\n");
+ 397:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     MPL_LOGI("accel: %7.4f %7.4f %7.4f\n", accel[0] / 65536.f,
+ 398:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              accel[1] / 65536.f, accel[2] / 65536.f);
+ 399:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     MPL_LOGI("gyro: %7.4f %7.4f %7.4f\n", gyro[0] / 65536.f, gyro[1] / 65536.f,
+ 400:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              gyro[2] / 65536.f);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 24
+
+
+ 401:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Test passed. We can trust the gyro data here, so now we need to update
+ 402:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * calibrated data*/
+ 403:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 404:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef USE_CAL_HW_REGISTERS
+ 405:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /*
+ 406:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * This portion of the code uses the HW offset registers that are in the
+ 407:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * MPUxxxx devices instead of pushing the cal data to the MPL software
+ 408:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * library
+ 409:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 410:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     unsigned char i = 0;
+ 411:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 412:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     for (i = 0; i < 3; i++) {
+ 413:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       gyro[i] = (long)(gyro[i] * 32.8f);  // convert to +-1000dps
+ 414:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       accel[i] *= 2048.f;                 // convert to +-16G
+ 415:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       accel[i] = accel[i] >> 16;
+ 416:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       gyro[i] = (long)(gyro[i] >> 16);
+ 417:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 418:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 419:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_set_gyro_bias_reg(gyro);
+ 420:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 421:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if defined(MPU6500) || defined(MPU9250)
+ 422:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_set_accel_bias_6500_reg(accel);
+ 423:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #elif defined(MPU6050) || defined(MPU9150)
+ 424:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_set_accel_bias_6050_reg(accel);
+ 425:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 426:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #else
+ 427:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Push the calibrated data to the MPL library.
+ 428:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      *
+ 429:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * MPL expects biases in hardware units << 16, but self test returns
+ 430:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * biases in g's << 16.
+ 431:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 432:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     unsigned short accel_sens;
+ 433:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float gyro_sens;
+ 434:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 435:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_get_accel_sens(&accel_sens);
+ 436:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[0] *= accel_sens;
+ 437:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] *= accel_sens;
+ 438:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] *= accel_sens;
+ 439:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_accel_bias(accel, 3);
+ 440:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_get_gyro_sens(&gyro_sens);
+ 441:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[0] = (long)(gyro[0] * gyro_sens);
+ 442:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[1] = (long)(gyro[1] * gyro_sens);
+ 443:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[2] = (long)(gyro[2] * gyro_sens);
+ 444:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_gyro_bias(gyro, 3);
+ 445:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 446:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   } else {
+ 447:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if (!(result & 0x1)) MPL_LOGE("Gyro failed.\n");
+ 448:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if (!(result & 0x2)) MPL_LOGE("Accel failed.\n");
+ 449:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if (!(result & 0x4)) MPL_LOGE("Compass failed.\n");
+ 450:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 451:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 842              		.loc 1 451 1 view .LVU215
+ 843 0010 09B0     		add	sp, sp, #36
+ 844              	.LCFI18:
+ 845              		.cfi_remember_state
+ 846              		.cfi_def_cfa_offset 4
+ 847              		@ sp needed
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 25
+
+
+ 848 0012 5DF804FB 		ldr	pc, [sp], #4
+ 849              	.LVL91:
+ 850              	.L51:
+ 851              	.LCFI19:
+ 852              		.cfi_restore_state
+ 853              	.LBB5:
+ 396:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     MPL_LOGI("Passed!\n");
+ 854              		.loc 1 396 5 is_stmt 1 view .LVU216
+ 396:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     MPL_LOGI("Passed!\n");
+ 855              		.loc 1 396 5 view .LVU217
+ 396:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     MPL_LOGI("Passed!\n");
+ 856              		.loc 1 396 5 view .LVU218
+ 397:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              accel[1] / 65536.f, accel[2] / 65536.f);
+ 857              		.loc 1 397 5 view .LVU219
+ 397:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              accel[1] / 65536.f, accel[2] / 65536.f);
+ 858              		.loc 1 397 5 view .LVU220
+ 397:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              accel[1] / 65536.f, accel[2] / 65536.f);
+ 859              		.loc 1 397 5 view .LVU221
+ 399:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              gyro[2] / 65536.f);
+ 860              		.loc 1 399 5 view .LVU222
+ 399:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              gyro[2] / 65536.f);
+ 861              		.loc 1 399 5 view .LVU223
+ 399:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              gyro[2] / 65536.f);
+ 862              		.loc 1 399 5 view .LVU224
+ 432:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float gyro_sens;
+ 863              		.loc 1 432 5 view .LVU225
+ 433:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 864              		.loc 1 433 5 view .LVU226
+ 435:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[0] *= accel_sens;
+ 865              		.loc 1 435 5 view .LVU227
+ 866 0016 0DF10200 		add	r0, sp, #2
+ 867              	.LVL92:
+ 435:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[0] *= accel_sens;
+ 868              		.loc 1 435 5 is_stmt 0 view .LVU228
+ 869 001a FFF7FEFF 		bl	mpu_get_accel_sens
+ 870              	.LVL93:
+ 436:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] *= accel_sens;
+ 871              		.loc 1 436 5 is_stmt 1 view .LVU229
+ 436:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] *= accel_sens;
+ 872              		.loc 1 436 14 is_stmt 0 view .LVU230
+ 873 001e BDF80230 		ldrh	r3, [sp, #2]
+ 874 0022 029A     		ldr	r2, [sp, #8]
+ 875 0024 03FB02F2 		mul	r2, r3, r2
+ 876 0028 0292     		str	r2, [sp, #8]
+ 437:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] *= accel_sens;
+ 877              		.loc 1 437 5 is_stmt 1 view .LVU231
+ 437:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] *= accel_sens;
+ 878              		.loc 1 437 10 is_stmt 0 view .LVU232
+ 879 002a 039A     		ldr	r2, [sp, #12]
+ 437:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] *= accel_sens;
+ 880              		.loc 1 437 14 view .LVU233
+ 881 002c 03FB02F2 		mul	r2, r3, r2
+ 882 0030 0392     		str	r2, [sp, #12]
+ 438:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_accel_bias(accel, 3);
+ 883              		.loc 1 438 5 is_stmt 1 view .LVU234
+ 438:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_accel_bias(accel, 3);
+ 884              		.loc 1 438 10 is_stmt 0 view .LVU235
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 26
+
+
+ 885 0032 049A     		ldr	r2, [sp, #16]
+ 438:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_accel_bias(accel, 3);
+ 886              		.loc 1 438 14 view .LVU236
+ 887 0034 02FB03F3 		mul	r3, r2, r3
+ 888 0038 0493     		str	r3, [sp, #16]
+ 439:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     mpu_get_gyro_sens(&gyro_sens);
+ 889              		.loc 1 439 5 is_stmt 1 view .LVU237
+ 890 003a 0321     		movs	r1, #3
+ 891 003c 02A8     		add	r0, sp, #8
+ 892 003e FFF7FEFF 		bl	inv_set_accel_bias
+ 893              	.LVL94:
+ 440:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[0] = (long)(gyro[0] * gyro_sens);
+ 894              		.loc 1 440 5 view .LVU238
+ 895 0042 01A8     		add	r0, sp, #4
+ 896 0044 FFF7FEFF 		bl	mpu_get_gyro_sens
+ 897              	.LVL95:
+ 441:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[1] = (long)(gyro[1] * gyro_sens);
+ 898              		.loc 1 441 5 view .LVU239
+ 441:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[1] = (long)(gyro[1] * gyro_sens);
+ 899              		.loc 1 441 30 is_stmt 0 view .LVU240
+ 900 0048 9DED017A 		vldr.32	s14, [sp, #4]
+ 901 004c DDED057A 		vldr.32	s15, [sp, #20]	@ int
+ 902 0050 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 903 0054 67EE877A 		vmul.f32	s15, s15, s14
+ 441:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[1] = (long)(gyro[1] * gyro_sens);
+ 904              		.loc 1 441 15 view .LVU241
+ 905 0058 FDEEE77A 		vcvt.s32.f32	s15, s15
+ 441:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[1] = (long)(gyro[1] * gyro_sens);
+ 906              		.loc 1 441 13 view .LVU242
+ 907 005c CDED057A 		vstr.32	s15, [sp, #20]	@ int
+ 442:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[2] = (long)(gyro[2] * gyro_sens);
+ 908              		.loc 1 442 5 is_stmt 1 view .LVU243
+ 442:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[2] = (long)(gyro[2] * gyro_sens);
+ 909              		.loc 1 442 30 is_stmt 0 view .LVU244
+ 910 0060 DDED067A 		vldr.32	s15, [sp, #24]	@ int
+ 911 0064 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 912 0068 67EE877A 		vmul.f32	s15, s15, s14
+ 442:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[2] = (long)(gyro[2] * gyro_sens);
+ 913              		.loc 1 442 15 view .LVU245
+ 914 006c FDEEE77A 		vcvt.s32.f32	s15, s15
+ 442:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     gyro[2] = (long)(gyro[2] * gyro_sens);
+ 915              		.loc 1 442 13 view .LVU246
+ 916 0070 CDED067A 		vstr.32	s15, [sp, #24]	@ int
+ 443:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_gyro_bias(gyro, 3);
+ 917              		.loc 1 443 5 is_stmt 1 view .LVU247
+ 443:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_gyro_bias(gyro, 3);
+ 918              		.loc 1 443 30 is_stmt 0 view .LVU248
+ 919 0074 DDED077A 		vldr.32	s15, [sp, #28]	@ int
+ 920 0078 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 921 007c 67EE877A 		vmul.f32	s15, s15, s14
+ 443:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_gyro_bias(gyro, 3);
+ 922              		.loc 1 443 15 view .LVU249
+ 923 0080 FDEEE77A 		vcvt.s32.f32	s15, s15
+ 443:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_set_gyro_bias(gyro, 3);
+ 924              		.loc 1 443 13 view .LVU250
+ 925 0084 CDED077A 		vstr.32	s15, [sp, #28]	@ int
+ 444:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 27
+
+
+ 926              		.loc 1 444 5 is_stmt 1 view .LVU251
+ 927 0088 0321     		movs	r1, #3
+ 928 008a 05A8     		add	r0, sp, #20
+ 929 008c FFF7FEFF 		bl	inv_set_gyro_bias
+ 930              	.LVL96:
+ 931              	.LBE5:
+ 449:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 932              		.loc 1 449 26 view .LVU252
+ 449:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 933              		.loc 1 449 26 view .LVU253
+ 449:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 934              		.loc 1 449 26 view .LVU254
+ 935              		.loc 1 451 1 is_stmt 0 view .LVU255
+ 936 0090 BEE7     		b	.L48
+ 937              		.cfi_endproc
+ 938              	.LFE237:
+ 940              		.section	.text.MPU6050_Init,"ax",%progbits
+ 941              		.align	1
+ 942              		.global	MPU6050_Init
+ 943              		.syntax unified
+ 944              		.thumb
+ 945              		.thumb_func
+ 947              	MPU6050_Init:
+ 948              	.LFB238:
+ 452:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 453:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #if USE_PYTHON_CLIENT
+ 454:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** // 以下两个回调函数是python上位机相关的，不适用时 #define USE_PYTHON_CLIENT 0
+ 455:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** /**
+ 456:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  * @brief Tap回调函数
+ 457:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  *作为参数 int dmp_register_tap_cb(void (*func)(unsigned char, unsigned char))
+ 458:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  * @param direction
+ 459:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  * @param count
+ 460:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  */
+ 461:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void tap_cb(unsigned char direction, unsigned char count) {
+ 462:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    MPU_DEBUG_FUNC();
+ 463:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   switch (direction) {
+ 464:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case TAP_X_UP:
+ 465:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Tap X+ ");
+ 466:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 467:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case TAP_X_DOWN:
+ 468:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Tap X- ");
+ 469:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 470:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case TAP_Y_UP:
+ 471:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Tap Y+ ");
+ 472:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 473:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case TAP_Y_DOWN:
+ 474:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Tap Y- ");
+ 475:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 476:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case TAP_Z_UP:
+ 477:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Tap Z+ ");
+ 478:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 479:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case TAP_Z_DOWN:
+ 480:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Tap Z- ");
+ 481:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 482:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     default:
+ 483:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       return;
+ 484:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 28
+
+
+ 485:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   MPL_LOGI("x%d\n", count);
+ 486:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   return;
+ 487:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 488:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** /**
+ 489:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  * @brief Orientation回调函数
+ 490:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  *作为参数  int dmp_register_android_orient_cb(void (*func)(unsigned char))
+ 491:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  * @param orientation
+ 492:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  */
+ 493:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void android_orient_cb(unsigned char orientation) {
+ 494:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    MPU_DEBUG_FUNC();
+ 495:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   switch (orientation) {
+ 496:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case ANDROID_ORIENT_PORTRAIT:
+ 497:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Portrait\n");
+ 498:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 499:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case ANDROID_ORIENT_LANDSCAPE:
+ 500:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Landscape\n");
+ 501:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 502:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case ANDROID_ORIENT_REVERSE_PORTRAIT:
+ 503:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Reverse Portrait\n");
+ 504:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 505:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case ANDROID_ORIENT_REVERSE_LANDSCAPE:
+ 506:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       MPL_LOGI("Reverse Landscape\n");
+ 507:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 508:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     default:
+ 509:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       return;
+ 510:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 511:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 512:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 513:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void handle_input(void) {
+ 514:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   char c;
+ 515:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   HAL_UART_Receive(&huart1, (uint8_t *)&c, 1, HAL_MAX_DELAY);
+ 516:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // char c = USART_ReceiveData(DEBUG_USARTx);
+ 517:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // MPU_DEBUG_FUNC();
+ 518:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   switch (c) {
+ 519:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* These commands turn off individual sensors. */
+ 520:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '8':
+ 521:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.sensors ^= ACCEL_ON;
+ 522:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       setup_gyro();
+ 523:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (!(hal.sensors & ACCEL_ON)) inv_accel_was_turned_off();
+ 524:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 525:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '9':
+ 526:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.sensors ^= GYRO_ON;
+ 527:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       setup_gyro();
+ 528:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (!(hal.sensors & GYRO_ON)) inv_gyro_was_turned_off();
+ 529:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 530:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 531:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '0':
+ 532:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.sensors ^= COMPASS_ON;
+ 533:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       setup_gyro();
+ 534:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (!(hal.sensors & COMPASS_ON)) inv_compass_was_turned_off();
+ 535:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 536:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 537:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* The commands send individual sensor data or fused data to the PC. */
+ 538:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'a':
+ 539:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_ACCEL;
+ 540:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 541:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'g':
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 29
+
+
+ 542:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_GYRO;
+ 543:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 544:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 545:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'c':
+ 546:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_COMPASS;
+ 547:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 548:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 549:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'e':
+ 550:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_EULER;
+ 551:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 552:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'r':
+ 553:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_ROT_MAT;
+ 554:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 555:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'q':
+ 556:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_QUAT;
+ 557:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 558:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'h':
+ 559:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_HEADING;
+ 560:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 561:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'i':
+ 562:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_LINEAR_ACCEL;
+ 563:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 564:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'o':
+ 565:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_GRAVITY_VECTOR;
+ 566:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 567:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifdef COMPASS_ENABLED
+ 568:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'w':
+ 569:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       send_status_compass();
+ 570:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 571:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 572:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* This command prints out the value of each gyro register for debugging.
+ 573:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * If logging is disabled, this function has no effect.
+ 574:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 575:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'd':
+ 576:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       mpu_reg_dump();
+ 577:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 578:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Test out low-power accel mode. */
+ 579:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'p':
+ 580:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) /* LP accel is not compatible with the DMP. */
+ 581:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         break;
+ 582:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       mpu_lp_accel_mode(20);
+ 583:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* When LP accel mode is enabled, the driver automatically configures
+ 584:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * the hardware for latched interrupts. However, the MCU sometimes
+ 585:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * misses the rising/falling edge, and the hal.new_gyro flag is never
+ 586:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * set. To avoid getting locked in this state, we're overriding the
+ 587:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * driver's configuration and sticking to unlatched interrupt mode.
+ 588:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        *
+ 589:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * TODO: The MCU supports level-triggered interrupts.
+ 590:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        */
+ 591:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       mpu_set_int_latched(0);
+ 592:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.sensors &= ~(GYRO_ON | COMPASS_ON);
+ 593:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.sensors |= ACCEL_ON;
+ 594:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.lp_accel_mode = 1;
+ 595:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_gyro_was_turned_off();
+ 596:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_compass_was_turned_off();
+ 597:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 598:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* The hardware self test can be run without any interaction with the
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 30
+
+
+ 599:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * MPL since it's completely localized in the gyro driver. Logging is
+ 600:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * assumed to be enabled; otherwise, a couple LEDs could probably be used
+ 601:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * here to display the test results.
+ 602:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 603:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 't':
+ 604:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       run_self_test();
+ 605:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Let MPL know that contiguity was broken. */
+ 606:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_accel_was_turned_off();
+ 607:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_gyro_was_turned_off();
+ 608:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_compass_was_turned_off();
+ 609:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 610:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Depending on your application, sensor data may be needed at a faster or
+ 611:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * slower rate. These commands can speed up or slow down the rate at which
+ 612:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * the sensor data is pushed to the MPL.
+ 613:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      *
+ 614:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * In this example, the compass rate is never changed.
+ 615:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 616:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '1':
+ 617:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) {
+ 618:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_set_fifo_rate(10);
+ 619:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_set_quat_sample_rate(100000L);
+ 620:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else
+ 621:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_sample_rate(10);
+ 622:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_gyro_sample_rate(100000L);
+ 623:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_accel_sample_rate(100000L);
+ 624:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 625:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '2':
+ 626:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) {
+ 627:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_set_fifo_rate(20);
+ 628:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_set_quat_sample_rate(50000L);
+ 629:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else
+ 630:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_sample_rate(20);
+ 631:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_gyro_sample_rate(50000L);
+ 632:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_accel_sample_rate(50000L);
+ 633:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 634:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '3':
+ 635:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) {
+ 636:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_set_fifo_rate(40);
+ 637:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_set_quat_sample_rate(25000L);
+ 638:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else
+ 639:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_sample_rate(40);
+ 640:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_gyro_sample_rate(25000L);
+ 641:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_accel_sample_rate(25000L);
+ 642:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 643:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '4':
+ 644:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) {
+ 645:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_set_fifo_rate(50);
+ 646:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_set_quat_sample_rate(20000L);
+ 647:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else
+ 648:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_sample_rate(50);
+ 649:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_gyro_sample_rate(20000L);
+ 650:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_accel_sample_rate(20000L);
+ 651:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 652:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '5':
+ 653:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) {
+ 654:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_set_fifo_rate(100);
+ 655:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_set_quat_sample_rate(10000L);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 31
+
+
+ 656:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else
+ 657:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_sample_rate(100);
+ 658:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_gyro_sample_rate(10000L);
+ 659:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_set_accel_sample_rate(10000L);
+ 660:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 661:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case ',':
+ 662:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Set hardware to interrupt on gesture event only. This feature is
+ 663:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * useful for keeping the MCU asleep until the DMP detects as a tap or
+ 664:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * orientation event.
+ 665:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        */
+ 666:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       dmp_set_interrupt_mode(DMP_INT_GESTURE);
+ 667:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 668:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '.':
+ 669:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Set hardware to interrupt periodically. */
+ 670:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       dmp_set_interrupt_mode(DMP_INT_CONTINUOUS);
+ 671:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 672:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '6':
+ 673:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Toggle pedometer display. */
+ 674:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.report ^= PRINT_PEDO;
+ 675:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 676:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case '7':
+ 677:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Reset pedometer. */
+ 678:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       dmp_set_pedometer_step_count(0);
+ 679:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       dmp_set_pedometer_walk_time(0);
+ 680:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 681:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'f':
+ 682:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.lp_accel_mode) /* LP accel is not compatible with the DMP. */
+ 683:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         return;
+ 684:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Toggle DMP. */
+ 685:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (hal.dmp_on) {
+ 686:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         unsigned short dmp_rate;
+ 687:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         unsigned char mask = 0;
+ 688:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         hal.dmp_on = 0;
+ 689:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_dmp_state(0);
+ 690:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         /* Restore FIFO settings. */
+ 691:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         if (hal.sensors & ACCEL_ON) mask |= INV_XYZ_ACCEL;
+ 692:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         if (hal.sensors & GYRO_ON) mask |= INV_XYZ_GYRO;
+ 693:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         if (hal.sensors & COMPASS_ON) mask |= INV_XYZ_COMPASS;
+ 694:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_configure_fifo(mask);
+ 695:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         /* When the DMP is used, the hardware sampling rate is fixed at
+ 696:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * 200Hz, and the DMP is configured to downsample the FIFO output
+ 697:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * using the function dmp_set_fifo_rate. However, when the DMP is
+ 698:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * turned off, the sampling rate remains at 200Hz. This could be
+ 699:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * handled in inv_mpu.c, but it would need to know that
+ 700:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * inv_mpu_dmp_motion_driver.c exists. To avoid this, we'll just
+ 701:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * put the extra logic in the application layer.
+ 702:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          */
+ 703:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_get_fifo_rate(&dmp_rate);
+ 704:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_sample_rate(dmp_rate);
+ 705:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_quaternion_sensor_was_turned_off();
+ 706:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         MPL_LOGI("DMP disabled.\n");
+ 707:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else {
+ 708:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         unsigned short sample_rate;
+ 709:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         hal.dmp_on = 1;
+ 710:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         /* Preserve current FIFO rate. */
+ 711:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_get_sample_rate(&sample_rate);
+ 712:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         dmp_set_fifo_rate(sample_rate);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 32
+
+
+ 713:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_set_quat_sample_rate(1000000L / sample_rate);
+ 714:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         mpu_set_dmp_state(1);
+ 715:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         MPL_LOGI("DMP enabled.\n");
+ 716:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       }
+ 717:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 718:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'm':
+ 719:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Test the motion interrupt hardware feature. */
+ 720:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #ifndef MPU6050  // not enabled for 6050 product
+ 721:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.motion_int_mode = 1;
+ 722:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 723:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 724:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 725:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     case 'v':
+ 726:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Toggle LP quaternion.
+ 727:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * The DMP features can be enabled/disabled at runtime. Use this same
+ 728:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        * approach for other features.
+ 729:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****        */
+ 730:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       hal.dmp_features ^= DMP_FEATURE_6X_LP_QUAT;
+ 731:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       dmp_enable_feature(hal.dmp_features);
+ 732:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       if (!(hal.dmp_features & DMP_FEATURE_6X_LP_QUAT)) {
+ 733:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         inv_quaternion_sensor_was_turned_off();
+ 734:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         MPL_LOGI("LP quaternion disabled.\n");
+ 735:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       } else
+ 736:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         MPL_LOGI("LP quaternion enabled.\n");
+ 737:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 738:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     default:
+ 739:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       break;
+ 740:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   }
+ 741:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   hal.rx.cmd = 0;
+ 742:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 743:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** #endif
+ 744:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void MPU6050_Init(void) {
+ 949              		.loc 1 744 25 is_stmt 1 view -0
+ 950              		.cfi_startproc
+ 951              		@ args = 0, pretend = 0, frame = 0
+ 952              		@ frame_needed = 0, uses_anonymous_args = 0
+ 953 0000 08B5     		push	{r3, lr}
+ 954              	.LCFI20:
+ 955              		.cfi_def_cfa_offset 8
+ 956              		.cfi_offset 3, -8
+ 957              		.cfi_offset 14, -4
+ 745:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_sw_reset();
+ 958              		.loc 1 745 3 view .LVU257
+ 959 0002 FFF7FEFF 		bl	mpu6050_sw_reset
+ 960              	.LVL97:
+ 746:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_set_gyro_fsr(3);
+ 961              		.loc 1 746 3 view .LVU258
+ 962 0006 0320     		movs	r0, #3
+ 963 0008 FFF7FEFF 		bl	mpu6050_set_gyro_fsr
+ 964              	.LVL98:
+ 747:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_set_accel_fsr(0);
+ 965              		.loc 1 747 3 view .LVU259
+ 966 000c 0020     		movs	r0, #0
+ 967 000e FFF7FEFF 		bl	mpu6050_set_accel_fsr
+ 968              	.LVL99:
+ 748:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_set_rate(500);
+ 969              		.loc 1 748 3 view .LVU260
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 33
+
+
+ 970 0012 4FF4FA70 		mov	r0, #500
+ 971 0016 FFF7FEFF 		bl	mpu6050_set_rate
+ 972              	.LVL100:
+ 749:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_wirte_byte(ATK_MS6050_IIC_ADDR, MPU_INT_EN_REG, 0x00);
+ 973              		.loc 1 749 3 view .LVU261
+ 974 001a 0022     		movs	r2, #0
+ 975 001c 3821     		movs	r1, #56
+ 976 001e 6820     		movs	r0, #104
+ 977 0020 FFF7FEFF 		bl	mpu6050_wirte_byte
+ 978              	.LVL101:
+ 750:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_wirte_byte(ATK_MS6050_IIC_ADDR, MPU_USER_CTRL_REG, 0x00);
+ 979              		.loc 1 750 3 view .LVU262
+ 980 0024 0022     		movs	r2, #0
+ 981 0026 6A21     		movs	r1, #106
+ 982 0028 6820     		movs	r0, #104
+ 983 002a FFF7FEFF 		bl	mpu6050_wirte_byte
+ 984              	.LVL102:
+ 751:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_wirte_byte(ATK_MS6050_IIC_ADDR, MPU_FIFO_EN_REG, 0x00);
+ 985              		.loc 1 751 3 view .LVU263
+ 986 002e 0022     		movs	r2, #0
+ 987 0030 2321     		movs	r1, #35
+ 988 0032 6820     		movs	r0, #104
+ 989 0034 FFF7FEFF 		bl	mpu6050_wirte_byte
+ 990              	.LVL103:
+ 752:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_wirte_byte(ATK_MS6050_IIC_ADDR, MPU_INTBP_CFG_REG, 0x80);
+ 991              		.loc 1 752 3 view .LVU264
+ 992 0038 8022     		movs	r2, #128
+ 993 003a 3721     		movs	r1, #55
+ 994 003c 6820     		movs	r0, #104
+ 995 003e FFF7FEFF 		bl	mpu6050_wirte_byte
+ 996              	.LVL104:
+ 753:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_wirte_byte(ATK_MS6050_IIC_ADDR, MPU_PWR_MGMT1_REG, 0x01);
+ 997              		.loc 1 753 3 view .LVU265
+ 998 0042 0122     		movs	r2, #1
+ 999 0044 6B21     		movs	r1, #107
+ 1000 0046 6820     		movs	r0, #104
+ 1001 0048 FFF7FEFF 		bl	mpu6050_wirte_byte
+ 1002              	.LVL105:
+ 754:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_wirte_byte(ATK_MS6050_IIC_ADDR, MPU_PWR_MGMT2_REG, 0x00);
+ 1003              		.loc 1 754 3 view .LVU266
+ 1004 004c 0022     		movs	r2, #0
+ 1005 004e 6C21     		movs	r1, #108
+ 1006 0050 6820     		movs	r0, #104
+ 1007 0052 FFF7FEFF 		bl	mpu6050_wirte_byte
+ 1008              	.LVL106:
+ 755:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu6050_set_rate(500);
+ 1009              		.loc 1 755 3 view .LVU267
+ 1010 0056 4FF4FA70 		mov	r0, #500
+ 1011 005a FFF7FEFF 		bl	mpu6050_set_rate
+ 1012              	.LVL107:
+ 756:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   mpu_init(NULL);
+ 1013              		.loc 1 756 3 view .LVU268
+ 1014 005e 0020     		movs	r0, #0
+ 1015 0060 FFF7FEFF 		bl	mpu_init
+ 1016              	.LVL108:
+ 757:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   MPU6050_mpl_init();
+ 1017              		.loc 1 757 3 view .LVU269
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 34
+
+
+ 1018 0064 FFF7FEFF 		bl	MPU6050_mpl_init
+ 1019              	.LVL109:
+ 758:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   MPU6050_config();
+ 1020              		.loc 1 758 3 view .LVU270
+ 1021 0068 FFF7FEFF 		bl	MPU6050_config
+ 1022              	.LVL110:
+ 759:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 1023              		.loc 1 759 1 is_stmt 0 view .LVU271
+ 1024 006c 08BD     		pop	{r3, pc}
+ 1025              		.cfi_endproc
+ 1026              	.LFE238:
+ 1028              		.global	__aeabi_dmul
+ 1029              		.section	.rodata.MPU6050_getValue.str1.4,"aMS",%progbits,1
+ 1030              		.align	2
+ 1031              	.LC6:
+ 1032 0000 4552524F 		.ascii	"ERROR execute on data\000"
+ 1032      52206578 
+ 1032      65637574 
+ 1032      65206F6E 
+ 1032      20646174 
+ 1033              		.section	.text.MPU6050_getValue,"ax",%progbits
+ 1034              		.align	1
+ 1035              		.global	MPU6050_getValue
+ 1036              		.syntax unified
+ 1037              		.thumb
+ 1038              		.thumb_func
+ 1040              	MPU6050_getValue:
+ 1041              	.LFB239:
+ 760:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** // void MPU6050Test(void) {
+ 761:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //   unsigned char new_temp = 0;
+ 762:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //
+ 763:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //   unsigned long timestamp;
+ 764:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //   // MPU6050_Init();
+ 765:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //
+ 766:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //   // while (1) {
+ 767:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     unsigned long sensor_timestamp;
+ 768:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     get_tick_count(&timestamp);
+ 769:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     short gyro[3], accel_short[3], sensors;
+ 770:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     unsigned char more;
+ 771:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     long accel[3], quat[4], temperature;
+ 772:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     /* This function gets new data from the FIFO when the DMP is in
+ 773:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * use. The FIFO can contain any combination of gyro, accel,
+ 774:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * quaternion, and gesture data. The sensors parameter tells the
+ 775:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * caller which data fields were actually populated with new data.
+ 776:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * For example, if sensors == (INV_XYZ_GYRO | INV_WXYZ_QUAT), then
+ 777:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * the FIFO isn't being filled with accel data.
+ 778:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * The driver parses the gesture data to determine if a gesture
+ 779:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * event has occurred; on an event, the application will be notified
+ 780:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * via a callback (assuming that a callback function was properly
+ 781:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * registered). The more parameter is non-zero if there are
+ 782:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * leftover packets in the FIFO.
+ 783:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      */
+ 784:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
+ 785:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //
+ 786:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     inv_build_quat(quat, 0, sensor_timestamp);
+ 787:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     /* Push the new data to the MPL. */
+ 788:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     inv_build_gyro(gyro, sensor_timestamp);
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 35
+
+
+ 789:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     // new_data = 1;
+ 790:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     if (new_temp) {
+ 791:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       new_temp = 0;
+ 792:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       /* Temperature only used for gyro temp comp. */
+ 793:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       mpu_get_temperature(&temperature, &sensor_timestamp);
+ 794:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       inv_build_temp(temperature, sensor_timestamp);
+ 795:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     }
+ 796:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     accel[0] = (long)accel_short[0];
+ 797:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     accel[1] = (long)accel_short[1];
+ 798:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     accel[2] = (long)accel_short[2];
+ 799:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     inv_build_accel(accel, 0, sensor_timestamp);
+ 800:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     long data[9];
+ 801:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     int8_t accuracy;
+ 802:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     if (inv_execute_on_data()) {
+ 803:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       printf("ERROR execute on data\n");
+ 804:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     }
+ 805:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     /* This function reads bias-compensated sensor data and sensor
+ 806:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * fusion outputs from the MPL. The outputs are formatted as seen
+ 807:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * in eMPL_outputs.c. This function only needs to be called at the
+ 808:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      * rate requested by the host.
+ 809:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //      */
+ 810:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //
+ 811:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     float float_data[3];
+ 812:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     // if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp)) {
+ 813:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     //   float_data[0] = data[0] * 1.0 / (1 << 16);
+ 814:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     //   float_data[1] = data[1] * 1.0 / (1 << 16);
+ 815:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     //   float_data[2] = data[2] * 1.0 / (1 << 16);
+ 816:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     //   printf("加速度(g/s2): %d  %d  %d\n", (int)float_data[0],
+ 817:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     //          (int)float_data[1], (int)float_data[2]);
+ 818:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     // }
+ 819:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     //
+ 820:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp)) {
+ 821:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       float_data[0] = data[0] * 1.0 / (1 << 16);
+ 822:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       float_data[1] = data[1] * 1.0 / (1 << 16);
+ 823:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       float_data[2] = data[2] * 1.0 / (1 << 16);
+ 824:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //       // printf("\n角速度(rad/s): %d   %d   %d  \n", (int)float_data[0],
+ 825:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //              // (int)float_data[1], (int)float_data[2]);
+ 826:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //     }
+ 827:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** //   // }
+ 828:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** // }
+ 829:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** int MPU6050_getValue(void) {
+ 1042              		.loc 1 829 28 is_stmt 1 view -0
+ 1043              		.cfi_startproc
+ 1044              		@ args = 0, pretend = 0, frame = 56
+ 1045              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1046 0000 30B5     		push	{r4, r5, lr}
+ 1047              	.LCFI21:
+ 1048              		.cfi_def_cfa_offset 12
+ 1049              		.cfi_offset 4, -12
+ 1050              		.cfi_offset 5, -8
+ 1051              		.cfi_offset 14, -4
+ 1052 0002 2DED088B 		vpush.64	{d8, d9, d10, d11}
+ 1053              	.LCFI22:
+ 1054              		.cfi_def_cfa_offset 44
+ 1055              		.cfi_offset 80, -44
+ 1056              		.cfi_offset 81, -40
+ 1057              		.cfi_offset 82, -36
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 36
+
+
+ 1058              		.cfi_offset 83, -32
+ 1059              		.cfi_offset 84, -28
+ 1060              		.cfi_offset 85, -24
+ 1061              		.cfi_offset 86, -20
+ 1062              		.cfi_offset 87, -16
+ 1063 0006 91B0     		sub	sp, sp, #68
+ 1064              	.LCFI23:
+ 1065              		.cfi_def_cfa_offset 112
+ 830:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 831:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned char new_temp = 0;
+ 1066              		.loc 1 831 3 view .LVU273
+ 1067              	.LVL111:
+ 832:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   int ret;
+ 1068              		.loc 1 832 3 view .LVU274
+ 833:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   unsigned long timestamp;
+ 1069              		.loc 1 833 3 view .LVU275
+ 834:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float q0 = 0.0f;
+ 1070              		.loc 1 834 5 view .LVU276
+ 835:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float q1 = 0.0f;
+ 1071              		.loc 1 835 5 view .LVU277
+ 836:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float q2 = 0.0f;
+ 1072              		.loc 1 836 5 view .LVU278
+ 837:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float q3 = 0.0f;
+ 1073              		.loc 1 837 5 view .LVU279
+ 838:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     unsigned long sensor_timestamp;
+ 1074              		.loc 1 838 5 view .LVU280
+ 839:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     get_tick_count(&timestamp);
+ 1075              		.loc 1 839 5 view .LVU281
+ 1076 0008 0FA8     		add	r0, sp, #60
+ 1077 000a FFF7FEFF 		bl	get_ms_user
+ 1078              	.LVL112:
+ 840:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     short gyro[3],accel_short[3], sensors;
+ 1079              		.loc 1 840 5 view .LVU282
+ 841:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     unsigned char more;
+ 1080              		.loc 1 841 5 view .LVU283
+ 842:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     long accel[3], quat[4], temperature;
+ 1081              		.loc 1 842 5 view .LVU284
+ 843:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     float pitch, roll, yaw;
+ 1082              		.loc 1 843 5 view .LVU285
+ 844:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* This function gets new data from the FIFO when the DMP is in
+ 845:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * use. The FIFO can contain any combination of gyro, accel,
+ 846:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * quaternion, and gesture data. The sensors parameter tells the
+ 847:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * caller which data fields were actually populated with new data.
+ 848:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * For example, if sensors == (INV_XYZ_GYRO | INV_WXYZ_QUAT), then
+ 849:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * the FIFO isn't being filled with accel data.
+ 850:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * via a callback (assuming that a callback function was properly
+ 851:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * registered). The more parameter is non-zero if there are
+ 852:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * leftover packets in the FIFO.
+ 853:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 854:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    ret =  dmp_read_fifo(gyro, accel_short, quat, &sensor_timestamp, &sensors, &more);
+ 1083              		.loc 1 854 4 view .LVU286
+ 1084              		.loc 1 854 11 is_stmt 0 view .LVU287
+ 1085 000e 0DF12503 		add	r3, sp, #37
+ 1086 0012 0193     		str	r3, [sp, #4]
+ 1087 0014 0DF12603 		add	r3, sp, #38
+ 1088 0018 0093     		str	r3, [sp]
+ 1089 001a 0EAB     		add	r3, sp, #56
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 37
+
+
+ 1090 001c 02AA     		add	r2, sp, #8
+ 1091 001e 0AA9     		add	r1, sp, #40
+ 1092 0020 0CA8     		add	r0, sp, #48
+ 1093 0022 FFF7FEFF 		bl	dmp_read_fifo
+ 1094              	.LVL113:
+ 1095 0026 0446     		mov	r4, r0
+ 1096              	.LVL114:
+ 855:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 856:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    if (sensors & INV_WXYZ_QUAT)
+ 1097              		.loc 1 856 4 is_stmt 1 view .LVU288
+ 1098              		.loc 1 856 16 is_stmt 0 view .LVU289
+ 1099 0028 BDF92630 		ldrsh	r3, [sp, #38]
+ 1100              		.loc 1 856 7 view .LVU290
+ 1101 002c 13F4807F 		tst	r3, #256
+ 1102 0030 20D1     		bne	.L58
+ 1103              	.LVL115:
+ 1104              	.L55:
+ 857:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     {
+ 858:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         /* ATK-MS6050的DMP输出的是姿态解算后的四元数，
+ 859:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * 采用q30格式，即结果被放大了2的30次方倍，
+ 860:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * 因为四元数并不是角度信号，因此为了得到欧拉角，
+ 861:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * 就需要对ATK-MS6050的DMP输出结果进行转换
+ 862:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          */
+ 863:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q0 = quat[0] / q30;
+ 864:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q1 = quat[1] / q30;
+ 865:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q2 = quat[2] / q30;
+ 866:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q3 = quat[3] / q30;
+ 867:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         
+ 868:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         /* 计算俯仰角、横滚角、航向角
+ 869:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          * 57.3为弧度转角度的转换系数，即180/PI
+ 870:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****          */
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         roll  = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3;
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 874:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 875:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerY = roll; 
+ 876:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerZ = yaw;
+ 877:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 878:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_quat(quat, 0, sensor_timestamp);
+ 1105              		.loc 1 878 5 is_stmt 1 view .LVU291
+ 1106 0032 0E9A     		ldr	r2, [sp, #56]
+ 1107 0034 0021     		movs	r1, #0
+ 1108 0036 02A8     		add	r0, sp, #8
+ 1109 0038 FFF7FEFF 		bl	inv_build_quat
+ 1110              	.LVL116:
+ 879:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* Push the new data to the MPL. */
+ 880:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_gyro(gyro, sensor_timestamp);
+ 1111              		.loc 1 880 5 view .LVU292
+ 1112 003c 0E99     		ldr	r1, [sp, #56]
+ 1113 003e 0CA8     		add	r0, sp, #48
+ 1114 0040 FFF7FEFF 		bl	inv_build_gyro
+ 1115              	.LVL117:
+ 881:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // new_data = 1;
+ 882:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if (new_temp) {
+ 1116              		.loc 1 882 5 view .LVU293
+ 883:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       new_temp = 0;
+ 884:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       /* Temperature only used for gyro temp comp. */
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 38
+
+
+ 885:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       mpu_get_temperature(&temperature, &sensor_timestamp);
+ 886:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       inv_build_temp(temperature, sensor_timestamp);
+ 887:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 888:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[0] = (long)accel_short[0];
+ 1117              		.loc 1 888 5 view .LVU294
+ 1118              		.loc 1 888 33 is_stmt 0 view .LVU295
+ 1119 0044 BDF92830 		ldrsh	r3, [sp, #40]
+ 1120              		.loc 1 888 14 view .LVU296
+ 1121 0048 0693     		str	r3, [sp, #24]
+ 889:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[1] = (long)accel_short[1];
+ 1122              		.loc 1 889 5 is_stmt 1 view .LVU297
+ 1123              		.loc 1 889 33 is_stmt 0 view .LVU298
+ 1124 004a BDF92A30 		ldrsh	r3, [sp, #42]
+ 1125              		.loc 1 889 14 view .LVU299
+ 1126 004e 0793     		str	r3, [sp, #28]
+ 890:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     accel[2] = (long)accel_short[2];
+ 1127              		.loc 1 890 5 is_stmt 1 view .LVU300
+ 1128              		.loc 1 890 33 is_stmt 0 view .LVU301
+ 1129 0050 BDF92C30 		ldrsh	r3, [sp, #44]
+ 1130              		.loc 1 890 14 view .LVU302
+ 1131 0054 0893     		str	r3, [sp, #32]
+ 891:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     inv_build_accel(accel, 0, sensor_timestamp);
+ 1132              		.loc 1 891 5 is_stmt 1 view .LVU303
+ 1133 0056 0E9A     		ldr	r2, [sp, #56]
+ 1134 0058 0021     		movs	r1, #0
+ 1135 005a 06A8     		add	r0, sp, #24
+ 1136 005c FFF7FEFF 		bl	inv_build_accel
+ 1137              	.LVL118:
+ 892:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // long data[3];
+ 893:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // int8_t accuracy;
+ 894:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     if (inv_execute_on_data()) {
+ 1138              		.loc 1 894 5 view .LVU304
+ 1139              		.loc 1 894 9 is_stmt 0 view .LVU305
+ 1140 0060 FFF7FEFF 		bl	inv_execute_on_data
+ 1141              	.LVL119:
+ 1142              		.loc 1 894 8 view .LVU306
+ 1143 0064 0028     		cmp	r0, #0
+ 1144 0066 40F0A380 		bne	.L59
+ 1145              	.L54:
+ 895:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****       printf("ERROR execute on data\n");
+ 896:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 897:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     /* This function reads bias-compensated sensor data and sensor
+ 898:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * fusion outputs from the MPL. The outputs are formatted as seen
+ 899:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * in eMPL_outputs.c. This function only needs to be called at the
+ 900:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      * rate requested by the host.
+ 901:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      */
+ 902:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** 
+ 903:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         // if (inv_get_sensor_type_accel(data, &accuracy, (inv_time_t *)&timestamp)) {
+ 904:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.AccelX = data[0] * 1.0 / (1 << 16);
+ 905:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.AccelY = data[1] * 1.0 / (1 << 16);
+ 906:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.AccelZ = data[2] * 1.0 / (1 << 16);
+ 907:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //   // printf("加速度(g/s2): %d  %d  %d\n", (int)IMU_Result.AccelX,
+ 908:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //          // (int)IMU_Result.AccelY, (int)IMU_Result.AccelZ);
+ 909:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // }
+ 910:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //
+ 911:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // printf("\npit: %d, rol: %d, yaw: %d\n", (int)pitch, (int)roll, (int)yaw);
+ 912:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // if (inv_get_sensor_type_gyro(data, &accuracy, (inv_time_t *)&timestamp)) {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 39
+
+
+ 913:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.GyroX = data[0] * 1.0 / (1 << 16);
+ 914:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.GyroY = data[1] * 1.0 / (1 << 16);
+ 915:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.GyroZ = data[2] * 1.0 / (1 << 16);
+ 916:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // if(IMU_Result.GyroX <600 && IMU_Result.GyroZ < 500 && IMU_Result.GyroY < 500 && 
+ 917:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //  IMU_Result.GyroX > -600 && IMU_Result.GyroY > -600 && IMU_Result.GyroZ > -600){
+ 918:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //   // printf("\n角速度(degree/s):GyroX= %d,GyroY= %d,GyroZ= %d\n", (int)IMU_Result.GyroX,
+ 919:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     //          // (int)IMU_Result.GyroY, (int)IMU_Result.GyroZ);
+ 920:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // }
+ 921:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     // }
+ 922:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //  if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 923:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 924:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    IMU_Result.GyroY = gyro[1]/16.4 - gyro_bias[1];
+ 925:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 926:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //   
+ 927:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //    printf("\n角速度(degree/s):GyroX= %d,GyroY= %d,GyroZ= %d\n", (int)IMU_Result.GyroX,
+ 928:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   //            (int)IMU_Result.GyroY, (int)IMU_Result.GyroZ);
+ 929:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   // };
+ 930:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 931:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      return ret; 
+ 932:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  }
+ 1146              		.loc 1 932 2 view .LVU307
+ 1147 006a 2046     		mov	r0, r4
+ 1148 006c 11B0     		add	sp, sp, #68
+ 1149              	.LCFI24:
+ 1150              		.cfi_remember_state
+ 1151              		.cfi_def_cfa_offset 44
+ 1152              		@ sp needed
+ 1153 006e BDEC088B 		vldm	sp!, {d8-d11}
+ 1154              	.LCFI25:
+ 1155              		.cfi_restore 86
+ 1156              		.cfi_restore 87
+ 1157              		.cfi_restore 84
+ 1158              		.cfi_restore 85
+ 1159              		.cfi_restore 82
+ 1160              		.cfi_restore 83
+ 1161              		.cfi_restore 80
+ 1162              		.cfi_restore 81
+ 1163              		.cfi_def_cfa_offset 12
+ 1164 0072 30BD     		pop	{r4, r5, pc}
+ 1165              	.LVL120:
+ 1166              	.L58:
+ 1167              	.LCFI26:
+ 1168              		.cfi_restore_state
+ 863:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q1 = quat[1] / q30;
+ 1169              		.loc 1 863 9 is_stmt 1 view .LVU308
+ 863:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q1 = quat[1] / q30;
+ 1170              		.loc 1 863 22 is_stmt 0 view .LVU309
+ 1171 0074 DDED027A 		vldr.32	s15, [sp, #8]	@ int
+ 1172 0078 B8EEE78A 		vcvt.f32.s32	s16, s15
+ 863:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q1 = quat[1] / q30;
+ 1173              		.loc 1 863 12 view .LVU310
+ 1174 007c 9FED507A 		vldr.32	s14, .L60+8
+ 1175 0080 28EE078A 		vmul.f32	s16, s16, s14
+ 1176              	.LVL121:
+ 864:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q2 = quat[2] / q30;
+ 1177              		.loc 1 864 9 is_stmt 1 view .LVU311
+ 864:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q2 = quat[2] / q30;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 40
+
+
+ 1178              		.loc 1 864 22 is_stmt 0 view .LVU312
+ 1179 0084 DDED037A 		vldr.32	s15, [sp, #12]	@ int
+ 1180 0088 B8EEE79A 		vcvt.f32.s32	s18, s15
+ 864:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q2 = quat[2] / q30;
+ 1181              		.loc 1 864 12 view .LVU313
+ 1182 008c 29EE079A 		vmul.f32	s18, s18, s14
+ 1183              	.LVL122:
+ 865:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q3 = quat[3] / q30;
+ 1184              		.loc 1 865 9 is_stmt 1 view .LVU314
+ 865:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q3 = quat[3] / q30;
+ 1185              		.loc 1 865 22 is_stmt 0 view .LVU315
+ 1186 0090 DDED047A 		vldr.32	s15, [sp, #16]	@ int
+ 1187 0094 F8EEE78A 		vcvt.f32.s32	s17, s15
+ 865:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         q3 = quat[3] / q30;
+ 1188              		.loc 1 865 12 view .LVU316
+ 1189 0098 68EE878A 		vmul.f32	s17, s17, s14
+ 1190              	.LVL123:
+ 866:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         
+ 1191              		.loc 1 866 9 is_stmt 1 view .LVU317
+ 866:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         
+ 1192              		.loc 1 866 22 is_stmt 0 view .LVU318
+ 1193 009c DDED057A 		vldr.32	s15, [sp, #20]	@ int
+ 1194 00a0 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 866:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         
+ 1195              		.loc 1 866 12 view .LVU319
+ 1196 00a4 27EE87AA 		vmul.f32	s20, s15, s14
+ 1197              	.LVL124:
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1198              		.loc 1 871 9 is_stmt 1 view .LVU320
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1199              		.loc 1 871 25 is_stmt 0 view .LVU321
+ 1200 00a8 F8EE009A 		vmov.f32	s19, #-2.0e+0
+ 1201 00ac 69EE299A 		vmul.f32	s19, s18, s19
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1202              		.loc 1 871 30 view .LVU322
+ 1203 00b0 29EE8A7A 		vmul.f32	s14, s19, s20
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1204              		.loc 1 871 39 view .LVU323
+ 1205 00b4 78EE08AA 		vadd.f32	s21, s16, s16
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1206              		.loc 1 871 44 view .LVU324
+ 1207 00b8 6AEEA87A 		vmul.f32	s15, s21, s17
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1208              		.loc 1 871 17 view .LVU325
+ 1209 00bc 77EE277A 		vadd.f32	s15, s14, s15
+ 1210 00c0 17EE900A 		vmov	r0, s15
+ 1211              	.LVL125:
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1212              		.loc 1 871 17 view .LVU326
+ 1213 00c4 FFF7FEFF 		bl	__aeabi_f2d
+ 1214              	.LVL126:
+ 1215 00c8 41EC100B 		vmov	d0, r0, r1
+ 1216 00cc FFF7FEFF 		bl	asin
+ 1217              	.LVL127:
+ 1218 00d0 51EC100B 		vmov	r0, r1, d0
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1219              		.loc 1 871 50 view .LVU327
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 41
+
+
+ 1220 00d4 38A3     		adr	r3, .L60
+ 1221 00d6 D3E90023 		ldrd	r2, [r3]
+ 1222 00da FFF7FEFF 		bl	__aeabi_dmul
+ 1223              	.LVL128:
+ 871:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         pitch   = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3;
+ 1224              		.loc 1 871 15 view .LVU328
+ 1225 00de FFF7FEFF 		bl	__aeabi_d2f
+ 1226              	.LVL129:
+ 1227 00e2 0546     		mov	r5, r0	@ float
+ 1228              	.LVL130:
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1229              		.loc 1 872 9 is_stmt 1 view .LVU329
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1230              		.loc 1 872 27 is_stmt 0 view .LVU330
+ 1231 00e4 78EEA87A 		vadd.f32	s15, s17, s17
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1232              		.loc 1 872 32 view .LVU331
+ 1233 00e8 27EE8A7A 		vmul.f32	s14, s15, s20
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1234              		.loc 1 872 46 view .LVU332
+ 1235 00ec 6AEE89AA 		vmul.f32	s21, s21, s18
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1236              		.loc 1 872 37 view .LVU333
+ 1237 00f0 77EE2AAA 		vadd.f32	s21, s14, s21
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1238              		.loc 1 872 60 view .LVU334
+ 1239 00f4 69EE899A 		vmul.f32	s19, s19, s18
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1240              		.loc 1 872 74 view .LVU335
+ 1241 00f8 67EEA87A 		vmul.f32	s15, s15, s17
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1242              		.loc 1 872 65 view .LVU336
+ 1243 00fc 79EEE79A 		vsub.f32	s19, s19, s15
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1244              		.loc 1 872 19 view .LVU337
+ 1245 0100 F7EE007A 		vmov.f32	s15, #1.0e+0
+ 1246 0104 79EEA77A 		vadd.f32	s15, s19, s15
+ 1247 0108 17EE900A 		vmov	r0, s15
+ 1248              	.LVL131:
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1249              		.loc 1 872 19 view .LVU338
+ 1250 010c FFF7FEFF 		bl	__aeabi_f2d
+ 1251              	.LVL132:
+ 1252 0110 41EC1B0B 		vmov	d11, r0, r1
+ 1253 0114 1AEE900A 		vmov	r0, s21
+ 1254 0118 FFF7FEFF 		bl	__aeabi_f2d
+ 1255              	.LVL133:
+ 1256 011c B0EE4B1A 		vmov.f32	s2, s22
+ 1257 0120 F0EE6B1A 		vmov.f32	s3, s23
+ 1258 0124 41EC100B 		vmov	d0, r0, r1
+ 1259 0128 FFF7FEFF 		bl	atan2
+ 1260              	.LVL134:
+ 1261 012c 51EC100B 		vmov	r0, r1, d0
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1262              		.loc 1 872 84 view .LVU339
+ 1263 0130 21A3     		adr	r3, .L60
+ 1264 0132 D3E90023 		ldrd	r2, [r3]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 42
+
+
+ 1265 0136 FFF7FEFF 		bl	__aeabi_dmul
+ 1266              	.LVL135:
+ 872:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****         yaw    = atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3;
+ 1267              		.loc 1 872 17 view .LVU340
+ 1268 013a FFF7FEFF 		bl	__aeabi_d2f
+ 1269              	.LVL136:
+ 1270 013e 0AEE900A 		vmov	s21, r0
+ 1271              	.LVL137:
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1272              		.loc 1 873 9 is_stmt 1 view .LVU341
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1273              		.loc 1 873 32 is_stmt 0 view .LVU342
+ 1274 0142 69EE287A 		vmul.f32	s15, s18, s17
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1275              		.loc 1 873 42 view .LVU343
+ 1276 0146 28EE0A7A 		vmul.f32	s14, s16, s20
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1277              		.loc 1 873 37 view .LVU344
+ 1278 014a 77EE877A 		vadd.f32	s15, s15, s14
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1279              		.loc 1 873 26 view .LVU345
+ 1280 014e 77EEA79A 		vadd.f32	s19, s15, s15
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1281              		.loc 1 873 52 view .LVU346
+ 1282 0152 28EE088A 		vmul.f32	s16, s16, s16
+ 1283              	.LVL138:
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1284              		.loc 1 873 62 view .LVU347
+ 1285 0156 29EE099A 		vmul.f32	s18, s18, s18
+ 1286              	.LVL139:
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1287              		.loc 1 873 57 view .LVU348
+ 1288 015a 38EE098A 		vadd.f32	s16, s16, s18
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1289              		.loc 1 873 72 view .LVU349
+ 1290 015e 68EEA88A 		vmul.f32	s17, s17, s17
+ 1291              	.LVL140:
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1292              		.loc 1 873 67 view .LVU350
+ 1293 0162 38EE688A 		vsub.f32	s16, s16, s17
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1294              		.loc 1 873 82 view .LVU351
+ 1295 0166 6AEE0A7A 		vmul.f32	s15, s20, s20
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1296              		.loc 1 873 18 view .LVU352
+ 1297 016a 78EE677A 		vsub.f32	s15, s16, s15
+ 1298 016e 17EE900A 		vmov	r0, s15
+ 1299              	.LVL141:
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1300              		.loc 1 873 18 view .LVU353
+ 1301 0172 FFF7FEFF 		bl	__aeabi_f2d
+ 1302              	.LVL142:
+ 1303 0176 41EC180B 		vmov	d8, r0, r1
+ 1304 017a 19EE900A 		vmov	r0, s19
+ 1305 017e FFF7FEFF 		bl	__aeabi_f2d
+ 1306              	.LVL143:
+ 1307 0182 B0EE481A 		vmov.f32	s2, s16
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 43
+
+
+ 1308 0186 F0EE681A 		vmov.f32	s3, s17
+ 1309 018a 41EC100B 		vmov	d0, r0, r1
+ 1310 018e FFF7FEFF 		bl	atan2
+ 1311              	.LVL144:
+ 1312 0192 51EC100B 		vmov	r0, r1, d0
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1313              		.loc 1 873 88 view .LVU354
+ 1314 0196 08A3     		adr	r3, .L60
+ 1315 0198 D3E90023 		ldrd	r2, [r3]
+ 1316 019c FFF7FEFF 		bl	__aeabi_dmul
+ 1317              	.LVL145:
+ 873:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerX = pitch;
+ 1318              		.loc 1 873 16 view .LVU355
+ 1319 01a0 FFF7FEFF 		bl	__aeabi_d2f
+ 1320              	.LVL146:
+ 874:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerY = roll; 
+ 1321              		.loc 1 874 5 is_stmt 1 view .LVU356
+ 874:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerY = roll; 
+ 1322              		.loc 1 874 23 is_stmt 0 view .LVU357
+ 1323 01a4 074B     		ldr	r3, .L60+12
+ 1324 01a6 C3ED00AA 		vstr.32	s21, [r3]
+ 875:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerZ = yaw;
+ 1325              		.loc 1 875 5 is_stmt 1 view .LVU358
+ 875:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     IMU_Result.EulerZ = yaw;
+ 1326              		.loc 1 875 23 is_stmt 0 view .LVU359
+ 1327 01aa 5D60     		str	r5, [r3, #4]	@ float
+ 876:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 1328              		.loc 1 876 5 is_stmt 1 view .LVU360
+ 876:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 1329              		.loc 1 876 23 is_stmt 0 view .LVU361
+ 1330 01ac 9860     		str	r0, [r3, #8]	@ float
+ 1331 01ae 40E7     		b	.L55
+ 1332              	.LVL147:
+ 1333              	.L59:
+ 895:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     }
+ 1334              		.loc 1 895 7 is_stmt 1 view .LVU362
+ 1335 01b0 0548     		ldr	r0, .L60+16
+ 1336 01b2 FFF7FEFF 		bl	puts
+ 1337              	.LVL148:
+ 931:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  }
+ 1338              		.loc 1 931 6 view .LVU363
+ 931:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****  }
+ 1339              		.loc 1 931 13 is_stmt 0 view .LVU364
+ 1340 01b6 58E7     		b	.L54
+ 1341              	.L61:
+ 1342              		.align	3
+ 1343              	.L60:
+ 1344 01b8 66666666 		.word	1717986918
+ 1345 01bc 66A64C40 		.word	1078765158
+ 1346 01c0 00008030 		.word	813694976
+ 1347 01c4 00000000 		.word	IMU_Result
+ 1348 01c8 00000000 		.word	.LC6
+ 1349              		.cfi_endproc
+ 1350              	.LFE239:
+ 1352              		.global	__aeabi_dsub
+ 1353              		.section	.rodata.mpu6050_get_gyrodata.str1.4,"aMS",%progbits,1
+ 1354              		.align	2
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 44
+
+
+ 1355              	.LC7:
+ 1356 0000 0AE8A792 		.ascii	"\012\350\247\222\351\200\237\345\272\246(degree/s):"
+ 1356      E9809FE5 
+ 1356      BAA62864 
+ 1356      65677265 
+ 1356      652F7329 
+ 1357 0015 4779726F 		.ascii	"GyroX= %d,GyroY= %d,GyroZ= %d\012\000"
+ 1357      583D2025 
+ 1357      642C4779 
+ 1357      726F593D 
+ 1357      2025642C 
+ 1358              		.section	.text.mpu6050_get_gyrodata,"ax",%progbits
+ 1359              		.align	1
+ 1360              		.global	mpu6050_get_gyrodata
+ 1361              		.syntax unified
+ 1362              		.thumb
+ 1363              		.thumb_func
+ 1365              	mpu6050_get_gyrodata:
+ 1366              	.LFB240:
+ 933:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** void mpu6050_get_gyrodata(void)
+ 934:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** {
+ 1367              		.loc 1 934 1 is_stmt 1 view -0
+ 1368              		.cfi_startproc
+ 1369              		@ args = 0, pretend = 0, frame = 16
+ 1370              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1371 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 1372              	.LCFI27:
+ 1373              		.cfi_def_cfa_offset 20
+ 1374              		.cfi_offset 4, -20
+ 1375              		.cfi_offset 5, -16
+ 1376              		.cfi_offset 6, -12
+ 1377              		.cfi_offset 7, -8
+ 1378              		.cfi_offset 14, -4
+ 1379 0002 2DED028B 		vpush.64	{d8}
+ 1380              	.LCFI28:
+ 1381              		.cfi_def_cfa_offset 28
+ 1382              		.cfi_offset 80, -28
+ 1383              		.cfi_offset 81, -24
+ 1384 0006 85B0     		sub	sp, sp, #20
+ 1385              	.LCFI29:
+ 1386              		.cfi_def_cfa_offset 48
+ 935:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    short gyro[3];
+ 1387              		.loc 1 935 4 view .LVU366
+ 936:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****    unsigned long timestamp;
+ 1388              		.loc 1 936 4 view .LVU367
+ 937:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** if(0 == mpu_get_gyro_reg(gyro,(inv_time_t *)&timestamp)){
+ 1389              		.loc 1 937 1 view .LVU368
+ 1390              		.loc 1 937 9 is_stmt 0 view .LVU369
+ 1391 0008 01A9     		add	r1, sp, #4
+ 1392 000a 02A8     		add	r0, sp, #8
+ 1393 000c FFF7FEFF 		bl	mpu_get_gyro_reg
+ 1394              	.LVL149:
+ 1395              		.loc 1 937 3 view .LVU370
+ 1396 0010 18B1     		cbz	r0, .L65
+ 1397              	.L62:
+ 938:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 939:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroY = gyro[1]/16.4 - gyro_bias[1];
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 45
+
+
+ 940:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 941:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 942:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      printf("\n角速度(degree/s):GyroX= %d,GyroY= %d,GyroZ= %d\n", (int)IMU_Result.GyroX,
+ 943:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              (int)IMU_Result.GyroY, (int)IMU_Result.GyroZ);
+ 944:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****   };
+ 945:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 1398              		.loc 1 945 1 view .LVU371
+ 1399 0012 05B0     		add	sp, sp, #20
+ 1400              	.LCFI30:
+ 1401              		.cfi_remember_state
+ 1402              		.cfi_def_cfa_offset 28
+ 1403              		@ sp needed
+ 1404 0014 BDEC028B 		vldm	sp!, {d8}
+ 1405              	.LCFI31:
+ 1406              		.cfi_restore 80
+ 1407              		.cfi_restore 81
+ 1408              		.cfi_def_cfa_offset 20
+ 1409 0018 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1410              	.L65:
+ 1411              	.LCFI32:
+ 1412              		.cfi_restore_state
+ 938:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 1413              		.loc 1 938 6 is_stmt 1 view .LVU372
+ 938:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 1414              		.loc 1 938 32 is_stmt 0 view .LVU373
+ 1415 001a BDF90800 		ldrsh	r0, [sp, #8]
+ 1416 001e FFF7FEFF 		bl	__aeabi_i2d
+ 1417              	.LVL150:
+ 1418 0022 2DA3     		adr	r3, .L66
+ 1419 0024 D3E90023 		ldrd	r2, [r3]
+ 1420 0028 FFF7FEFF 		bl	__aeabi_ddiv
+ 1421              	.LVL151:
+ 1422 002c 0646     		mov	r6, r0
+ 1423 002e 0F46     		mov	r7, r1
+ 938:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 1424              		.loc 1 938 49 view .LVU374
+ 1425 0030 2B4D     		ldr	r5, .L66+8
+ 1426 0032 2868     		ldr	r0, [r5]	@ float
+ 1427 0034 FFF7FEFF 		bl	__aeabi_f2d
+ 1428              	.LVL152:
+ 1429 0038 0246     		mov	r2, r0
+ 1430 003a 0B46     		mov	r3, r1
+ 938:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 1431              		.loc 1 938 38 view .LVU375
+ 1432 003c 3046     		mov	r0, r6
+ 1433 003e 3946     		mov	r1, r7
+ 1434 0040 FFF7FEFF 		bl	__aeabi_dsub
+ 1435              	.LVL153:
+ 1436 0044 FFF7FEFF 		bl	__aeabi_d2f
+ 1437              	.LVL154:
+ 1438 0048 08EE100A 		vmov	s16, r0
+ 938:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroX = gyro[0]/16.4 - gyro_bias[0];
+ 1439              		.loc 1 938 23 view .LVU376
+ 1440 004c 254C     		ldr	r4, .L66+12
+ 1441 004e A061     		str	r0, [r4, #24]	@ float
+ 939:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 1442              		.loc 1 939 6 is_stmt 1 view .LVU377
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 46
+
+
+ 939:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 1443              		.loc 1 939 32 is_stmt 0 view .LVU378
+ 1444 0050 BDF90A00 		ldrsh	r0, [sp, #10]
+ 1445 0054 FFF7FEFF 		bl	__aeabi_i2d
+ 1446              	.LVL155:
+ 1447 0058 1FA3     		adr	r3, .L66
+ 1448 005a D3E90023 		ldrd	r2, [r3]
+ 1449 005e FFF7FEFF 		bl	__aeabi_ddiv
+ 1450              	.LVL156:
+ 1451 0062 0646     		mov	r6, r0
+ 1452 0064 0F46     		mov	r7, r1
+ 939:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 1453              		.loc 1 939 49 view .LVU379
+ 1454 0066 6868     		ldr	r0, [r5, #4]	@ float
+ 1455 0068 FFF7FEFF 		bl	__aeabi_f2d
+ 1456              	.LVL157:
+ 1457 006c 0246     		mov	r2, r0
+ 1458 006e 0B46     		mov	r3, r1
+ 939:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 1459              		.loc 1 939 38 view .LVU380
+ 1460 0070 3046     		mov	r0, r6
+ 1461 0072 3946     		mov	r1, r7
+ 1462 0074 FFF7FEFF 		bl	__aeabi_dsub
+ 1463              	.LVL158:
+ 1464 0078 FFF7FEFF 		bl	__aeabi_d2f
+ 1465              	.LVL159:
+ 1466 007c 08EE900A 		vmov	s17, r0
+ 939:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****      IMU_Result.GyroZ = gyro[2]/16.4 - gyro_bias[2];
+ 1467              		.loc 1 939 23 view .LVU381
+ 1468 0080 E061     		str	r0, [r4, #28]	@ float
+ 940:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 1469              		.loc 1 940 6 is_stmt 1 view .LVU382
+ 940:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 1470              		.loc 1 940 32 is_stmt 0 view .LVU383
+ 1471 0082 BDF90C00 		ldrsh	r0, [sp, #12]
+ 1472 0086 FFF7FEFF 		bl	__aeabi_i2d
+ 1473              	.LVL160:
+ 1474 008a 13A3     		adr	r3, .L66
+ 1475 008c D3E90023 		ldrd	r2, [r3]
+ 1476 0090 FFF7FEFF 		bl	__aeabi_ddiv
+ 1477              	.LVL161:
+ 1478 0094 0646     		mov	r6, r0
+ 1479 0096 0F46     		mov	r7, r1
+ 940:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 1480              		.loc 1 940 49 view .LVU384
+ 1481 0098 A868     		ldr	r0, [r5, #8]	@ float
+ 1482 009a FFF7FEFF 		bl	__aeabi_f2d
+ 1483              	.LVL162:
+ 1484 009e 0246     		mov	r2, r0
+ 1485 00a0 0B46     		mov	r3, r1
+ 940:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 1486              		.loc 1 940 38 view .LVU385
+ 1487 00a2 3046     		mov	r0, r6
+ 1488 00a4 3946     		mov	r1, r7
+ 1489 00a6 FFF7FEFF 		bl	__aeabi_dsub
+ 1490              	.LVL163:
+ 1491 00aa FFF7FEFF 		bl	__aeabi_d2f
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 47
+
+
+ 1492              	.LVL164:
+ 1493 00ae 07EE900A 		vmov	s15, r0
+ 940:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****     
+ 1494              		.loc 1 940 23 view .LVU386
+ 1495 00b2 2062     		str	r0, [r4, #32]	@ float
+ 942:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c ****              (int)IMU_Result.GyroY, (int)IMU_Result.GyroZ);
+ 1496              		.loc 1 942 6 is_stmt 1 view .LVU387
+ 1497 00b4 FDEEE77A 		vcvt.s32.f32	s15, s15
+ 1498 00b8 17EE903A 		vmov	r3, s15	@ int
+ 1499 00bc FDEEE87A 		vcvt.s32.f32	s15, s17
+ 1500 00c0 17EE902A 		vmov	r2, s15	@ int
+ 1501 00c4 FDEEC87A 		vcvt.s32.f32	s15, s16
+ 1502 00c8 17EE901A 		vmov	r1, s15	@ int
+ 1503 00cc 0648     		ldr	r0, .L66+16
+ 1504 00ce FFF7FEFF 		bl	printf
+ 1505              	.LVL165:
+ 944:Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.c **** }
+ 1506              		.loc 1 944 4 view .LVU388
+ 1507              		.loc 1 945 1 is_stmt 0 view .LVU389
+ 1508 00d2 9EE7     		b	.L62
+ 1509              	.L67:
+ 1510 00d4 AFF30080 		.align	3
+ 1511              	.L66:
+ 1512 00d8 66666666 		.word	1717986918
+ 1513 00dc 66663040 		.word	1076913766
+ 1514 00e0 00000000 		.word	gyro_bias
+ 1515 00e4 00000000 		.word	IMU_Result
+ 1516 00e8 00000000 		.word	.LC7
+ 1517              		.cfi_endproc
+ 1518              	.LFE240:
+ 1520              		.global	sum_bias
+ 1521              		.section	.bss.sum_bias,"aw",%nobits
+ 1522              		.align	2
+ 1525              	sum_bias:
+ 1526 0000 00000000 		.space	12
+ 1526      00000000 
+ 1526      00000000 
+ 1527              		.global	gyro_bias
+ 1528              		.section	.bss.gyro_bias,"aw",%nobits
+ 1529              		.align	2
+ 1532              	gyro_bias:
+ 1533 0000 00000000 		.space	12
+ 1533      00000000 
+ 1533      00000000 
+ 1534              		.global	gyro_pdata
+ 1535              		.section	.data.gyro_pdata,"aw"
+ 1536              		.align	2
+ 1539              	gyro_pdata:
+ 1540 0000 01000000 		.ascii	"\001\000\000\000\001\000\000\000\001"
+ 1540      01000000 
+ 1540      01
+ 1541              		.global	hal
+ 1542              		.section	.bss.hal,"aw",%nobits
+ 1543              		.align	2
+ 1546              	hal:
+ 1547 0000 00000000 		.space	36
+ 1547      00000000 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 48
+
+
+ 1547      00000000 
+ 1547      00000000 
+ 1547      00000000 
+ 1548              		.global	mpl_key
+ 1549              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 1550              		.align	2
+ 1551              	.LC8:
+ 1552 0000 654D504C 		.ascii	"eMPL 5.1\000"
+ 1552      20352E31 
+ 1552      00
+ 1553              		.section	.data.mpl_key,"aw"
+ 1554              		.align	2
+ 1557              	mpl_key:
+ 1558 0000 00000000 		.word	.LC8
+ 1559              		.text
+ 1560              	.Letext0:
+ 1561              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 1562              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 1563              		.file 4 "Middlewares/MPU6050_Motion_Driver/porting/mpu6050_SL.h"
+ 1564              		.file 5 "Middlewares/MPU6050_Motion_Driver/driver/include/mltypes.h"
+ 1565              		.file 6 "Middlewares/MPU6050_Motion_Driver/driver/eMPL/inv_mpu.h"
+ 1566              		.file 7 "Middlewares/MPU6050_Motion_Driver/porting/mpu6050_init.h"
+ 1567              		.file 8 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mat
+ 1568              		.file 9 "Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.h"
+ 1569              		.file 10 "Middlewares/MPU6050_Motion_Driver/mllite/data_builder.h"
+ 1570              		.file 11 "Middlewares/MPU6050_Motion_Driver/driver/eMPL/inv_mpu_dmp_motion_driver.h"
+ 1571              		.file 12 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h"
+ 1572              		.file 13 "Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h"
+ 1573              		.file 14 "Middlewares/MPU6050_Motion_Driver/mllite/mpl.h"
+ 1574              		.file 15 "Middlewares/MPU6050_Motion_Driver/eMPL-hal/eMPL_outputs.h"
+ 1575              		.file 16 "Middlewares/MPU6050_Motion_Driver/mpl/gyro_tc.h"
+ 1576              		.file 17 "Middlewares/MPU6050_Motion_Driver/mpl/fast_no_motion.h"
+ 1577              		.file 18 "Middlewares/MPU6050_Motion_Driver/mpl/fusion_9axis.h"
+ 1578              		.file 19 "Middlewares/MPU6050_Motion_Driver/mpl/quaternion_supervisor.h"
+ 1579              		.file 20 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/st
+ 1580              		.file 21 "<built-in>"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 49
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 mpu6050_SL.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:21     .rodata.MPU6050_mpu_init.str1.4:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:28     .text.MPU6050_mpu_init:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:34     .text.MPU6050_mpu_init:00000000 MPU6050_mpu_init
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:92     .text.MPU6050_mpu_init:00000028 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:98     .rodata.MPU6050_mpl_init.str1.4:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:105    .text.MPU6050_mpl_init:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:111    .text.MPU6050_mpl_init:00000000 MPU6050_mpl_init
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:157    .text.MPU6050_mpl_init:0000001c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:163    .rodata.MPU6050_config.str1.4:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:175    .text.MPU6050_config:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:181    .text.MPU6050_config:00000000 MPU6050_config
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:510    .text.MPU6050_config:000001b8 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1539   .data.gyro_pdata:00000000 gyro_pdata
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1546   .bss.hal:00000000 hal
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1525   .bss.sum_bias:00000000 sum_bias
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1532   .bss.gyro_bias:00000000 gyro_bias
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:523    .text.MPU6050_data_ready_cb:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:529    .text.MPU6050_data_ready_cb:00000000 MPU6050_data_ready_cb
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:546    .text.MPU6050_data_ready_cb:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:551    .text.setup_gyro:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:557    .text.setup_gyro:00000000 setup_gyro
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:645    .text.setup_gyro:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:651    .text.MPU6050_get_sensor:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:657    .text.MPU6050_get_sensor:00000000 MPU6050_get_sensor
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:804    .text.MPU6050_get_sensor:00000098 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:809    .text.run_self_test:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:815    .text.run_self_test:00000000 run_self_test
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:941    .text.MPU6050_Init:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:947    .text.MPU6050_Init:00000000 MPU6050_Init
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1030   .rodata.MPU6050_getValue.str1.4:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1034   .text.MPU6050_getValue:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1040   .text.MPU6050_getValue:00000000 MPU6050_getValue
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1344   .text.MPU6050_getValue:000001b8 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1354   .rodata.mpu6050_get_gyrodata.str1.4:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1359   .text.mpu6050_get_gyrodata:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1365   .text.mpu6050_get_gyrodata:00000000 mpu6050_get_gyrodata
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1512   .text.mpu6050_get_gyrodata:000000d8 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1522   .bss.sum_bias:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1529   .bss.gyro_bias:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1536   .data.gyro_pdata:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1543   .bss.hal:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1557   .data.mpl_key:00000000 mpl_key
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1550   .rodata.str1.4:00000000 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s:1554   .data.mpl_key:00000000 $d
+
+UNDEFINED SYMBOLS
+mpu_init
+printf
+inv_init_mpl
+puts
+__aeabi_f2d
+__aeabi_i2d
+__aeabi_ddiv
+__aeabi_dadd
+__aeabi_d2f
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cchnQwtD.s 			page 50
+
+
+inv_enable_quaternion
+inv_enable_9x_sensor_fusion
+inv_enable_fast_nomot
+inv_enable_gyro_tc
+inv_enable_eMPL_outputs
+inv_start_mpl
+mpu_set_sensors
+mpu_configure_fifo
+mpu_set_sample_rate
+mpu_get_sample_rate
+mpu_get_gyro_fsr
+mpu_get_accel_fsr
+inv_set_gyro_sample_rate
+inv_set_accel_sample_rate
+inv_orientation_matrix_to_scalar
+inv_set_gyro_orientation_and_scale
+inv_set_accel_orientation_and_scale
+dmp_load_motion_driver_firmware
+dmp_set_orientation
+dmp_enable_feature
+dmp_set_fifo_rate
+mpu_set_dmp_state
+HAL_Delay
+atk_ms6050_run_self_test
+mpu_get_gyro_reg
+dmp_read_fifo
+inv_execute_on_data
+inv_build_gyro
+mpu_get_temperature
+inv_build_temp
+inv_build_accel
+inv_build_quat
+mpu_run_self_test
+mpu_get_accel_sens
+inv_set_accel_bias
+mpu_get_gyro_sens
+inv_set_gyro_bias
+mpu6050_sw_reset
+mpu6050_set_gyro_fsr
+mpu6050_set_accel_fsr
+mpu6050_set_rate
+mpu6050_wirte_byte
+__aeabi_dmul
+get_ms_user
+asin
+atan2
+IMU_Result
+__aeabi_dsub

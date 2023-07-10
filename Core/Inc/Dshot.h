@@ -1,0 +1,37 @@
+#ifndef __DSHOT_H__
+#define __DSHOT_H__
+#include "Dshot_tim.h"
+#include <stdbool.h>
+#include <math.h>
+
+// MOTOR 4 (PA3) - TIM5 Channel 4, DMA1 Stream 3
+#define MOTOR_1_TIM             (&htim5)
+#define MOTOR_1_TIM_CHANNEL     TIM_CHANNEL_4
+
+// MOTOR 3 (PA2) - TIM2 Channel 3, DMA1 Stream 1
+#define MOTOR_2_TIM             (&htim2)
+#define MOTOR_2_TIM_CHANNEL     TIM_CHANNEL_3
+
+// MOTOR 1 (PA0) - TIM2 Channel 1, DMA1 Stream 5
+#define MOTOR_3_TIM             (&htim2)
+#define MOTOR_3_TIM_CHANNEL     TIM_CHANNEL_1
+
+// MOTOR 2 (PA1) - TIM5 Channel 2, DMA1 Stream 4
+#define MOTOR_4_TIM             (&htim5)
+#define MOTOR_4_TIM_CHANNEL     TIM_CHANNEL_2
+
+#define MOTOR_BIT_0                 7
+#define MOTOR_BIT_1                 14
+#define MOTOR_BITLENGTH             20
+#define DSHOT_FRAME_SIZE       	    16
+#define DSHOT_DMA_BUFFER_SIZE       18 /* resolution + frame reset (2us) */
+
+#define DSHOT_MIN_THROTTLE          48
+#define DSHOT_MAX_THROTTLE     	    2047
+#define DSHOT_RANGE 			    (DSHOT_MAX_THROTTLE - DSHOT_MIN_THROTTLE)
+
+
+void dshot_init(void);
+int dshot_write(uint16_t* motor_value);
+
+#endif

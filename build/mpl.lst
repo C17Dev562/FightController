@@ -1,0 +1,292 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"mpl.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/mllite/mpl.c"
+  20              		.section	.text.inv_init_mpl,"ax",%progbits
+  21              		.align	1
+  22              		.global	inv_init_mpl
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	inv_init_mpl:
+  28              	.LFB1:
+   1:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  $
+   6:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** /**
+   8:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *   @defgroup  MPL mpl
+   9:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *   @brief     Motion Library - Start Point
+  10:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *              Initializes MPL.
+  11:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *
+  12:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *   @{
+  13:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *       @file  mpl.c
+  14:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *       @brief MPL start point.
+  15:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  */
+  16:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  17:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "storage_manager.h"
+  18:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "log.h"
+  19:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "mpl.h"
+  20:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "start_manager.h"
+  21:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "data_builder.h"
+  22:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "results_holder.h"
+  23:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** #include "mlinclude.h"
+  24:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  25:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** /**
+  26:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  * @brief  Initializes the MPL. Should be called first and once 
+  27:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+  28:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  */
+  29:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** inv_error_t inv_init_mpl(void)
+  30:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s 			page 2
+
+
+  29              		.loc 1 30 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33 0000 08B5     		push	{r3, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 8
+  36              		.cfi_offset 3, -8
+  37              		.cfi_offset 14, -4
+  31:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     inv_init_storage_manager();
+  38              		.loc 1 31 5 view .LVU1
+  39 0002 FFF7FEFF 		bl	inv_init_storage_manager
+  40              	.LVL0:
+  32:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  33:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     /* initialize the start callback manager */
+  34:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_init_start_manager());
+  41              		.loc 1 34 5 view .LVU2
+  42 0006 FFF7FEFF 		bl	inv_init_start_manager
+  43              	.LVL1:
+  44 000a 30B9     		cbnz	r0, .L6
+  45              		.loc 1 34 46 discriminator 2 view .LVU3
+  35:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  36:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     /* initialize the data builder */
+  37:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_init_data_builder());
+  46              		.loc 1 37 5 discriminator 2 view .LVU4
+  47 000c FFF7FEFF 		bl	inv_init_data_builder
+  48              	.LVL2:
+  49 0010 40B9     		cbnz	r0, .L7
+  50              		.loc 1 37 45 discriminator 2 view .LVU5
+  38:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  39:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_enable_results_holder());
+  51              		.loc 1 39 5 discriminator 2 view .LVU6
+  52 0012 FFF7FEFF 		bl	inv_enable_results_holder
+  53              	.LVL3:
+  54 0016 50B9     		cbnz	r0, .L8
+  55              	.L1:
+  40:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  41:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     return INV_SUCCESS;
+  42:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** }
+  56              		.loc 1 42 1 is_stmt 0 view .LVU7
+  57 0018 08BD     		pop	{r3, pc}
+  58              	.L6:
+  34:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  59              		.loc 1 34 5 is_stmt 1 discriminator 1 view .LVU8
+  34:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  60              		.loc 1 34 5 discriminator 1 view .LVU9
+  61 001a FFF7FEFF 		bl	inv_init_start_manager
+  62              	.LVL4:
+  34:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  63              		.loc 1 34 5 discriminator 1 view .LVU10
+  34:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  64              		.loc 1 34 5 discriminator 1 view .LVU11
+  65 001e FFF7FEFF 		bl	inv_init_start_manager
+  66              	.LVL5:
+  67 0022 F9E7     		b	.L1
+  68              	.L7:
+  37:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s 			page 3
+
+
+  69              		.loc 1 37 5 discriminator 1 view .LVU12
+  37:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  70              		.loc 1 37 5 discriminator 1 view .LVU13
+  71 0024 FFF7FEFF 		bl	inv_init_data_builder
+  72              	.LVL6:
+  37:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  73              		.loc 1 37 5 discriminator 1 view .LVU14
+  37:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  74              		.loc 1 37 5 discriminator 1 view .LVU15
+  75 0028 FFF7FEFF 		bl	inv_init_data_builder
+  76              	.LVL7:
+  77 002c F4E7     		b	.L1
+  78              	.L8:
+  39:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  79              		.loc 1 39 5 discriminator 1 view .LVU16
+  39:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  80              		.loc 1 39 5 discriminator 1 view .LVU17
+  81 002e FFF7FEFF 		bl	inv_enable_results_holder
+  82              	.LVL8:
+  39:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  83              		.loc 1 39 5 discriminator 1 view .LVU18
+  39:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  84              		.loc 1 39 5 discriminator 1 view .LVU19
+  85 0032 FFF7FEFF 		bl	inv_enable_results_holder
+  86              	.LVL9:
+  87 0036 EFE7     		b	.L1
+  88              		.cfi_endproc
+  89              	.LFE1:
+  91              		.section	.text.inv_get_version,"ax",%progbits
+  92              		.align	1
+  93              		.global	inv_get_version
+  94              		.syntax unified
+  95              		.thumb
+  96              		.thumb_func
+  98              	inv_get_version:
+  99              	.LVL10:
+ 100              	.LFB2:
+  43:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  44:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** const char ml_ver[] = "InvenSense MA 5.1.2";
+  45:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  46:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** /**
+  47:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *  @brief  used to get the MPL version.
+  48:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *  @param  version     a string where the MPL version gets stored.
+  49:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *  @return INV_SUCCESS if successful or a non-zero error code otherwise.
+  50:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  */
+  51:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** inv_error_t inv_get_version(char **version)
+  52:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** {
+ 101              		.loc 1 52 1 view -0
+ 102              		.cfi_startproc
+ 103              		@ args = 0, pretend = 0, frame = 0
+ 104              		@ frame_needed = 0, uses_anonymous_args = 0
+ 105              		@ link register save eliminated.
+  53:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INVENSENSE_FUNC_START;
+ 106              		.loc 1 53 5 view .LVU21
+  54:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     /* cast out the const */
+  55:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     *version = (char *)&ml_ver;
+ 107              		.loc 1 55 5 view .LVU22
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s 			page 4
+
+
+ 108              		.loc 1 55 14 is_stmt 0 view .LVU23
+ 109 0000 014B     		ldr	r3, .L10
+ 110 0002 0360     		str	r3, [r0]
+  56:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     return INV_SUCCESS;
+ 111              		.loc 1 56 5 is_stmt 1 view .LVU24
+  57:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** }
+ 112              		.loc 1 57 1 is_stmt 0 view .LVU25
+ 113 0004 0020     		movs	r0, #0
+ 114              	.LVL11:
+ 115              		.loc 1 57 1 view .LVU26
+ 116 0006 7047     		bx	lr
+ 117              	.L11:
+ 118              		.align	2
+ 119              	.L10:
+ 120 0008 00000000 		.word	ml_ver
+ 121              		.cfi_endproc
+ 122              	.LFE2:
+ 124              		.section	.text.inv_start_mpl,"ax",%progbits
+ 125              		.align	1
+ 126              		.global	inv_start_mpl
+ 127              		.syntax unified
+ 128              		.thumb
+ 129              		.thumb_func
+ 131              	inv_start_mpl:
+ 132              	.LFB3:
+  58:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** 
+  59:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** /** 
+  60:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *  @brief  Starts the MPL. Typically called after inv_init_mpl() or after a
+  61:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *          inv_stop_mpl() to start the MPL back up an running.
+  62:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  *  @return INV_SUCCESS if successful or a non-zero error code otherwise.
+  63:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****  */
+  64:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** inv_error_t inv_start_mpl(void)
+  65:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** {
+ 133              		.loc 1 65 1 is_stmt 1 view -0
+ 134              		.cfi_startproc
+ 135              		@ args = 0, pretend = 0, frame = 0
+ 136              		@ frame_needed = 0, uses_anonymous_args = 0
+ 137 0000 08B5     		push	{r3, lr}
+ 138              	.LCFI1:
+ 139              		.cfi_def_cfa_offset 8
+ 140              		.cfi_offset 3, -8
+ 141              		.cfi_offset 14, -4
+  66:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_execute_mpl_start_notification());
+ 142              		.loc 1 66 5 view .LVU28
+ 143 0002 FFF7FEFF 		bl	inv_execute_mpl_start_notification
+ 144              	.LVL12:
+ 145 0006 00B9     		cbnz	r0, .L15
+ 146              	.L12:
+  67:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     return INV_SUCCESS;
+  68:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c **** }
+ 147              		.loc 1 68 1 is_stmt 0 view .LVU29
+ 148 0008 08BD     		pop	{r3, pc}
+ 149              	.L15:
+  66:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_execute_mpl_start_notification());
+ 150              		.loc 1 66 5 is_stmt 1 discriminator 1 view .LVU30
+  66:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_execute_mpl_start_notification());
+ 151              		.loc 1 66 5 discriminator 1 view .LVU31
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s 			page 5
+
+
+ 152 000a FFF7FEFF 		bl	inv_execute_mpl_start_notification
+ 153              	.LVL13:
+  66:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_execute_mpl_start_notification());
+ 154              		.loc 1 66 5 discriminator 1 view .LVU32
+  66:Middlewares/MPU6050_Motion_Driver/mllite/mpl.c ****     INV_ERROR_CHECK(inv_execute_mpl_start_notification());
+ 155              		.loc 1 66 5 discriminator 1 view .LVU33
+ 156 000e FFF7FEFF 		bl	inv_execute_mpl_start_notification
+ 157              	.LVL14:
+ 158 0012 F9E7     		b	.L12
+ 159              		.cfi_endproc
+ 160              	.LFE3:
+ 162              		.global	ml_ver
+ 163              		.section	.rodata.ml_ver,"a"
+ 164              		.align	2
+ 167              	ml_ver:
+ 168 0000 496E7665 		.ascii	"InvenSense MA 5.1.2\000"
+ 168      6E53656E 
+ 168      7365204D 
+ 168      4120352E 
+ 168      312E3200 
+ 169              		.text
+ 170              	.Letext0:
+ 171              		.file 2 "Middlewares/MPU6050_Motion_Driver/mllite/start_manager.h"
+ 172              		.file 3 "Middlewares/MPU6050_Motion_Driver/mllite/results_holder.h"
+ 173              		.file 4 "Middlewares/MPU6050_Motion_Driver/mllite/data_builder.h"
+ 174              		.file 5 "Middlewares/MPU6050_Motion_Driver/driver/include/log.h"
+ 175              		.file 6 "Middlewares/MPU6050_Motion_Driver/driver/include/mltypes.h"
+ 176              		.file 7 "Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.h"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s 			page 6
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 mpl.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:21     .text.inv_init_mpl:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:27     .text.inv_init_mpl:00000000 inv_init_mpl
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:92     .text.inv_get_version:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:98     .text.inv_get_version:00000000 inv_get_version
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:120    .text.inv_get_version:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:167    .rodata.ml_ver:00000000 ml_ver
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:125    .text.inv_start_mpl:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:131    .text.inv_start_mpl:00000000 inv_start_mpl
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccd2Zaga.s:164    .rodata.ml_ver:00000000 $d
+
+UNDEFINED SYMBOLS
+inv_init_storage_manager
+inv_init_start_manager
+inv_init_data_builder
+inv_enable_results_holder
+inv_execute_mpl_start_notification

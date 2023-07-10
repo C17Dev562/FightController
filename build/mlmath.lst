@@ -1,0 +1,448 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"mlmath.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c"
+  20              		.section	.text.ml_asin,"ax",%progbits
+  21              		.align	1
+  22              		.global	ml_asin
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	ml_asin:
+  28              	.LVL0:
+  29              	.LFB0:
+   1:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     Copyright (C) 2011 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  $
+   6:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** /*******************************************************************************
+   8:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  *
+   9:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  * $Id: mlmath.c 5629 2011-06-11 03:13:08Z mcaramello $
+  10:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  *
+  11:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****  *******************************************************************************/
+  12:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  13:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** #include <math.h>
+  14:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  15:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_asin(double x)
+  16:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+  30              		.loc 1 16 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		.loc 1 16 1 is_stmt 0 view .LVU1
+  35 0000 08B5     		push	{r3, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 3, -8
+  39              		.cfi_offset 14, -4
+  17:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return asin(x);
+  40              		.loc 1 17 5 is_stmt 1 view .LVU2
+  41              		.loc 1 17 12 is_stmt 0 view .LVU3
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 2
+
+
+  42 0002 FFF7FEFF 		bl	asin
+  43              	.LVL1:
+  18:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+  44              		.loc 1 18 1 view .LVU4
+  45 0006 08BD     		pop	{r3, pc}
+  46              		.cfi_endproc
+  47              	.LFE0:
+  49              		.section	.text.ml_atan,"ax",%progbits
+  50              		.align	1
+  51              		.global	ml_atan
+  52              		.syntax unified
+  53              		.thumb
+  54              		.thumb_func
+  56              	ml_atan:
+  57              	.LVL2:
+  58              	.LFB1:
+  19:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  20:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_atan(double x)
+  21:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+  59              		.loc 1 21 1 is_stmt 1 view -0
+  60              		.cfi_startproc
+  61              		@ args = 0, pretend = 0, frame = 0
+  62              		@ frame_needed = 0, uses_anonymous_args = 0
+  63              		.loc 1 21 1 is_stmt 0 view .LVU6
+  64 0000 08B5     		push	{r3, lr}
+  65              	.LCFI1:
+  66              		.cfi_def_cfa_offset 8
+  67              		.cfi_offset 3, -8
+  68              		.cfi_offset 14, -4
+  22:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return atan(x);
+  69              		.loc 1 22 5 is_stmt 1 view .LVU7
+  70              		.loc 1 22 12 is_stmt 0 view .LVU8
+  71 0002 FFF7FEFF 		bl	atan
+  72              	.LVL3:
+  23:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+  73              		.loc 1 23 1 view .LVU9
+  74 0006 08BD     		pop	{r3, pc}
+  75              		.cfi_endproc
+  76              	.LFE1:
+  78              		.section	.text.ml_atan2,"ax",%progbits
+  79              		.align	1
+  80              		.global	ml_atan2
+  81              		.syntax unified
+  82              		.thumb
+  83              		.thumb_func
+  85              	ml_atan2:
+  86              	.LVL4:
+  87              	.LFB2:
+  24:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  25:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_atan2(double x, double y)
+  26:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+  88              		.loc 1 26 1 is_stmt 1 view -0
+  89              		.cfi_startproc
+  90              		@ args = 0, pretend = 0, frame = 0
+  91              		@ frame_needed = 0, uses_anonymous_args = 0
+  92              		.loc 1 26 1 is_stmt 0 view .LVU11
+  93 0000 08B5     		push	{r3, lr}
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 3
+
+
+  94              	.LCFI2:
+  95              		.cfi_def_cfa_offset 8
+  96              		.cfi_offset 3, -8
+  97              		.cfi_offset 14, -4
+  27:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return atan2(x, y);
+  98              		.loc 1 27 5 is_stmt 1 view .LVU12
+  99              		.loc 1 27 12 is_stmt 0 view .LVU13
+ 100 0002 FFF7FEFF 		bl	atan2
+ 101              	.LVL5:
+  28:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 102              		.loc 1 28 1 view .LVU14
+ 103 0006 08BD     		pop	{r3, pc}
+ 104              		.cfi_endproc
+ 105              	.LFE2:
+ 107              		.section	.text.ml_log,"ax",%progbits
+ 108              		.align	1
+ 109              		.global	ml_log
+ 110              		.syntax unified
+ 111              		.thumb
+ 112              		.thumb_func
+ 114              	ml_log:
+ 115              	.LVL6:
+ 116              	.LFB3:
+  29:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  30:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_log(double x)
+  31:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 117              		.loc 1 31 1 is_stmt 1 view -0
+ 118              		.cfi_startproc
+ 119              		@ args = 0, pretend = 0, frame = 0
+ 120              		@ frame_needed = 0, uses_anonymous_args = 0
+ 121              		.loc 1 31 1 is_stmt 0 view .LVU16
+ 122 0000 08B5     		push	{r3, lr}
+ 123              	.LCFI3:
+ 124              		.cfi_def_cfa_offset 8
+ 125              		.cfi_offset 3, -8
+ 126              		.cfi_offset 14, -4
+  32:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return log(x);
+ 127              		.loc 1 32 5 is_stmt 1 view .LVU17
+ 128              		.loc 1 32 12 is_stmt 0 view .LVU18
+ 129 0002 FFF7FEFF 		bl	log
+ 130              	.LVL7:
+  33:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 131              		.loc 1 33 1 view .LVU19
+ 132 0006 08BD     		pop	{r3, pc}
+ 133              		.cfi_endproc
+ 134              	.LFE3:
+ 136              		.section	.text.ml_sqrt,"ax",%progbits
+ 137              		.align	1
+ 138              		.global	ml_sqrt
+ 139              		.syntax unified
+ 140              		.thumb
+ 141              		.thumb_func
+ 143              	ml_sqrt:
+ 144              	.LVL8:
+ 145              	.LFB4:
+  34:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  35:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_sqrt(double x)
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 4
+
+
+  36:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 146              		.loc 1 36 1 is_stmt 1 view -0
+ 147              		.cfi_startproc
+ 148              		@ args = 0, pretend = 0, frame = 0
+ 149              		@ frame_needed = 0, uses_anonymous_args = 0
+ 150              		.loc 1 36 1 is_stmt 0 view .LVU21
+ 151 0000 08B5     		push	{r3, lr}
+ 152              	.LCFI4:
+ 153              		.cfi_def_cfa_offset 8
+ 154              		.cfi_offset 3, -8
+ 155              		.cfi_offset 14, -4
+  37:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return sqrt(x);
+ 156              		.loc 1 37 5 is_stmt 1 view .LVU22
+ 157              		.loc 1 37 12 is_stmt 0 view .LVU23
+ 158 0002 FFF7FEFF 		bl	sqrt
+ 159              	.LVL9:
+  38:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 160              		.loc 1 38 1 view .LVU24
+ 161 0006 08BD     		pop	{r3, pc}
+ 162              		.cfi_endproc
+ 163              	.LFE4:
+ 165              		.section	.text.ml_ceil,"ax",%progbits
+ 166              		.align	1
+ 167              		.global	ml_ceil
+ 168              		.syntax unified
+ 169              		.thumb
+ 170              		.thumb_func
+ 172              	ml_ceil:
+ 173              	.LVL10:
+ 174              	.LFB5:
+  39:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  40:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_ceil(double x)
+  41:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 175              		.loc 1 41 1 is_stmt 1 view -0
+ 176              		.cfi_startproc
+ 177              		@ args = 0, pretend = 0, frame = 0
+ 178              		@ frame_needed = 0, uses_anonymous_args = 0
+ 179              		.loc 1 41 1 is_stmt 0 view .LVU26
+ 180 0000 08B5     		push	{r3, lr}
+ 181              	.LCFI5:
+ 182              		.cfi_def_cfa_offset 8
+ 183              		.cfi_offset 3, -8
+ 184              		.cfi_offset 14, -4
+  42:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return ceil(x);
+ 185              		.loc 1 42 5 is_stmt 1 view .LVU27
+ 186              		.loc 1 42 12 is_stmt 0 view .LVU28
+ 187 0002 FFF7FEFF 		bl	ceil
+ 188              	.LVL11:
+  43:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 189              		.loc 1 43 1 view .LVU29
+ 190 0006 08BD     		pop	{r3, pc}
+ 191              		.cfi_endproc
+ 192              	.LFE5:
+ 194              		.section	.text.ml_floor,"ax",%progbits
+ 195              		.align	1
+ 196              		.global	ml_floor
+ 197              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 5
+
+
+ 198              		.thumb
+ 199              		.thumb_func
+ 201              	ml_floor:
+ 202              	.LVL12:
+ 203              	.LFB6:
+  44:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  45:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_floor(double x)
+  46:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 204              		.loc 1 46 1 is_stmt 1 view -0
+ 205              		.cfi_startproc
+ 206              		@ args = 0, pretend = 0, frame = 0
+ 207              		@ frame_needed = 0, uses_anonymous_args = 0
+ 208              		.loc 1 46 1 is_stmt 0 view .LVU31
+ 209 0000 08B5     		push	{r3, lr}
+ 210              	.LCFI6:
+ 211              		.cfi_def_cfa_offset 8
+ 212              		.cfi_offset 3, -8
+ 213              		.cfi_offset 14, -4
+  47:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return floor(x);
+ 214              		.loc 1 47 5 is_stmt 1 view .LVU32
+ 215              		.loc 1 47 12 is_stmt 0 view .LVU33
+ 216 0002 FFF7FEFF 		bl	floor
+ 217              	.LVL13:
+  48:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 218              		.loc 1 48 1 view .LVU34
+ 219 0006 08BD     		pop	{r3, pc}
+ 220              		.cfi_endproc
+ 221              	.LFE6:
+ 223              		.section	.text.ml_cos,"ax",%progbits
+ 224              		.align	1
+ 225              		.global	ml_cos
+ 226              		.syntax unified
+ 227              		.thumb
+ 228              		.thumb_func
+ 230              	ml_cos:
+ 231              	.LVL14:
+ 232              	.LFB7:
+  49:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  50:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_cos(double x)
+  51:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 233              		.loc 1 51 1 is_stmt 1 view -0
+ 234              		.cfi_startproc
+ 235              		@ args = 0, pretend = 0, frame = 0
+ 236              		@ frame_needed = 0, uses_anonymous_args = 0
+ 237              		.loc 1 51 1 is_stmt 0 view .LVU36
+ 238 0000 08B5     		push	{r3, lr}
+ 239              	.LCFI7:
+ 240              		.cfi_def_cfa_offset 8
+ 241              		.cfi_offset 3, -8
+ 242              		.cfi_offset 14, -4
+  52:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return cos(x);
+ 243              		.loc 1 52 5 is_stmt 1 view .LVU37
+ 244              		.loc 1 52 12 is_stmt 0 view .LVU38
+ 245 0002 FFF7FEFF 		bl	cos
+ 246              	.LVL15:
+  53:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 247              		.loc 1 53 1 view .LVU39
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 6
+
+
+ 248 0006 08BD     		pop	{r3, pc}
+ 249              		.cfi_endproc
+ 250              	.LFE7:
+ 252              		.section	.text.ml_sin,"ax",%progbits
+ 253              		.align	1
+ 254              		.global	ml_sin
+ 255              		.syntax unified
+ 256              		.thumb
+ 257              		.thumb_func
+ 259              	ml_sin:
+ 260              	.LVL16:
+ 261              	.LFB8:
+  54:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  55:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_sin(double x)
+  56:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 262              		.loc 1 56 1 is_stmt 1 view -0
+ 263              		.cfi_startproc
+ 264              		@ args = 0, pretend = 0, frame = 0
+ 265              		@ frame_needed = 0, uses_anonymous_args = 0
+ 266              		.loc 1 56 1 is_stmt 0 view .LVU41
+ 267 0000 08B5     		push	{r3, lr}
+ 268              	.LCFI8:
+ 269              		.cfi_def_cfa_offset 8
+ 270              		.cfi_offset 3, -8
+ 271              		.cfi_offset 14, -4
+  57:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return sin(x);
+ 272              		.loc 1 57 5 is_stmt 1 view .LVU42
+ 273              		.loc 1 57 12 is_stmt 0 view .LVU43
+ 274 0002 FFF7FEFF 		bl	sin
+ 275              	.LVL17:
+  58:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 276              		.loc 1 58 1 view .LVU44
+ 277 0006 08BD     		pop	{r3, pc}
+ 278              		.cfi_endproc
+ 279              	.LFE8:
+ 281              		.section	.text.ml_acos,"ax",%progbits
+ 282              		.align	1
+ 283              		.global	ml_acos
+ 284              		.syntax unified
+ 285              		.thumb
+ 286              		.thumb_func
+ 288              	ml_acos:
+ 289              	.LVL18:
+ 290              	.LFB9:
+  59:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  60:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_acos(double x)
+  61:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 291              		.loc 1 61 1 is_stmt 1 view -0
+ 292              		.cfi_startproc
+ 293              		@ args = 0, pretend = 0, frame = 0
+ 294              		@ frame_needed = 0, uses_anonymous_args = 0
+ 295              		.loc 1 61 1 is_stmt 0 view .LVU46
+ 296 0000 08B5     		push	{r3, lr}
+ 297              	.LCFI9:
+ 298              		.cfi_def_cfa_offset 8
+ 299              		.cfi_offset 3, -8
+ 300              		.cfi_offset 14, -4
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 7
+
+
+  62:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return acos(x);
+ 301              		.loc 1 62 5 is_stmt 1 view .LVU47
+ 302              		.loc 1 62 12 is_stmt 0 view .LVU48
+ 303 0002 FFF7FEFF 		bl	acos
+ 304              	.LVL19:
+  63:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }
+ 305              		.loc 1 63 1 view .LVU49
+ 306 0006 08BD     		pop	{r3, pc}
+ 307              		.cfi_endproc
+ 308              	.LFE9:
+ 310              		.section	.text.ml_pow,"ax",%progbits
+ 311              		.align	1
+ 312              		.global	ml_pow
+ 313              		.syntax unified
+ 314              		.thumb
+ 315              		.thumb_func
+ 317              	ml_pow:
+ 318              	.LVL20:
+ 319              	.LFB10:
+  64:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** 
+  65:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** double ml_pow(double x, double y)
+  66:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** {
+ 320              		.loc 1 66 1 is_stmt 1 view -0
+ 321              		.cfi_startproc
+ 322              		@ args = 0, pretend = 0, frame = 0
+ 323              		@ frame_needed = 0, uses_anonymous_args = 0
+ 324              		.loc 1 66 1 is_stmt 0 view .LVU51
+ 325 0000 08B5     		push	{r3, lr}
+ 326              	.LCFI10:
+ 327              		.cfi_def_cfa_offset 8
+ 328              		.cfi_offset 3, -8
+ 329              		.cfi_offset 14, -4
+  67:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c ****     return pow(x, y);
+ 330              		.loc 1 67 5 is_stmt 1 view .LVU52
+ 331              		.loc 1 67 12 is_stmt 0 view .LVU53
+ 332 0002 FFF7FEFF 		bl	pow
+ 333              	.LVL21:
+  68:Middlewares/MPU6050_Motion_Driver/mllite/mlmath.c **** }...
+ 334              		.loc 1 68 1 view .LVU54
+ 335 0006 08BD     		pop	{r3, pc}
+ 336              		.cfi_endproc
+ 337              	.LFE10:
+ 339              		.text
+ 340              	.Letext0:
+ 341              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mat
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s 			page 8
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 mlmath.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:21     .text.ml_asin:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:27     .text.ml_asin:00000000 ml_asin
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:50     .text.ml_atan:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:56     .text.ml_atan:00000000 ml_atan
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:79     .text.ml_atan2:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:85     .text.ml_atan2:00000000 ml_atan2
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:108    .text.ml_log:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:114    .text.ml_log:00000000 ml_log
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:137    .text.ml_sqrt:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:143    .text.ml_sqrt:00000000 ml_sqrt
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:166    .text.ml_ceil:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:172    .text.ml_ceil:00000000 ml_ceil
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:195    .text.ml_floor:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:201    .text.ml_floor:00000000 ml_floor
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:224    .text.ml_cos:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:230    .text.ml_cos:00000000 ml_cos
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:253    .text.ml_sin:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:259    .text.ml_sin:00000000 ml_sin
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:282    .text.ml_acos:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:288    .text.ml_acos:00000000 ml_acos
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:311    .text.ml_pow:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccuBW02b.s:317    .text.ml_pow:00000000 ml_pow
+
+UNDEFINED SYMBOLS
+asin
+atan
+atan2
+log
+sqrt
+ceil
+floor
+cos
+sin
+acos
+pow

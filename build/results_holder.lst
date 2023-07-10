@@ -1,0 +1,2871 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"results_holder.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c"
+  20              		.section	.text.inv_generate_results,"ax",%progbits
+  21              		.align	1
+  22              		.global	inv_generate_results
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	inv_generate_results:
+  28              	.LVL0:
+  29              	.LFB24:
+   1:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  $
+   6:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /**
+   8:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *   @defgroup  Results_Holder results_holder
+   9:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *   @brief     Motion Library - Results Holder
+  10:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *              Holds the data for MPL
+  11:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *
+  12:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *   @{
+  13:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *       @file results_holder.c
+  14:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *       @brief Results Holder for HAL.
+  15:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+  16:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  17:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include <string.h>
+  18:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  19:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "results_holder.h"
+  20:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "ml_math_func.h"
+  21:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "mlmath.h"
+  22:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "start_manager.h"
+  23:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "data_builder.h"
+  24:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "message_layer.h"
+  25:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #include "log.h"
+  26:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  27:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** // These 2 status bits are used to control when the 9 axis quaternion is updated
+  28:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #define INV_COMPASS_CORRECTION_SET 1
+  29:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** #define INV_6_AXIS_QUAT_SET 2
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 2
+
+
+  30:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  31:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** struct results_t {
+  32:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long nav_quat[4];
+  33:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long gam_quat[4];
+  34:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_time_t nav_timestamp;
+  35:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_time_t gam_timestamp;
+  36:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long local_field[3]; /**< local earth's magnetic field */
+  37:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long mag_scale[3]; /**< scale factor to apply to magnetic field reading */
+  38:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long compass_correction[4]; /**< quaternion going from gyro,accel quaternion to 9 axis */
+  39:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     int acc_state; /**< Describes accel state */
+  40:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     int got_accel_bias; /**< Flag describing if accel bias is known */
+  41:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long compass_bias_error[3]; /**< Error Squared */
+  42:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     unsigned char motion_state;
+  43:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     unsigned int motion_state_counter; /**< Incremented for each no motion event in a row */
+  44:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long compass_count; /**< compass state internal counter */
+  45:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     int got_compass_bias; /**< Flag describing if compass bias is known */
+  46:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     int large_mag_field; /**< Flag describing if there is a large magnetic field */
+  47:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     int compass_state; /**< Internal compass state */
+  48:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long status;
+  49:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     struct inv_sensor_cal_t *sensor;
+  50:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     float quat_confidence_interval;
+  51:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** };
+  52:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** static struct results_t rh;
+  53:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  54:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** @internal
+  55:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * Store a quaternion more suitable for gaming. This quaternion is often determined
+  56:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * using only gyro and accel.
+  57:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[in] quat Length 4, Quaternion scaled by 2^30
+  58:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+  59:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_store_gaming_quaternion(const long *quat, inv_time_t timestamp)
+  60:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+  61:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.status |= INV_6_AXIS_QUAT_SET;
+  62:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(&rh.gam_quat, quat, sizeof(rh.gam_quat));
+  63:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.gam_timestamp = timestamp;
+  64:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+  65:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  66:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** @internal
+  67:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * Sets the quaternion adjustment from 6 axis (accel, gyro) to 9 axis quaternion.
+  68:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[in] data Quaternion Adjustment
+  69:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[in] timestamp Timestamp of when this is valid
+  70:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+  71:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_compass_correction(const long *data, inv_time_t timestamp)
+  72:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+  73:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.status |= INV_COMPASS_CORRECTION_SET;
+  74:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.compass_correction, data, sizeof(rh.compass_correction));
+  75:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.nav_timestamp = timestamp;
+  76:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+  77:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  78:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** @internal
+  79:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * Gets the quaternion adjustment from 6 axis (accel, gyro) to 9 axis quaternion.
+  80:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[out] data Quaternion Adjustment
+  81:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[out] timestamp Timestamp of when this is valid
+  82:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+  83:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_get_compass_correction(long *data, inv_time_t *timestamp)
+  84:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+  85:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.compass_correction, sizeof(rh.compass_correction));
+  86:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *timestamp = rh.nav_timestamp;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 3
+
+
+  87:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+  88:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  89:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Returns non-zero if there is a large magnetic field. See inv_set_large_mag_field() for setting 
+  90:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns non-zero if there is a large magnetic field.
+  91:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+  92:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** int inv_get_large_mag_field()
+  93:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+  94:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.large_mag_field;
+  95:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+  96:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+  97:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Set to non-zero if there as a large magnetic field. See inv_get_large_mag_field() for getting t
+  98:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] state value to set for magnetic field strength. Should be non-zero if it is large.
+  99:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 100:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_large_mag_field(int state)
+ 101:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 102:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.large_mag_field = state;
+ 103:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 104:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 105:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Gets the accel state set by inv_set_acc_state()
+ 106:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return accel state.
+ 107:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 108:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** int inv_get_acc_state()
+ 109:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 110:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.acc_state;
+ 111:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 112:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets the accel state. See inv_get_acc_state() to get the value.
+ 114:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] state value to set accel state to.
+ 115:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_acc_state(int state)
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.acc_state = state;
+ 119:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return;
+ 120:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 121:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 122:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Returns the motion state
+ 123:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[out] cntr Number of previous times a no motion event has occured in a row.
+ 124:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 125:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 126:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** int inv_get_motion_state(unsigned int *cntr)
+ 127:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 128:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *cntr = rh.motion_state_counter;
+ 129:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.motion_state;
+ 130:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 131:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 132:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets the motion state
+ 133:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] state motion state where INV_NO_MOTION is not moving
+ 134:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *            and INV_MOTION is moving.
+ 135:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 136:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_motion_state(unsigned char state)
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 138:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long set;
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (state == rh.motion_state) {
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         if (state == INV_NO_MOTION) {
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             rh.motion_state_counter++;
+ 142:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         } else {
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             rh.motion_state_counter = 0;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 4
+
+
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         }
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return;
+ 146:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.motion_state_counter = 0;
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.motion_state = state;
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     /* Equivalent to set = state, but #define's may change. */
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (state == INV_MOTION)
+ 151:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         set = INV_MSG_MOTION_EVENT;
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     else
+ 153:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         set = INV_MSG_NO_MOTION_EVENT;
+ 154:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_set_message(set, (INV_MSG_MOTION_EVENT | INV_MSG_NO_MOTION_EVENT), 0);
+ 155:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 156:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 157:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets the local earth's magnetic field
+ 158:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[in] data Local earth's magnetic field in uT scaled by 2^16.
+ 159:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** *            Length = 3. Y typically points north, Z typically points down in
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** *                        northern hemisphere and up in southern hemisphere.
+ 161:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 162:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_local_field(const long *data)
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.local_field, data, sizeof(rh.local_field));
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 166:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 167:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Gets the local earth's magnetic field
+ 168:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[out] data Local earth's magnetic field in uT scaled by 2^16.
+ 169:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** *            Length = 3. Y typically points north, Z typically points down in
+ 170:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** *                        northern hemisphere and up in southern hemisphere.
+ 171:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 172:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_get_local_field(long *data)
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 174:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.local_field, sizeof(rh.local_field));
+ 175:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 176:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 177:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets the compass sensitivity
+ 178:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] data Length 3, sensitivity for each compass axis
+ 179:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  scaled such that 1.0 = 2^30.
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 181:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_mag_scale(const long *data)
+ 182:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 183:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.mag_scale, data, sizeof(rh.mag_scale));
+ 184:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 185:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 186:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Gets the compass sensitivity
+ 187:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] data Length 3, sensitivity for each compass axis
+ 188:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  scaled such that 1.0 = 2^30.
+ 189:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 190:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_get_mag_scale(long *data)
+ 191:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 192:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.mag_scale, sizeof(rh.mag_scale));
+ 193:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 194:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 195:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Gets gravity vector
+ 196:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] data gravity vector in body frame scaled such that 1.0 = 2^30.
+ 197:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+ 198:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 199:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_gravity(long *data)
+ 200:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 5
+
+
+ 201:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] =
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q29_mult(rh.nav_quat[1], rh.nav_quat[3]) - inv_q29_mult(rh.nav_quat[2], rh.nav_quat[0])
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] =
+ 204:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q29_mult(rh.nav_quat[2], rh.nav_quat[3]) + inv_q29_mult(rh.nav_quat[1], rh.nav_quat[0])
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] =
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         (inv_q29_mult(rh.nav_quat[3], rh.nav_quat[3]) + inv_q29_mult(rh.nav_quat[0], rh.nav_quat[0]
+ 207:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         1073741824L;
+ 208:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ 210:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 211:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 212:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Returns a quaternion based only on gyro and accel.
+ 213:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] data 6-axis  gyro and accel quaternion scaled such that 1.0 = 2^30.
+ 214:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+ 215:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 216:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_6axis_quaternion(long *data)
+ 217:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 218:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.gam_quat, sizeof(rh.gam_quat));
+ 219:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ 220:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 221:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 222:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Returns a quaternion.
+ 223:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] data 9-axis quaternion scaled such that 1.0 = 2^30.
+ 224:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+ 225:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 226:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_quaternion(long *data)
+ 227:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 228:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (rh.status & (INV_COMPASS_CORRECTION_SET | INV_6_AXIS_QUAT_SET)) {
+ 229:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q_mult(rh.compass_correction, rh.gam_quat, rh.nav_quat);
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         rh.status &= ~(INV_COMPASS_CORRECTION_SET | INV_6_AXIS_QUAT_SET);
+ 231:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 232:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.nav_quat, sizeof(rh.nav_quat));
+ 233:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ 234:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 235:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 236:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Returns a quaternion.
+ 237:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] data 9-axis quaternion.
+ 238:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+ 239:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 240:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_quaternion_float(float *data)
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 242:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long ldata[4];
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_error_t result = inv_get_quaternion(ldata);
+ 244:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] = inv_q30_to_float(ldata[0]);
+ 245:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] = inv_q30_to_float(ldata[1]);
+ 246:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] = inv_q30_to_float(ldata[2]);
+ 247:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[3] = inv_q30_to_float(ldata[3]);
+ 248:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return result;
+ 249:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 250:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 251:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Returns a quaternion with accuracy and timestamp.
+ 252:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] data 9-axis quaternion scaled such that 1.0 = 2^30.
+ 253:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] accuracy Accuracy of quaternion, 0-3, where 3 is most accurate.
+ 254:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] timestamp Timestamp of this quaternion in nanoseconds
+ 255:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 256:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_get_quaternion_set(long *data, int *accuracy, inv_time_t *timestamp)
+ 257:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 6
+
+
+ 258:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_get_quaternion(data);
+ 259:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *timestamp = inv_get_last_timestamp();
+ 260:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (inv_get_compass_on()) {
+ 261:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_mag_accuracy();
+ 262:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else if (inv_get_gyro_on()) {
+ 263:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_gyro_accuracy();
+ 264:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }else if (inv_get_accel_on()) {
+ 265:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_accel_accuracy();
+ 266:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else {
+ 267:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = 0;
+ 268:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 269:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 270:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 271:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Callback that gets called everytime there is new data. It is 
+ 272:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * registered by inv_start_results_holder().
+ 273:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] sensor_cal New sensor data to process.
+ 274:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+ 275:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 276:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_generate_results(struct inv_sensor_cal_t *sensor_cal)
+ 277:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+  30              		.loc 1 277 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+ 278:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.sensor = sensor_cal;
+  35              		.loc 1 278 5 view .LVU1
+  36              		.loc 1 278 15 is_stmt 0 view .LVU2
+  37 0000 024B     		ldr	r3, .L2
+  38 0002 C3F88000 		str	r0, [r3, #128]
+ 279:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+  39              		.loc 1 279 5 is_stmt 1 view .LVU3
+ 280:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+  40              		.loc 1 280 1 is_stmt 0 view .LVU4
+  41 0006 0020     		movs	r0, #0
+  42              	.LVL1:
+  43              		.loc 1 280 1 view .LVU5
+  44 0008 7047     		bx	lr
+  45              	.L3:
+  46 000a 00BF     		.align	2
+  47              	.L2:
+  48 000c 00000000 		.word	rh
+  49              		.cfi_endproc
+  50              	.LFE24:
+  52              		.section	.text.inv_start_results_holder,"ax",%progbits
+  53              		.align	1
+  54              		.global	inv_start_results_holder
+  55              		.syntax unified
+  56              		.thumb
+  57              		.thumb_func
+  59              	inv_start_results_holder:
+  60              	.LFB25:
+ 281:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 282:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Function to turn on this module. This is automatically called by
+ 283:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  inv_enable_results_holder(). Typically not called by users.
+ 284:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return Returns INV_SUCCESS if successful or an error code if not.
+ 285:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 7
+
+
+ 286:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_start_results_holder(void)
+ 287:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+  61              		.loc 1 287 1 is_stmt 1 view -0
+  62              		.cfi_startproc
+  63              		@ args = 0, pretend = 0, frame = 0
+  64              		@ frame_needed = 0, uses_anonymous_args = 0
+  65 0000 08B5     		push	{r3, lr}
+  66              	.LCFI0:
+  67              		.cfi_def_cfa_offset 8
+  68              		.cfi_offset 3, -8
+  69              		.cfi_offset 14, -4
+ 288:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_register_data_cb(inv_generate_results, INV_PRIORITY_RESULTS_HOLDER,
+  70              		.loc 1 288 5 view .LVU7
+  71 0002 0722     		movs	r2, #7
+  72 0004 4FF44871 		mov	r1, #800
+  73 0008 0248     		ldr	r0, .L6
+  74 000a FFF7FEFF 		bl	inv_register_data_cb
+  75              	.LVL2:
+ 289:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         INV_GYRO_NEW | INV_ACCEL_NEW | INV_MAG_NEW);
+ 290:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+  76              		.loc 1 290 5 view .LVU8
+ 291:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+  77              		.loc 1 291 1 is_stmt 0 view .LVU9
+  78 000e 0020     		movs	r0, #0
+  79 0010 08BD     		pop	{r3, pc}
+  80              	.L7:
+  81 0012 00BF     		.align	2
+  82              	.L6:
+  83 0014 00000000 		.word	inv_generate_results
+  84              		.cfi_endproc
+  85              	.LFE25:
+  87              		.section	.text.inv_store_gaming_quaternion,"ax",%progbits
+  88              		.align	1
+  89              		.global	inv_store_gaming_quaternion
+  90              		.syntax unified
+  91              		.thumb
+  92              		.thumb_func
+  94              	inv_store_gaming_quaternion:
+  95              	.LVL3:
+  96              	.LFB6:
+  60:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.status |= INV_6_AXIS_QUAT_SET;
+  97              		.loc 1 60 1 is_stmt 1 view -0
+  98              		.cfi_startproc
+  99              		@ args = 0, pretend = 0, frame = 0
+ 100              		@ frame_needed = 0, uses_anonymous_args = 0
+ 101              		@ link register save eliminated.
+  60:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.status |= INV_6_AXIS_QUAT_SET;
+ 102              		.loc 1 60 1 is_stmt 0 view .LVU11
+ 103 0000 30B4     		push	{r4, r5}
+ 104              	.LCFI1:
+ 105              		.cfi_def_cfa_offset 8
+ 106              		.cfi_offset 4, -8
+ 107              		.cfi_offset 5, -4
+ 108 0002 0346     		mov	r3, r0
+ 109 0004 0D46     		mov	r5, r1
+  61:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(&rh.gam_quat, quat, sizeof(rh.gam_quat));
+ 110              		.loc 1 61 5 is_stmt 1 view .LVU12
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 8
+
+
+  61:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(&rh.gam_quat, quat, sizeof(rh.gam_quat));
+ 111              		.loc 1 61 7 is_stmt 0 view .LVU13
+ 112 0006 084C     		ldr	r4, .L10
+ 113 0008 E26F     		ldr	r2, [r4, #124]
+  61:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(&rh.gam_quat, quat, sizeof(rh.gam_quat));
+ 114              		.loc 1 61 15 view .LVU14
+ 115 000a 42F00202 		orr	r2, r2, #2
+ 116 000e E267     		str	r2, [r4, #124]
+  62:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.gam_timestamp = timestamp;
+ 117              		.loc 1 62 5 is_stmt 1 view .LVU15
+ 118 0010 04F1100C 		add	ip, r4, #16
+ 119 0014 0068     		ldr	r0, [r0]	@ unaligned
+ 120              	.LVL4:
+  62:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.gam_timestamp = timestamp;
+ 121              		.loc 1 62 5 is_stmt 0 view .LVU16
+ 122 0016 5968     		ldr	r1, [r3, #4]	@ unaligned
+ 123              	.LVL5:
+  62:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.gam_timestamp = timestamp;
+ 124              		.loc 1 62 5 view .LVU17
+ 125 0018 9A68     		ldr	r2, [r3, #8]	@ unaligned
+ 126 001a DB68     		ldr	r3, [r3, #12]	@ unaligned
+ 127              	.LVL6:
+  62:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.gam_timestamp = timestamp;
+ 128              		.loc 1 62 5 view .LVU18
+ 129 001c ACE80F00 		stmia	ip!, {r0, r1, r2, r3}
+  63:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 130              		.loc 1 63 5 is_stmt 1 view .LVU19
+  63:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 131              		.loc 1 63 22 is_stmt 0 view .LVU20
+ 132 0020 6562     		str	r5, [r4, #36]
+  64:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 133              		.loc 1 64 1 view .LVU21
+ 134 0022 30BC     		pop	{r4, r5}
+ 135              	.LCFI2:
+ 136              		.cfi_restore 5
+ 137              		.cfi_restore 4
+ 138              		.cfi_def_cfa_offset 0
+ 139              	.LVL7:
+  64:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 140              		.loc 1 64 1 view .LVU22
+ 141 0024 7047     		bx	lr
+ 142              	.L11:
+ 143 0026 00BF     		.align	2
+ 144              	.L10:
+ 145 0028 00000000 		.word	rh
+ 146              		.cfi_endproc
+ 147              	.LFE6:
+ 149              		.section	.text.inv_set_compass_correction,"ax",%progbits
+ 150              		.align	1
+ 151              		.global	inv_set_compass_correction
+ 152              		.syntax unified
+ 153              		.thumb
+ 154              		.thumb_func
+ 156              	inv_set_compass_correction:
+ 157              	.LVL8:
+ 158              	.LFB7:
+  72:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.status |= INV_COMPASS_CORRECTION_SET;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 9
+
+
+ 159              		.loc 1 72 1 is_stmt 1 view -0
+ 160              		.cfi_startproc
+ 161              		@ args = 0, pretend = 0, frame = 0
+ 162              		@ frame_needed = 0, uses_anonymous_args = 0
+ 163              		@ link register save eliminated.
+  72:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.status |= INV_COMPASS_CORRECTION_SET;
+ 164              		.loc 1 72 1 is_stmt 0 view .LVU24
+ 165 0000 30B4     		push	{r4, r5}
+ 166              	.LCFI3:
+ 167              		.cfi_def_cfa_offset 8
+ 168              		.cfi_offset 4, -8
+ 169              		.cfi_offset 5, -4
+ 170 0002 0346     		mov	r3, r0
+ 171 0004 0D46     		mov	r5, r1
+  73:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.compass_correction, data, sizeof(rh.compass_correction));
+ 172              		.loc 1 73 5 is_stmt 1 view .LVU25
+  73:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.compass_correction, data, sizeof(rh.compass_correction));
+ 173              		.loc 1 73 7 is_stmt 0 view .LVU26
+ 174 0006 084C     		ldr	r4, .L14
+ 175 0008 E26F     		ldr	r2, [r4, #124]
+  73:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.compass_correction, data, sizeof(rh.compass_correction));
+ 176              		.loc 1 73 15 view .LVU27
+ 177 000a 42F00102 		orr	r2, r2, #1
+ 178 000e E267     		str	r2, [r4, #124]
+  74:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.nav_timestamp = timestamp;
+ 179              		.loc 1 74 5 is_stmt 1 view .LVU28
+ 180 0010 04F1400C 		add	ip, r4, #64
+ 181 0014 0068     		ldr	r0, [r0]	@ unaligned
+ 182              	.LVL9:
+  74:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.nav_timestamp = timestamp;
+ 183              		.loc 1 74 5 is_stmt 0 view .LVU29
+ 184 0016 5968     		ldr	r1, [r3, #4]	@ unaligned
+ 185              	.LVL10:
+  74:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.nav_timestamp = timestamp;
+ 186              		.loc 1 74 5 view .LVU30
+ 187 0018 9A68     		ldr	r2, [r3, #8]	@ unaligned
+ 188 001a DB68     		ldr	r3, [r3, #12]	@ unaligned
+ 189              	.LVL11:
+  74:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.nav_timestamp = timestamp;
+ 190              		.loc 1 74 5 view .LVU31
+ 191 001c ACE80F00 		stmia	ip!, {r0, r1, r2, r3}
+  75:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 192              		.loc 1 75 5 is_stmt 1 view .LVU32
+  75:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 193              		.loc 1 75 22 is_stmt 0 view .LVU33
+ 194 0020 2562     		str	r5, [r4, #32]
+  76:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 195              		.loc 1 76 1 view .LVU34
+ 196 0022 30BC     		pop	{r4, r5}
+ 197              	.LCFI4:
+ 198              		.cfi_restore 5
+ 199              		.cfi_restore 4
+ 200              		.cfi_def_cfa_offset 0
+ 201              	.LVL12:
+  76:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 202              		.loc 1 76 1 view .LVU35
+ 203 0024 7047     		bx	lr
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 10
+
+
+ 204              	.L15:
+ 205 0026 00BF     		.align	2
+ 206              	.L14:
+ 207 0028 00000000 		.word	rh
+ 208              		.cfi_endproc
+ 209              	.LFE7:
+ 211              		.section	.text.inv_get_compass_correction,"ax",%progbits
+ 212              		.align	1
+ 213              		.global	inv_get_compass_correction
+ 214              		.syntax unified
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	inv_get_compass_correction:
+ 219              	.LVL13:
+ 220              	.LFB8:
+  84:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.compass_correction, sizeof(rh.compass_correction));
+ 221              		.loc 1 84 1 is_stmt 1 view -0
+ 222              		.cfi_startproc
+ 223              		@ args = 0, pretend = 0, frame = 0
+ 224              		@ frame_needed = 0, uses_anonymous_args = 0
+  84:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.compass_correction, sizeof(rh.compass_correction));
+ 225              		.loc 1 84 1 is_stmt 0 view .LVU37
+ 226 0000 30B5     		push	{r4, r5, lr}
+ 227              	.LCFI5:
+ 228              		.cfi_def_cfa_offset 12
+ 229              		.cfi_offset 4, -12
+ 230              		.cfi_offset 5, -8
+ 231              		.cfi_offset 14, -4
+ 232 0002 8446     		mov	ip, r0
+ 233 0004 0D46     		mov	r5, r1
+  85:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *timestamp = rh.nav_timestamp;
+ 234              		.loc 1 85 5 is_stmt 1 view .LVU38
+ 235 0006 084C     		ldr	r4, .L18
+ 236 0008 A646     		mov	lr, r4
+ 237 000a BEE80F00 		ldmia	lr!, {r0, r1, r2, r3}
+ 238              	.LVL14:
+  85:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *timestamp = rh.nav_timestamp;
+ 239              		.loc 1 85 5 is_stmt 0 view .LVU39
+ 240 000e CCF80000 		str	r0, [ip]	@ unaligned
+ 241 0012 CCF80410 		str	r1, [ip, #4]	@ unaligned
+ 242 0016 CCF80820 		str	r2, [ip, #8]	@ unaligned
+ 243 001a CCF80C30 		str	r3, [ip, #12]	@ unaligned
+  86:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 244              		.loc 1 86 5 is_stmt 1 view .LVU40
+  86:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 245              		.loc 1 86 20 is_stmt 0 view .LVU41
+ 246 001e 54F8203C 		ldr	r3, [r4, #-32]
+  86:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 247              		.loc 1 86 16 view .LVU42
+ 248 0022 2B60     		str	r3, [r5]
+  87:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 249              		.loc 1 87 1 view .LVU43
+ 250 0024 30BD     		pop	{r4, r5, pc}
+ 251              	.LVL15:
+ 252              	.L19:
+  87:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 253              		.loc 1 87 1 view .LVU44
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 11
+
+
+ 254 0026 00BF     		.align	2
+ 255              	.L18:
+ 256 0028 40000000 		.word	rh+64
+ 257              		.cfi_endproc
+ 258              	.LFE8:
+ 260              		.section	.text.inv_get_large_mag_field,"ax",%progbits
+ 261              		.align	1
+ 262              		.global	inv_get_large_mag_field
+ 263              		.syntax unified
+ 264              		.thumb
+ 265              		.thumb_func
+ 267              	inv_get_large_mag_field:
+ 268              	.LFB9:
+  93:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.large_mag_field;
+ 269              		.loc 1 93 1 is_stmt 1 view -0
+ 270              		.cfi_startproc
+ 271              		@ args = 0, pretend = 0, frame = 0
+ 272              		@ frame_needed = 0, uses_anonymous_args = 0
+ 273              		@ link register save eliminated.
+  94:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 274              		.loc 1 94 5 view .LVU46
+  95:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 275              		.loc 1 95 1 is_stmt 0 view .LVU47
+ 276 0000 014B     		ldr	r3, .L21
+ 277 0002 586F     		ldr	r0, [r3, #116]
+ 278 0004 7047     		bx	lr
+ 279              	.L22:
+ 280 0006 00BF     		.align	2
+ 281              	.L21:
+ 282 0008 00000000 		.word	rh
+ 283              		.cfi_endproc
+ 284              	.LFE9:
+ 286              		.section	.text.inv_set_large_mag_field,"ax",%progbits
+ 287              		.align	1
+ 288              		.global	inv_set_large_mag_field
+ 289              		.syntax unified
+ 290              		.thumb
+ 291              		.thumb_func
+ 293              	inv_set_large_mag_field:
+ 294              	.LVL16:
+ 295              	.LFB10:
+ 101:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.large_mag_field = state;
+ 296              		.loc 1 101 1 is_stmt 1 view -0
+ 297              		.cfi_startproc
+ 298              		@ args = 0, pretend = 0, frame = 0
+ 299              		@ frame_needed = 0, uses_anonymous_args = 0
+ 300              		@ link register save eliminated.
+ 102:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 301              		.loc 1 102 5 view .LVU49
+ 102:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 302              		.loc 1 102 24 is_stmt 0 view .LVU50
+ 303 0000 014B     		ldr	r3, .L24
+ 304 0002 5867     		str	r0, [r3, #116]
+ 103:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 305              		.loc 1 103 1 view .LVU51
+ 306 0004 7047     		bx	lr
+ 307              	.L25:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 12
+
+
+ 308 0006 00BF     		.align	2
+ 309              	.L24:
+ 310 0008 00000000 		.word	rh
+ 311              		.cfi_endproc
+ 312              	.LFE10:
+ 314              		.section	.text.inv_get_acc_state,"ax",%progbits
+ 315              		.align	1
+ 316              		.global	inv_get_acc_state
+ 317              		.syntax unified
+ 318              		.thumb
+ 319              		.thumb_func
+ 321              	inv_get_acc_state:
+ 322              	.LFB11:
+ 109:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.acc_state;
+ 323              		.loc 1 109 1 is_stmt 1 view -0
+ 324              		.cfi_startproc
+ 325              		@ args = 0, pretend = 0, frame = 0
+ 326              		@ frame_needed = 0, uses_anonymous_args = 0
+ 327              		@ link register save eliminated.
+ 110:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 328              		.loc 1 110 5 view .LVU53
+ 111:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 329              		.loc 1 111 1 is_stmt 0 view .LVU54
+ 330 0000 014B     		ldr	r3, .L27
+ 331 0002 186D     		ldr	r0, [r3, #80]
+ 332 0004 7047     		bx	lr
+ 333              	.L28:
+ 334 0006 00BF     		.align	2
+ 335              	.L27:
+ 336 0008 00000000 		.word	rh
+ 337              		.cfi_endproc
+ 338              	.LFE11:
+ 340              		.section	.text.inv_set_acc_state,"ax",%progbits
+ 341              		.align	1
+ 342              		.global	inv_set_acc_state
+ 343              		.syntax unified
+ 344              		.thumb
+ 345              		.thumb_func
+ 347              	inv_set_acc_state:
+ 348              	.LVL17:
+ 349              	.LFB12:
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.acc_state = state;
+ 350              		.loc 1 117 1 is_stmt 1 view -0
+ 351              		.cfi_startproc
+ 352              		@ args = 0, pretend = 0, frame = 0
+ 353              		@ frame_needed = 0, uses_anonymous_args = 0
+ 354              		@ link register save eliminated.
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return;
+ 355              		.loc 1 118 5 view .LVU56
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return;
+ 356              		.loc 1 118 18 is_stmt 0 view .LVU57
+ 357 0000 014B     		ldr	r3, .L30
+ 358 0002 1865     		str	r0, [r3, #80]
+ 119:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 359              		.loc 1 119 5 is_stmt 1 view .LVU58
+ 120:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 360              		.loc 1 120 1 is_stmt 0 view .LVU59
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 13
+
+
+ 361 0004 7047     		bx	lr
+ 362              	.L31:
+ 363 0006 00BF     		.align	2
+ 364              	.L30:
+ 365 0008 00000000 		.word	rh
+ 366              		.cfi_endproc
+ 367              	.LFE12:
+ 369              		.section	.text.inv_get_motion_state,"ax",%progbits
+ 370              		.align	1
+ 371              		.global	inv_get_motion_state
+ 372              		.syntax unified
+ 373              		.thumb
+ 374              		.thumb_func
+ 376              	inv_get_motion_state:
+ 377              	.LVL18:
+ 378              	.LFB13:
+ 127:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *cntr = rh.motion_state_counter;
+ 379              		.loc 1 127 1 is_stmt 1 view -0
+ 380              		.cfi_startproc
+ 381              		@ args = 0, pretend = 0, frame = 0
+ 382              		@ frame_needed = 0, uses_anonymous_args = 0
+ 383              		@ link register save eliminated.
+ 128:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.motion_state;
+ 384              		.loc 1 128 5 view .LVU61
+ 128:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.motion_state;
+ 385              		.loc 1 128 15 is_stmt 0 view .LVU62
+ 386 0000 024B     		ldr	r3, .L33
+ 387 0002 9A6E     		ldr	r2, [r3, #104]
+ 128:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.motion_state;
+ 388              		.loc 1 128 11 view .LVU63
+ 389 0004 0260     		str	r2, [r0]
+ 129:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 390              		.loc 1 129 5 is_stmt 1 view .LVU64
+ 130:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 391              		.loc 1 130 1 is_stmt 0 view .LVU65
+ 392 0006 93F86400 		ldrb	r0, [r3, #100]	@ zero_extendqisi2
+ 393              	.LVL19:
+ 130:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 394              		.loc 1 130 1 view .LVU66
+ 395 000a 7047     		bx	lr
+ 396              	.L34:
+ 397              		.align	2
+ 398              	.L33:
+ 399 000c 00000000 		.word	rh
+ 400              		.cfi_endproc
+ 401              	.LFE13:
+ 403              		.section	.text.inv_set_motion_state,"ax",%progbits
+ 404              		.align	1
+ 405              		.global	inv_set_motion_state
+ 406              		.syntax unified
+ 407              		.thumb
+ 408              		.thumb_func
+ 410              	inv_set_motion_state:
+ 411              	.LVL20:
+ 412              	.LFB14:
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long set;
+ 413              		.loc 1 137 1 is_stmt 1 view -0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 14
+
+
+ 414              		.cfi_startproc
+ 415              		@ args = 0, pretend = 0, frame = 0
+ 416              		@ frame_needed = 0, uses_anonymous_args = 0
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long set;
+ 417              		.loc 1 137 1 is_stmt 0 view .LVU68
+ 418 0000 08B5     		push	{r3, lr}
+ 419              	.LCFI6:
+ 420              		.cfi_def_cfa_offset 8
+ 421              		.cfi_offset 3, -8
+ 422              		.cfi_offset 14, -4
+ 138:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (state == rh.motion_state) {
+ 423              		.loc 1 138 5 is_stmt 1 view .LVU69
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         if (state == INV_NO_MOTION) {
+ 424              		.loc 1 139 5 view .LVU70
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         if (state == INV_NO_MOTION) {
+ 425              		.loc 1 139 20 is_stmt 0 view .LVU71
+ 426 0002 0E4B     		ldr	r3, .L45
+ 427 0004 93F86430 		ldrb	r3, [r3, #100]	@ zero_extendqisi2
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         if (state == INV_NO_MOTION) {
+ 428              		.loc 1 139 8 view .LVU72
+ 429 0008 8342     		cmp	r3, r0
+ 430 000a 0CD0     		beq	.L43
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.motion_state = state;
+ 431              		.loc 1 147 5 is_stmt 1 view .LVU73
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.motion_state = state;
+ 432              		.loc 1 147 29 is_stmt 0 view .LVU74
+ 433 000c 0B4B     		ldr	r3, .L45
+ 434 000e 0022     		movs	r2, #0
+ 435 0010 9A66     		str	r2, [r3, #104]
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     /* Equivalent to set = state, but #define's may change. */
+ 436              		.loc 1 148 5 is_stmt 1 view .LVU75
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     /* Equivalent to set = state, but #define's may change. */
+ 437              		.loc 1 148 21 is_stmt 0 view .LVU76
+ 438 0012 83F86400 		strb	r0, [r3, #100]
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         set = INV_MSG_MOTION_EVENT;
+ 439              		.loc 1 150 5 is_stmt 1 view .LVU77
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         set = INV_MSG_MOTION_EVENT;
+ 440              		.loc 1 150 8 is_stmt 0 view .LVU78
+ 441 0016 0128     		cmp	r0, #1
+ 442 0018 00D0     		beq	.L40
+ 153:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_set_message(set, (INV_MSG_MOTION_EVENT | INV_MSG_NO_MOTION_EVENT), 0);
+ 443              		.loc 1 153 13 view .LVU79
+ 444 001a 0220     		movs	r0, #2
+ 445              	.LVL21:
+ 446              	.L40:
+ 154:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 447              		.loc 1 154 5 is_stmt 1 view .LVU80
+ 448 001c 0022     		movs	r2, #0
+ 449 001e 0321     		movs	r1, #3
+ 450 0020 FFF7FEFF 		bl	inv_set_message
+ 451              	.LVL22:
+ 452              	.L35:
+ 155:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 453              		.loc 1 155 1 is_stmt 0 view .LVU81
+ 454 0024 08BD     		pop	{r3, pc}
+ 455              	.LVL23:
+ 456              	.L43:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 15
+
+
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             rh.motion_state_counter++;
+ 457              		.loc 1 140 9 is_stmt 1 view .LVU82
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             rh.motion_state_counter++;
+ 458              		.loc 1 140 12 is_stmt 0 view .LVU83
+ 459 0026 0228     		cmp	r0, #2
+ 460 0028 03D0     		beq	.L44
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         }
+ 461              		.loc 1 143 13 is_stmt 1 view .LVU84
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         }
+ 462              		.loc 1 143 37 is_stmt 0 view .LVU85
+ 463 002a 044B     		ldr	r3, .L45
+ 464 002c 0022     		movs	r2, #0
+ 465 002e 9A66     		str	r2, [r3, #104]
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 466              		.loc 1 145 9 is_stmt 1 view .LVU86
+ 467 0030 F8E7     		b	.L35
+ 468              	.L44:
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         } else {
+ 469              		.loc 1 141 13 view .LVU87
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         } else {
+ 470              		.loc 1 141 15 is_stmt 0 view .LVU88
+ 471 0032 024A     		ldr	r2, .L45
+ 472 0034 936E     		ldr	r3, [r2, #104]
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         } else {
+ 473              		.loc 1 141 36 view .LVU89
+ 474 0036 0133     		adds	r3, r3, #1
+ 475 0038 9366     		str	r3, [r2, #104]
+ 476 003a F3E7     		b	.L35
+ 477              	.L46:
+ 478              		.align	2
+ 479              	.L45:
+ 480 003c 00000000 		.word	rh
+ 481              		.cfi_endproc
+ 482              	.LFE14:
+ 484              		.section	.text.inv_set_local_field,"ax",%progbits
+ 485              		.align	1
+ 486              		.global	inv_set_local_field
+ 487              		.syntax unified
+ 488              		.thumb
+ 489              		.thumb_func
+ 491              	inv_set_local_field:
+ 492              	.LVL24:
+ 493              	.LFB15:
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.local_field, data, sizeof(rh.local_field));
+ 494              		.loc 1 163 1 is_stmt 1 view -0
+ 495              		.cfi_startproc
+ 496              		@ args = 0, pretend = 0, frame = 0
+ 497              		@ frame_needed = 0, uses_anonymous_args = 0
+ 498              		@ link register save eliminated.
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.local_field, data, sizeof(rh.local_field));
+ 499              		.loc 1 163 1 is_stmt 0 view .LVU91
+ 500 0000 0246     		mov	r2, r0
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 501              		.loc 1 164 5 is_stmt 1 view .LVU92
+ 502 0002 034B     		ldr	r3, .L48
+ 503 0004 0068     		ldr	r0, [r0]	@ unaligned
+ 504              	.LVL25:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 16
+
+
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 505              		.loc 1 164 5 is_stmt 0 view .LVU93
+ 506 0006 5168     		ldr	r1, [r2, #4]	@ unaligned
+ 507 0008 9268     		ldr	r2, [r2, #8]	@ unaligned
+ 508              	.LVL26:
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 509              		.loc 1 164 5 view .LVU94
+ 510 000a 07C3     		stmia	r3!, {r0, r1, r2}
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 511              		.loc 1 165 1 view .LVU95
+ 512 000c 7047     		bx	lr
+ 513              	.L49:
+ 514 000e 00BF     		.align	2
+ 515              	.L48:
+ 516 0010 28000000 		.word	rh+40
+ 517              		.cfi_endproc
+ 518              	.LFE15:
+ 520              		.section	.text.inv_get_local_field,"ax",%progbits
+ 521              		.align	1
+ 522              		.global	inv_get_local_field
+ 523              		.syntax unified
+ 524              		.thumb
+ 525              		.thumb_func
+ 527              	inv_get_local_field:
+ 528              	.LVL27:
+ 529              	.LFB16:
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.local_field, sizeof(rh.local_field));
+ 530              		.loc 1 173 1 is_stmt 1 view -0
+ 531              		.cfi_startproc
+ 532              		@ args = 0, pretend = 0, frame = 0
+ 533              		@ frame_needed = 0, uses_anonymous_args = 0
+ 534              		@ link register save eliminated.
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.local_field, sizeof(rh.local_field));
+ 535              		.loc 1 173 1 is_stmt 0 view .LVU97
+ 536 0000 10B4     		push	{r4}
+ 537              	.LCFI7:
+ 538              		.cfi_def_cfa_offset 4
+ 539              		.cfi_offset 4, -4
+ 540 0002 0346     		mov	r3, r0
+ 174:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 541              		.loc 1 174 5 is_stmt 1 view .LVU98
+ 542 0004 034C     		ldr	r4, .L52
+ 543 0006 07CC     		ldmia	r4!, {r0, r1, r2}
+ 544              	.LVL28:
+ 174:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 545              		.loc 1 174 5 is_stmt 0 view .LVU99
+ 546 0008 1860     		str	r0, [r3]	@ unaligned
+ 547 000a 5960     		str	r1, [r3, #4]	@ unaligned
+ 548 000c 9A60     		str	r2, [r3, #8]	@ unaligned
+ 175:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 549              		.loc 1 175 1 view .LVU100
+ 550 000e 5DF8044B 		ldr	r4, [sp], #4
+ 551              	.LCFI8:
+ 552              		.cfi_restore 4
+ 553              		.cfi_def_cfa_offset 0
+ 554 0012 7047     		bx	lr
+ 555              	.L53:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 17
+
+
+ 556              		.align	2
+ 557              	.L52:
+ 558 0014 28000000 		.word	rh+40
+ 559              		.cfi_endproc
+ 560              	.LFE16:
+ 562              		.section	.text.inv_set_mag_scale,"ax",%progbits
+ 563              		.align	1
+ 564              		.global	inv_set_mag_scale
+ 565              		.syntax unified
+ 566              		.thumb
+ 567              		.thumb_func
+ 569              	inv_set_mag_scale:
+ 570              	.LVL29:
+ 571              	.LFB17:
+ 182:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.mag_scale, data, sizeof(rh.mag_scale));
+ 572              		.loc 1 182 1 is_stmt 1 view -0
+ 573              		.cfi_startproc
+ 574              		@ args = 0, pretend = 0, frame = 0
+ 575              		@ frame_needed = 0, uses_anonymous_args = 0
+ 576              		@ link register save eliminated.
+ 182:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.mag_scale, data, sizeof(rh.mag_scale));
+ 577              		.loc 1 182 1 is_stmt 0 view .LVU102
+ 578 0000 0246     		mov	r2, r0
+ 183:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 579              		.loc 1 183 5 is_stmt 1 view .LVU103
+ 580 0002 034B     		ldr	r3, .L55
+ 581 0004 0068     		ldr	r0, [r0]	@ unaligned
+ 582              	.LVL30:
+ 183:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 583              		.loc 1 183 5 is_stmt 0 view .LVU104
+ 584 0006 5168     		ldr	r1, [r2, #4]	@ unaligned
+ 585 0008 9268     		ldr	r2, [r2, #8]	@ unaligned
+ 586              	.LVL31:
+ 183:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 587              		.loc 1 183 5 view .LVU105
+ 588 000a 07C3     		stmia	r3!, {r0, r1, r2}
+ 184:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 589              		.loc 1 184 1 view .LVU106
+ 590 000c 7047     		bx	lr
+ 591              	.L56:
+ 592 000e 00BF     		.align	2
+ 593              	.L55:
+ 594 0010 34000000 		.word	rh+52
+ 595              		.cfi_endproc
+ 596              	.LFE17:
+ 598              		.section	.text.inv_get_mag_scale,"ax",%progbits
+ 599              		.align	1
+ 600              		.global	inv_get_mag_scale
+ 601              		.syntax unified
+ 602              		.thumb
+ 603              		.thumb_func
+ 605              	inv_get_mag_scale:
+ 606              	.LVL32:
+ 607              	.LFB18:
+ 191:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.mag_scale, sizeof(rh.mag_scale));
+ 608              		.loc 1 191 1 is_stmt 1 view -0
+ 609              		.cfi_startproc
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 18
+
+
+ 610              		@ args = 0, pretend = 0, frame = 0
+ 611              		@ frame_needed = 0, uses_anonymous_args = 0
+ 612              		@ link register save eliminated.
+ 191:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.mag_scale, sizeof(rh.mag_scale));
+ 613              		.loc 1 191 1 is_stmt 0 view .LVU108
+ 614 0000 10B4     		push	{r4}
+ 615              	.LCFI9:
+ 616              		.cfi_def_cfa_offset 4
+ 617              		.cfi_offset 4, -4
+ 618 0002 0346     		mov	r3, r0
+ 192:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 619              		.loc 1 192 5 is_stmt 1 view .LVU109
+ 620 0004 034C     		ldr	r4, .L59
+ 621 0006 07CC     		ldmia	r4!, {r0, r1, r2}
+ 622              	.LVL33:
+ 192:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 623              		.loc 1 192 5 is_stmt 0 view .LVU110
+ 624 0008 1860     		str	r0, [r3]	@ unaligned
+ 625 000a 5960     		str	r1, [r3, #4]	@ unaligned
+ 626 000c 9A60     		str	r2, [r3, #8]	@ unaligned
+ 193:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 627              		.loc 1 193 1 view .LVU111
+ 628 000e 5DF8044B 		ldr	r4, [sp], #4
+ 629              	.LCFI10:
+ 630              		.cfi_restore 4
+ 631              		.cfi_def_cfa_offset 0
+ 632 0012 7047     		bx	lr
+ 633              	.L60:
+ 634              		.align	2
+ 635              	.L59:
+ 636 0014 34000000 		.word	rh+52
+ 637              		.cfi_endproc
+ 638              	.LFE18:
+ 640              		.section	.text.inv_get_gravity,"ax",%progbits
+ 641              		.align	1
+ 642              		.global	inv_get_gravity
+ 643              		.syntax unified
+ 644              		.thumb
+ 645              		.thumb_func
+ 647              	inv_get_gravity:
+ 648              	.LVL34:
+ 649              	.LFB19:
+ 200:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] =
+ 650              		.loc 1 200 1 is_stmt 1 view -0
+ 651              		.cfi_startproc
+ 652              		@ args = 0, pretend = 0, frame = 0
+ 653              		@ frame_needed = 0, uses_anonymous_args = 0
+ 200:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] =
+ 654              		.loc 1 200 1 is_stmt 0 view .LVU113
+ 655 0000 70B5     		push	{r4, r5, r6, lr}
+ 656              	.LCFI11:
+ 657              		.cfi_def_cfa_offset 16
+ 658              		.cfi_offset 4, -16
+ 659              		.cfi_offset 5, -12
+ 660              		.cfi_offset 6, -8
+ 661              		.cfi_offset 14, -4
+ 662 0002 0646     		mov	r6, r0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 19
+
+
+ 201:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q29_mult(rh.nav_quat[1], rh.nav_quat[3]) - inv_q29_mult(rh.nav_quat[2], rh.nav_quat[0])
+ 663              		.loc 1 201 5 is_stmt 1 view .LVU114
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] =
+ 664              		.loc 1 202 9 is_stmt 0 view .LVU115
+ 665 0004 124C     		ldr	r4, .L63
+ 666 0006 E168     		ldr	r1, [r4, #12]
+ 667 0008 6068     		ldr	r0, [r4, #4]
+ 668              	.LVL35:
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] =
+ 669              		.loc 1 202 9 view .LVU116
+ 670 000a FFF7FEFF 		bl	inv_q29_mult
+ 671              	.LVL36:
+ 672 000e 0546     		mov	r5, r0
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] =
+ 673              		.loc 1 202 56 view .LVU117
+ 674 0010 2168     		ldr	r1, [r4]
+ 675 0012 A068     		ldr	r0, [r4, #8]
+ 676 0014 FFF7FEFF 		bl	inv_q29_mult
+ 677              	.LVL37:
+ 202:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] =
+ 678              		.loc 1 202 54 view .LVU118
+ 679 0018 2D1A     		subs	r5, r5, r0
+ 201:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q29_mult(rh.nav_quat[1], rh.nav_quat[3]) - inv_q29_mult(rh.nav_quat[2], rh.nav_quat[0])
+ 680              		.loc 1 201 13 view .LVU119
+ 681 001a 3560     		str	r5, [r6]
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q29_mult(rh.nav_quat[2], rh.nav_quat[3]) + inv_q29_mult(rh.nav_quat[1], rh.nav_quat[0])
+ 682              		.loc 1 203 5 is_stmt 1 view .LVU120
+ 204:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] =
+ 683              		.loc 1 204 9 is_stmt 0 view .LVU121
+ 684 001c E168     		ldr	r1, [r4, #12]
+ 685 001e A068     		ldr	r0, [r4, #8]
+ 686 0020 FFF7FEFF 		bl	inv_q29_mult
+ 687              	.LVL38:
+ 688 0024 0546     		mov	r5, r0
+ 204:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] =
+ 689              		.loc 1 204 56 view .LVU122
+ 690 0026 2168     		ldr	r1, [r4]
+ 691 0028 6068     		ldr	r0, [r4, #4]
+ 692 002a FFF7FEFF 		bl	inv_q29_mult
+ 693              	.LVL39:
+ 204:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] =
+ 694              		.loc 1 204 54 view .LVU123
+ 695 002e 0544     		add	r5, r5, r0
+ 203:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q29_mult(rh.nav_quat[2], rh.nav_quat[3]) + inv_q29_mult(rh.nav_quat[1], rh.nav_quat[0])
+ 696              		.loc 1 203 13 view .LVU124
+ 697 0030 7560     		str	r5, [r6, #4]
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         (inv_q29_mult(rh.nav_quat[3], rh.nav_quat[3]) + inv_q29_mult(rh.nav_quat[0], rh.nav_quat[0]
+ 698              		.loc 1 205 5 is_stmt 1 view .LVU125
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         1073741824L;
+ 699              		.loc 1 206 10 is_stmt 0 view .LVU126
+ 700 0032 E068     		ldr	r0, [r4, #12]
+ 701 0034 0146     		mov	r1, r0
+ 702 0036 FFF7FEFF 		bl	inv_q29_mult
+ 703              	.LVL40:
+ 704 003a 0546     		mov	r5, r0
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         1073741824L;
+ 705              		.loc 1 206 57 view .LVU127
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 20
+
+
+ 706 003c 2068     		ldr	r0, [r4]
+ 707 003e 0146     		mov	r1, r0
+ 708 0040 FFF7FEFF 		bl	inv_q29_mult
+ 709              	.LVL41:
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         1073741824L;
+ 710              		.loc 1 206 55 view .LVU128
+ 711 0044 0544     		add	r5, r5, r0
+ 206:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         1073741824L;
+ 712              		.loc 1 206 103 view .LVU129
+ 713 0046 05F14045 		add	r5, r5, #-1073741824
+ 205:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         (inv_q29_mult(rh.nav_quat[3], rh.nav_quat[3]) + inv_q29_mult(rh.nav_quat[0], rh.nav_quat[0]
+ 714              		.loc 1 205 13 view .LVU130
+ 715 004a B560     		str	r5, [r6, #8]
+ 209:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 716              		.loc 1 209 5 is_stmt 1 view .LVU131
+ 210:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 717              		.loc 1 210 1 is_stmt 0 view .LVU132
+ 718 004c 0020     		movs	r0, #0
+ 719 004e 70BD     		pop	{r4, r5, r6, pc}
+ 720              	.LVL42:
+ 721              	.L64:
+ 210:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 722              		.loc 1 210 1 view .LVU133
+ 723              		.align	2
+ 724              	.L63:
+ 725 0050 00000000 		.word	rh
+ 726              		.cfi_endproc
+ 727              	.LFE19:
+ 729              		.section	.text.inv_get_6axis_quaternion,"ax",%progbits
+ 730              		.align	1
+ 731              		.global	inv_get_6axis_quaternion
+ 732              		.syntax unified
+ 733              		.thumb
+ 734              		.thumb_func
+ 736              	inv_get_6axis_quaternion:
+ 737              	.LVL43:
+ 738              	.LFB20:
+ 217:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.gam_quat, sizeof(rh.gam_quat));
+ 739              		.loc 1 217 1 is_stmt 1 view -0
+ 740              		.cfi_startproc
+ 741              		@ args = 0, pretend = 0, frame = 0
+ 742              		@ frame_needed = 0, uses_anonymous_args = 0
+ 743              		@ link register save eliminated.
+ 217:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(data, rh.gam_quat, sizeof(rh.gam_quat));
+ 744              		.loc 1 217 1 is_stmt 0 view .LVU135
+ 745 0000 10B4     		push	{r4}
+ 746              	.LCFI12:
+ 747              		.cfi_def_cfa_offset 4
+ 748              		.cfi_offset 4, -4
+ 749 0002 8446     		mov	ip, r0
+ 218:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ 750              		.loc 1 218 5 is_stmt 1 view .LVU136
+ 751 0004 064C     		ldr	r4, .L67
+ 752 0006 0FCC     		ldmia	r4!, {r0, r1, r2, r3}
+ 753              	.LVL44:
+ 218:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ 754              		.loc 1 218 5 is_stmt 0 view .LVU137
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 21
+
+
+ 755 0008 CCF80000 		str	r0, [ip]	@ unaligned
+ 756 000c CCF80410 		str	r1, [ip, #4]	@ unaligned
+ 757 0010 CCF80820 		str	r2, [ip, #8]	@ unaligned
+ 758 0014 CCF80C30 		str	r3, [ip, #12]	@ unaligned
+ 219:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 759              		.loc 1 219 5 is_stmt 1 view .LVU138
+ 220:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 760              		.loc 1 220 1 is_stmt 0 view .LVU139
+ 761 0018 0020     		movs	r0, #0
+ 762 001a 5DF8044B 		ldr	r4, [sp], #4
+ 763              	.LCFI13:
+ 764              		.cfi_restore 4
+ 765              		.cfi_def_cfa_offset 0
+ 766 001e 7047     		bx	lr
+ 767              	.L68:
+ 768              		.align	2
+ 769              	.L67:
+ 770 0020 10000000 		.word	rh+16
+ 771              		.cfi_endproc
+ 772              	.LFE20:
+ 774              		.section	.text.inv_get_quaternion,"ax",%progbits
+ 775              		.align	1
+ 776              		.global	inv_get_quaternion
+ 777              		.syntax unified
+ 778              		.thumb
+ 779              		.thumb_func
+ 781              	inv_get_quaternion:
+ 782              	.LVL45:
+ 783              	.LFB21:
+ 227:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (rh.status & (INV_COMPASS_CORRECTION_SET | INV_6_AXIS_QUAT_SET)) {
+ 784              		.loc 1 227 1 is_stmt 1 view -0
+ 785              		.cfi_startproc
+ 786              		@ args = 0, pretend = 0, frame = 0
+ 787              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (rh.status & (INV_COMPASS_CORRECTION_SET | INV_6_AXIS_QUAT_SET)) {
+ 788              		.loc 1 227 1 is_stmt 0 view .LVU141
+ 789 0000 38B5     		push	{r3, r4, r5, lr}
+ 790              	.LCFI14:
+ 791              		.cfi_def_cfa_offset 16
+ 792              		.cfi_offset 3, -16
+ 793              		.cfi_offset 4, -12
+ 794              		.cfi_offset 5, -8
+ 795              		.cfi_offset 14, -4
+ 796 0002 0446     		mov	r4, r0
+ 228:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q_mult(rh.compass_correction, rh.gam_quat, rh.nav_quat);
+ 797              		.loc 1 228 5 is_stmt 1 view .LVU142
+ 228:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q_mult(rh.compass_correction, rh.gam_quat, rh.nav_quat);
+ 798              		.loc 1 228 11 is_stmt 0 view .LVU143
+ 799 0004 0C4B     		ldr	r3, .L73
+ 800 0006 DB6F     		ldr	r3, [r3, #124]
+ 228:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_q_mult(rh.compass_correction, rh.gam_quat, rh.nav_quat);
+ 801              		.loc 1 228 8 view .LVU144
+ 802 0008 13F0030F 		tst	r3, #3
+ 803 000c 07D1     		bne	.L72
+ 804              	.LVL46:
+ 805              	.L70:
+ 232:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 22
+
+
+ 806              		.loc 1 232 5 is_stmt 1 view .LVU145
+ 807 000e 0A4D     		ldr	r5, .L73
+ 808 0010 0FCD     		ldmia	r5!, {r0, r1, r2, r3}
+ 809 0012 2060     		str	r0, [r4]	@ unaligned
+ 810 0014 6160     		str	r1, [r4, #4]	@ unaligned
+ 811 0016 A260     		str	r2, [r4, #8]	@ unaligned
+ 812 0018 E360     		str	r3, [r4, #12]	@ unaligned
+ 233:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 813              		.loc 1 233 5 view .LVU146
+ 234:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 814              		.loc 1 234 1 is_stmt 0 view .LVU147
+ 815 001a 0020     		movs	r0, #0
+ 816 001c 38BD     		pop	{r3, r4, r5, pc}
+ 817              	.LVL47:
+ 818              	.L72:
+ 229:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         rh.status &= ~(INV_COMPASS_CORRECTION_SET | INV_6_AXIS_QUAT_SET);
+ 819              		.loc 1 229 9 is_stmt 1 view .LVU148
+ 820 001e 064D     		ldr	r5, .L73
+ 821 0020 2A46     		mov	r2, r5
+ 822 0022 05F11001 		add	r1, r5, #16
+ 823 0026 05F14000 		add	r0, r5, #64
+ 824              	.LVL48:
+ 229:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         rh.status &= ~(INV_COMPASS_CORRECTION_SET | INV_6_AXIS_QUAT_SET);
+ 825              		.loc 1 229 9 is_stmt 0 view .LVU149
+ 826 002a FFF7FEFF 		bl	inv_q_mult
+ 827              	.LVL49:
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 828              		.loc 1 230 9 is_stmt 1 view .LVU150
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 829              		.loc 1 230 11 is_stmt 0 view .LVU151
+ 830 002e EB6F     		ldr	r3, [r5, #124]
+ 230:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 831              		.loc 1 230 19 view .LVU152
+ 832 0030 23F00303 		bic	r3, r3, #3
+ 833 0034 EB67     		str	r3, [r5, #124]
+ 834 0036 EAE7     		b	.L70
+ 835              	.L74:
+ 836              		.align	2
+ 837              	.L73:
+ 838 0038 00000000 		.word	rh
+ 839              		.cfi_endproc
+ 840              	.LFE21:
+ 842              		.section	.text.inv_get_quaternion_float,"ax",%progbits
+ 843              		.align	1
+ 844              		.global	inv_get_quaternion_float
+ 845              		.syntax unified
+ 846              		.thumb
+ 847              		.thumb_func
+ 849              	inv_get_quaternion_float:
+ 850              	.LVL50:
+ 851              	.LFB22:
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long ldata[4];
+ 852              		.loc 1 241 1 is_stmt 1 view -0
+ 853              		.cfi_startproc
+ 854              		@ args = 0, pretend = 0, frame = 16
+ 855              		@ frame_needed = 0, uses_anonymous_args = 0
+ 241:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long ldata[4];
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 23
+
+
+ 856              		.loc 1 241 1 is_stmt 0 view .LVU154
+ 857 0000 10B5     		push	{r4, lr}
+ 858              	.LCFI15:
+ 859              		.cfi_def_cfa_offset 8
+ 860              		.cfi_offset 4, -8
+ 861              		.cfi_offset 14, -4
+ 862 0002 84B0     		sub	sp, sp, #16
+ 863              	.LCFI16:
+ 864              		.cfi_def_cfa_offset 24
+ 865 0004 0446     		mov	r4, r0
+ 242:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_error_t result = inv_get_quaternion(ldata);
+ 866              		.loc 1 242 5 is_stmt 1 view .LVU155
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] = inv_q30_to_float(ldata[0]);
+ 867              		.loc 1 243 5 view .LVU156
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] = inv_q30_to_float(ldata[0]);
+ 868              		.loc 1 243 26 is_stmt 0 view .LVU157
+ 869 0006 6846     		mov	r0, sp
+ 870              	.LVL51:
+ 243:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[0] = inv_q30_to_float(ldata[0]);
+ 871              		.loc 1 243 26 view .LVU158
+ 872 0008 FFF7FEFF 		bl	inv_get_quaternion
+ 873              	.LVL52:
+ 244:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] = inv_q30_to_float(ldata[1]);
+ 874              		.loc 1 244 5 is_stmt 1 view .LVU159
+ 875              	.LBB10:
+ 876              	.LBI10:
+ 877              		.file 2 "Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h"
+   1:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** /*
+   2:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****  $
+   6:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****  */
+   7:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #ifndef INVENSENSE_INV_MATH_FUNC_H__
+   8:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define INVENSENSE_INV_MATH_FUNC_H__
+   9:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** 
+  10:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #include "mltypes.h"
+  11:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** 
+  12:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define GYRO_MAG_SQR_SHIFT 6
+  13:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define NUM_ROTATION_MATRIX_ELEMENTS (9)
+  14:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define ROT_MATRIX_SCALE_LONG  (1073741824L)
+  15:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define ROT_MATRIX_SCALE_FLOAT (1073741824.0f)
+  16:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define ROT_MATRIX_LONG_TO_FLOAT( longval ) \
+  17:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     ((float) ((longval) / ROT_MATRIX_SCALE_FLOAT ))
+  18:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define SIGNM(k)((int)(k)&1?-1:1)
+  19:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define SIGNSET(x) ((x) ? -1 : +1)
+  20:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** 
+  21:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #define INV_TWO_POWER_NEG_30 9.313225746154785e-010f
+  22:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** 
+  23:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #ifdef __cplusplus
+  24:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** extern "C" {
+  25:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** #endif
+  26:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** 
+  27:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****      typedef struct {
+  28:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****         float state[4];
+  29:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****         float c[5];
+  30:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****         float input;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 24
+
+
+  31:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****         float output;
+  32:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     }   inv_biquad_filter_t;
+  33:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h **** 
+  34:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     static inline float inv_q30_to_float(long q30)
+ 878              		.loc 2 34 25 view .LVU160
+ 879              	.LBB11:
+  35:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     {
+  36:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****         return (float) q30 / ((float)(1L << 30));
+ 880              		.loc 2 36 9 view .LVU161
+ 881              		.loc 2 36 16 is_stmt 0 view .LVU162
+ 882 000c DDED007A 		vldr.32	s15, [sp]	@ int
+ 883 0010 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 884              		.loc 2 36 28 view .LVU163
+ 885 0014 9FED0F7A 		vldr.32	s14, .L77
+ 886 0018 67EE877A 		vmul.f32	s15, s15, s14
+ 887              	.LVL53:
+ 888              		.loc 2 36 28 view .LVU164
+ 889              	.LBE11:
+ 890              	.LBE10:
+ 244:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[1] = inv_q30_to_float(ldata[1]);
+ 891              		.loc 1 244 13 view .LVU165
+ 892 001c C4ED007A 		vstr.32	s15, [r4]
+ 245:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] = inv_q30_to_float(ldata[2]);
+ 893              		.loc 1 245 5 is_stmt 1 view .LVU166
+ 894              	.LVL54:
+ 895              	.LBB12:
+ 896              	.LBI12:
+  34:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     {
+ 897              		.loc 2 34 25 view .LVU167
+ 898              	.LBB13:
+ 899              		.loc 2 36 9 view .LVU168
+ 900              		.loc 2 36 16 is_stmt 0 view .LVU169
+ 901 0020 DDED017A 		vldr.32	s15, [sp, #4]	@ int
+ 902 0024 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 903              		.loc 2 36 28 view .LVU170
+ 904 0028 67EE877A 		vmul.f32	s15, s15, s14
+ 905              	.LVL55:
+ 906              		.loc 2 36 28 view .LVU171
+ 907              	.LBE13:
+ 908              	.LBE12:
+ 245:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[2] = inv_q30_to_float(ldata[2]);
+ 909              		.loc 1 245 13 view .LVU172
+ 910 002c C4ED017A 		vstr.32	s15, [r4, #4]
+ 246:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[3] = inv_q30_to_float(ldata[3]);
+ 911              		.loc 1 246 5 is_stmt 1 view .LVU173
+ 912              	.LVL56:
+ 913              	.LBB14:
+ 914              	.LBI14:
+  34:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     {
+ 915              		.loc 2 34 25 view .LVU174
+ 916              	.LBB15:
+ 917              		.loc 2 36 9 view .LVU175
+ 918              		.loc 2 36 16 is_stmt 0 view .LVU176
+ 919 0030 DDED027A 		vldr.32	s15, [sp, #8]	@ int
+ 920 0034 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 921              		.loc 2 36 28 view .LVU177
+ 922 0038 67EE877A 		vmul.f32	s15, s15, s14
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 25
+
+
+ 923              	.LVL57:
+ 924              		.loc 2 36 28 view .LVU178
+ 925              	.LBE15:
+ 926              	.LBE14:
+ 246:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     data[3] = inv_q30_to_float(ldata[3]);
+ 927              		.loc 1 246 13 view .LVU179
+ 928 003c C4ED027A 		vstr.32	s15, [r4, #8]
+ 247:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return result;
+ 929              		.loc 1 247 5 is_stmt 1 view .LVU180
+ 930              	.LVL58:
+ 931              	.LBB16:
+ 932              	.LBI16:
+  34:Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h ****     {
+ 933              		.loc 2 34 25 view .LVU181
+ 934              	.LBB17:
+ 935              		.loc 2 36 9 view .LVU182
+ 936              		.loc 2 36 16 is_stmt 0 view .LVU183
+ 937 0040 DDED037A 		vldr.32	s15, [sp, #12]	@ int
+ 938 0044 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 939              		.loc 2 36 28 view .LVU184
+ 940 0048 67EE877A 		vmul.f32	s15, s15, s14
+ 941              	.LVL59:
+ 942              		.loc 2 36 28 view .LVU185
+ 943              	.LBE17:
+ 944              	.LBE16:
+ 247:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return result;
+ 945              		.loc 1 247 13 view .LVU186
+ 946 004c C4ED037A 		vstr.32	s15, [r4, #12]
+ 248:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 947              		.loc 1 248 5 is_stmt 1 view .LVU187
+ 249:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 948              		.loc 1 249 1 is_stmt 0 view .LVU188
+ 949 0050 04B0     		add	sp, sp, #16
+ 950              	.LCFI17:
+ 951              		.cfi_def_cfa_offset 8
+ 952              		@ sp needed
+ 953 0052 10BD     		pop	{r4, pc}
+ 954              	.LVL60:
+ 955              	.L78:
+ 249:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 956              		.loc 1 249 1 view .LVU189
+ 957              		.align	2
+ 958              	.L77:
+ 959 0054 00008030 		.word	813694976
+ 960              		.cfi_endproc
+ 961              	.LFE22:
+ 963              		.section	.text.inv_get_quaternion_set,"ax",%progbits
+ 964              		.align	1
+ 965              		.global	inv_get_quaternion_set
+ 966              		.syntax unified
+ 967              		.thumb
+ 968              		.thumb_func
+ 970              	inv_get_quaternion_set:
+ 971              	.LVL61:
+ 972              	.LFB23:
+ 257:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_get_quaternion(data);
+ 973              		.loc 1 257 1 is_stmt 1 view -0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 26
+
+
+ 974              		.cfi_startproc
+ 975              		@ args = 0, pretend = 0, frame = 0
+ 976              		@ frame_needed = 0, uses_anonymous_args = 0
+ 257:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_get_quaternion(data);
+ 977              		.loc 1 257 1 is_stmt 0 view .LVU191
+ 978 0000 38B5     		push	{r3, r4, r5, lr}
+ 979              	.LCFI18:
+ 980              		.cfi_def_cfa_offset 16
+ 981              		.cfi_offset 3, -16
+ 982              		.cfi_offset 4, -12
+ 983              		.cfi_offset 5, -8
+ 984              		.cfi_offset 14, -4
+ 985 0002 0D46     		mov	r5, r1
+ 986 0004 1446     		mov	r4, r2
+ 258:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     *timestamp = inv_get_last_timestamp();
+ 987              		.loc 1 258 5 is_stmt 1 view .LVU192
+ 988 0006 FFF7FEFF 		bl	inv_get_quaternion
+ 989              	.LVL62:
+ 259:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (inv_get_compass_on()) {
+ 990              		.loc 1 259 5 view .LVU193
+ 259:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (inv_get_compass_on()) {
+ 991              		.loc 1 259 18 is_stmt 0 view .LVU194
+ 992 000a FFF7FEFF 		bl	inv_get_last_timestamp
+ 993              	.LVL63:
+ 259:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (inv_get_compass_on()) {
+ 994              		.loc 1 259 16 view .LVU195
+ 995 000e 2060     		str	r0, [r4]
+ 260:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_mag_accuracy();
+ 996              		.loc 1 260 5 is_stmt 1 view .LVU196
+ 260:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_mag_accuracy();
+ 997              		.loc 1 260 9 is_stmt 0 view .LVU197
+ 998 0010 FFF7FEFF 		bl	inv_get_compass_on
+ 999              	.LVL64:
+ 260:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_mag_accuracy();
+ 1000              		.loc 1 260 8 view .LVU198
+ 1001 0014 18B1     		cbz	r0, .L80
+ 261:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else if (inv_get_gyro_on()) {
+ 1002              		.loc 1 261 9 is_stmt 1 view .LVU199
+ 261:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else if (inv_get_gyro_on()) {
+ 1003              		.loc 1 261 21 is_stmt 0 view .LVU200
+ 1004 0016 FFF7FEFF 		bl	inv_get_mag_accuracy
+ 1005              	.LVL65:
+ 261:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else if (inv_get_gyro_on()) {
+ 1006              		.loc 1 261 19 view .LVU201
+ 1007 001a 2860     		str	r0, [r5]
+ 1008              	.L79:
+ 269:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 1009              		.loc 1 269 1 view .LVU202
+ 1010 001c 38BD     		pop	{r3, r4, r5, pc}
+ 1011              	.LVL66:
+ 1012              	.L80:
+ 262:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_gyro_accuracy();
+ 1013              		.loc 1 262 12 is_stmt 1 view .LVU203
+ 262:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_gyro_accuracy();
+ 1014              		.loc 1 262 16 is_stmt 0 view .LVU204
+ 1015 001e FFF7FEFF 		bl	inv_get_gyro_on
+ 1016              	.LVL67:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 27
+
+
+ 262:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_gyro_accuracy();
+ 1017              		.loc 1 262 15 view .LVU205
+ 1018 0022 18B1     		cbz	r0, .L82
+ 263:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }else if (inv_get_accel_on()) {
+ 1019              		.loc 1 263 9 is_stmt 1 view .LVU206
+ 263:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }else if (inv_get_accel_on()) {
+ 1020              		.loc 1 263 21 is_stmt 0 view .LVU207
+ 1021 0024 FFF7FEFF 		bl	inv_get_gyro_accuracy
+ 1022              	.LVL68:
+ 263:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }else if (inv_get_accel_on()) {
+ 1023              		.loc 1 263 19 view .LVU208
+ 1024 0028 2860     		str	r0, [r5]
+ 1025 002a F7E7     		b	.L79
+ 1026              	.L82:
+ 264:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_accel_accuracy();
+ 1027              		.loc 1 264 11 is_stmt 1 view .LVU209
+ 264:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_accel_accuracy();
+ 1028              		.loc 1 264 15 is_stmt 0 view .LVU210
+ 1029 002c FFF7FEFF 		bl	inv_get_accel_on
+ 1030              	.LVL69:
+ 264:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         *accuracy = inv_get_accel_accuracy();
+ 1031              		.loc 1 264 14 view .LVU211
+ 1032 0030 10B9     		cbnz	r0, .L85
+ 267:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1033              		.loc 1 267 9 is_stmt 1 view .LVU212
+ 267:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1034              		.loc 1 267 19 is_stmt 0 view .LVU213
+ 1035 0032 0023     		movs	r3, #0
+ 1036 0034 2B60     		str	r3, [r5]
+ 269:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 1037              		.loc 1 269 1 view .LVU214
+ 1038 0036 F1E7     		b	.L79
+ 1039              	.L85:
+ 265:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else {
+ 1040              		.loc 1 265 9 is_stmt 1 view .LVU215
+ 265:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else {
+ 1041              		.loc 1 265 21 is_stmt 0 view .LVU216
+ 1042 0038 FFF7FEFF 		bl	inv_get_accel_accuracy
+ 1043              	.LVL70:
+ 265:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     } else {
+ 1044              		.loc 1 265 19 view .LVU217
+ 1045 003c 2860     		str	r0, [r5]
+ 1046 003e EDE7     		b	.L79
+ 1047              		.cfi_endproc
+ 1048              	.LFE23:
+ 1050              		.section	.text.inv_init_results_holder,"ax",%progbits
+ 1051              		.align	1
+ 1052              		.global	inv_init_results_holder
+ 1053              		.syntax unified
+ 1054              		.thumb
+ 1055              		.thumb_func
+ 1057              	inv_init_results_holder:
+ 1058              	.LFB26:
+ 292:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 293:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Initializes results holder. This is called automatically by the
+ 294:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * enable function inv_enable_results_holder(). It may be called any time the feature is enabled, bu
+ 295:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * is typically not needed to be called by outside callers.
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 28
+
+
+ 296:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 297:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 298:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_init_results_holder(void)
+ 299:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1059              		.loc 1 299 1 is_stmt 1 view -0
+ 1060              		.cfi_startproc
+ 1061              		@ args = 0, pretend = 0, frame = 0
+ 1062              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1063 0000 10B5     		push	{r4, lr}
+ 1064              	.LCFI19:
+ 1065              		.cfi_def_cfa_offset 8
+ 1066              		.cfi_offset 4, -8
+ 1067              		.cfi_offset 14, -4
+ 300:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memset(&rh, 0, sizeof(rh));
+ 1068              		.loc 1 300 5 view .LVU219
+ 1069 0002 094C     		ldr	r4, .L88
+ 1070 0004 8822     		movs	r2, #136
+ 1071 0006 0021     		movs	r1, #0
+ 1072 0008 2046     		mov	r0, r4
+ 1073 000a FFF7FEFF 		bl	memset
+ 1074              	.LVL71:
+ 301:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.mag_scale[0] = 1L<<30;
+ 1075              		.loc 1 301 5 view .LVU220
+ 1076              		.loc 1 301 21 is_stmt 0 view .LVU221
+ 1077 000e 4FF08043 		mov	r3, #1073741824
+ 1078 0012 6363     		str	r3, [r4, #52]
+ 302:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.mag_scale[1] = 1L<<30;
+ 1079              		.loc 1 302 5 is_stmt 1 view .LVU222
+ 1080              		.loc 1 302 21 is_stmt 0 view .LVU223
+ 1081 0014 A363     		str	r3, [r4, #56]
+ 303:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.mag_scale[2] = 1L<<30;
+ 1082              		.loc 1 303 5 is_stmt 1 view .LVU224
+ 1083              		.loc 1 303 21 is_stmt 0 view .LVU225
+ 1084 0016 E363     		str	r3, [r4, #60]
+ 304:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.compass_correction[0] = 1L<<30;
+ 1085              		.loc 1 304 5 is_stmt 1 view .LVU226
+ 1086              		.loc 1 304 30 is_stmt 0 view .LVU227
+ 1087 0018 2364     		str	r3, [r4, #64]
+ 305:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.gam_quat[0] = 1L<<30;
+ 1088              		.loc 1 305 5 is_stmt 1 view .LVU228
+ 1089              		.loc 1 305 20 is_stmt 0 view .LVU229
+ 1090 001a 2361     		str	r3, [r4, #16]
+ 306:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.nav_quat[0] = 1L<<30;
+ 1091              		.loc 1 306 5 is_stmt 1 view .LVU230
+ 1092              		.loc 1 306 20 is_stmt 0 view .LVU231
+ 1093 001c 2360     		str	r3, [r4]
+ 307:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.quat_confidence_interval = (float)M_PI;
+ 1094              		.loc 1 307 5 is_stmt 1 view .LVU232
+ 1095              		.loc 1 307 33 is_stmt 0 view .LVU233
+ 1096 001e 034B     		ldr	r3, .L88+4
+ 1097 0020 C4F88430 		str	r3, [r4, #132]	@ float
+ 308:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return INV_SUCCESS;
+ 1098              		.loc 1 308 5 is_stmt 1 view .LVU234
+ 309:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1099              		.loc 1 309 1 is_stmt 0 view .LVU235
+ 1100 0024 0020     		movs	r0, #0
+ 1101 0026 10BD     		pop	{r4, pc}
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 29
+
+
+ 1102              	.L89:
+ 1103              		.align	2
+ 1104              	.L88:
+ 1105 0028 00000000 		.word	rh
+ 1106 002c DB0F4940 		.word	1078530011
+ 1107              		.cfi_endproc
+ 1108              	.LFE26:
+ 1110              		.section	.text.inv_enable_results_holder,"ax",%progbits
+ 1111              		.align	1
+ 1112              		.global	inv_enable_results_holder
+ 1113              		.syntax unified
+ 1114              		.thumb
+ 1115              		.thumb_func
+ 1117              	inv_enable_results_holder:
+ 1118              	.LFB27:
+ 310:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 311:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Turns on storage of results.
+ 312:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 313:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_enable_results_holder()
+ 314:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1119              		.loc 1 314 1 is_stmt 1 view -0
+ 1120              		.cfi_startproc
+ 1121              		@ args = 0, pretend = 0, frame = 0
+ 1122              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1123 0000 08B5     		push	{r3, lr}
+ 1124              	.LCFI20:
+ 1125              		.cfi_def_cfa_offset 8
+ 1126              		.cfi_offset 3, -8
+ 1127              		.cfi_offset 14, -4
+ 315:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     inv_error_t result;
+ 1128              		.loc 1 315 5 view .LVU237
+ 316:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     result = inv_init_results_holder();
+ 1129              		.loc 1 316 5 view .LVU238
+ 1130              		.loc 1 316 14 is_stmt 0 view .LVU239
+ 1131 0002 FFF7FEFF 		bl	inv_init_results_holder
+ 1132              	.LVL72:
+ 317:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if ( result ) {
+ 1133              		.loc 1 317 5 is_stmt 1 view .LVU240
+ 1134              		.loc 1 317 8 is_stmt 0 view .LVU241
+ 1135 0006 00B1     		cbz	r0, .L93
+ 1136              	.LVL73:
+ 1137              	.L90:
+ 318:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return result;
+ 319:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 320:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 321:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     result = inv_register_mpl_start_notification(inv_start_results_holder);
+ 322:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return result;
+ 323:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1138              		.loc 1 323 1 view .LVU242
+ 1139 0008 08BD     		pop	{r3, pc}
+ 1140              	.LVL74:
+ 1141              	.L93:
+ 321:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return result;
+ 1142              		.loc 1 321 5 is_stmt 1 view .LVU243
+ 321:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return result;
+ 1143              		.loc 1 321 14 is_stmt 0 view .LVU244
+ 1144 000a 0248     		ldr	r0, .L94
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 30
+
+
+ 1145 000c FFF7FEFF 		bl	inv_register_mpl_start_notification
+ 1146              	.LVL75:
+ 322:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1147              		.loc 1 322 5 is_stmt 1 view .LVU245
+ 322:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1148              		.loc 1 322 12 is_stmt 0 view .LVU246
+ 1149 0010 FAE7     		b	.L90
+ 1150              	.L95:
+ 1151 0012 00BF     		.align	2
+ 1152              	.L94:
+ 1153 0014 00000000 		.word	inv_start_results_holder
+ 1154              		.cfi_endproc
+ 1155              	.LFE27:
+ 1157              		.section	.text.inv_got_accel_bias,"ax",%progbits
+ 1158              		.align	1
+ 1159              		.global	inv_got_accel_bias
+ 1160              		.syntax unified
+ 1161              		.thumb
+ 1162              		.thumb_func
+ 1164              	inv_got_accel_bias:
+ 1165              	.LFB28:
+ 324:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 325:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets state of if we know the accel bias.
+ 326:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return return 1 if we know the accel bias, 0 if not.
+ 327:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *            it is set with inv_set_accel_bias_found()
+ 328:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 329:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** int inv_got_accel_bias()
+ 330:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1166              		.loc 1 330 1 is_stmt 1 view -0
+ 1167              		.cfi_startproc
+ 1168              		@ args = 0, pretend = 0, frame = 0
+ 1169              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1170              		@ link register save eliminated.
+ 331:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.got_accel_bias;
+ 1171              		.loc 1 331 5 view .LVU248
+ 332:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1172              		.loc 1 332 1 is_stmt 0 view .LVU249
+ 1173 0000 014B     		ldr	r3, .L97
+ 1174 0002 586D     		ldr	r0, [r3, #84]
+ 1175 0004 7047     		bx	lr
+ 1176              	.L98:
+ 1177 0006 00BF     		.align	2
+ 1178              	.L97:
+ 1179 0008 00000000 		.word	rh
+ 1180              		.cfi_endproc
+ 1181              	.LFE28:
+ 1183              		.section	.text.inv_set_accel_bias_found,"ax",%progbits
+ 1184              		.align	1
+ 1185              		.global	inv_set_accel_bias_found
+ 1186              		.syntax unified
+ 1187              		.thumb
+ 1188              		.thumb_func
+ 1190              	inv_set_accel_bias_found:
+ 1191              	.LVL76:
+ 1192              	.LFB29:
+ 333:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 334:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets whether we know the accel bias
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 31
+
+
+ 335:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] state Set to 1 if we know the accel bias. 
+ 336:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *            Can be retrieved with inv_got_accel_bias()
+ 337:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 338:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_accel_bias_found(int state)
+ 339:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1193              		.loc 1 339 1 is_stmt 1 view -0
+ 1194              		.cfi_startproc
+ 1195              		@ args = 0, pretend = 0, frame = 0
+ 1196              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1197              		@ link register save eliminated.
+ 340:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.got_accel_bias = state;
+ 1198              		.loc 1 340 5 view .LVU251
+ 1199              		.loc 1 340 23 is_stmt 0 view .LVU252
+ 1200 0000 014B     		ldr	r3, .L100
+ 1201 0002 5865     		str	r0, [r3, #84]
+ 341:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1202              		.loc 1 341 1 view .LVU253
+ 1203 0004 7047     		bx	lr
+ 1204              	.L101:
+ 1205 0006 00BF     		.align	2
+ 1206              	.L100:
+ 1207 0008 00000000 		.word	rh
+ 1208              		.cfi_endproc
+ 1209              	.LFE29:
+ 1211              		.section	.text.inv_got_compass_bias,"ax",%progbits
+ 1212              		.align	1
+ 1213              		.global	inv_got_compass_bias
+ 1214              		.syntax unified
+ 1215              		.thumb
+ 1216              		.thumb_func
+ 1218              	inv_got_compass_bias:
+ 1219              	.LFB30:
+ 342:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 343:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets state of if we know the compass bias.
+ 344:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return return 1 if we know the compass bias, 0 if not.
+ 345:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *            it is set with inv_set_compass_bias_found()
+ 346:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 347:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** int inv_got_compass_bias()
+ 348:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1220              		.loc 1 348 1 is_stmt 1 view -0
+ 1221              		.cfi_startproc
+ 1222              		@ args = 0, pretend = 0, frame = 0
+ 1223              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1224              		@ link register save eliminated.
+ 349:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.got_compass_bias;
+ 1225              		.loc 1 349 5 view .LVU255
+ 350:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1226              		.loc 1 350 1 is_stmt 0 view .LVU256
+ 1227 0000 014B     		ldr	r3, .L103
+ 1228 0002 186F     		ldr	r0, [r3, #112]
+ 1229 0004 7047     		bx	lr
+ 1230              	.L104:
+ 1231 0006 00BF     		.align	2
+ 1232              	.L103:
+ 1233 0008 00000000 		.word	rh
+ 1234              		.cfi_endproc
+ 1235              	.LFE30:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 32
+
+
+ 1237              		.section	.text.inv_set_compass_bias_found,"ax",%progbits
+ 1238              		.align	1
+ 1239              		.global	inv_set_compass_bias_found
+ 1240              		.syntax unified
+ 1241              		.thumb
+ 1242              		.thumb_func
+ 1244              	inv_set_compass_bias_found:
+ 1245              	.LVL77:
+ 1246              	.LFB31:
+ 351:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 352:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets whether we know the compass bias
+ 353:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] state Set to 1 if we know the compass bias. 
+ 354:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *            Can be retrieved with inv_got_compass_bias()
+ 355:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 356:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_compass_bias_found(int state)
+ 357:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1247              		.loc 1 357 1 is_stmt 1 view -0
+ 1248              		.cfi_startproc
+ 1249              		@ args = 0, pretend = 0, frame = 0
+ 1250              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1251              		@ link register save eliminated.
+ 358:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.got_compass_bias = state;
+ 1252              		.loc 1 358 5 view .LVU258
+ 1253              		.loc 1 358 25 is_stmt 0 view .LVU259
+ 1254 0000 014B     		ldr	r3, .L106
+ 1255 0002 1867     		str	r0, [r3, #112]
+ 359:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1256              		.loc 1 359 1 view .LVU260
+ 1257 0004 7047     		bx	lr
+ 1258              	.L107:
+ 1259 0006 00BF     		.align	2
+ 1260              	.L106:
+ 1261 0008 00000000 		.word	rh
+ 1262              		.cfi_endproc
+ 1263              	.LFE31:
+ 1265              		.section	.text.inv_set_compass_state,"ax",%progbits
+ 1266              		.align	1
+ 1267              		.global	inv_set_compass_state
+ 1268              		.syntax unified
+ 1269              		.thumb
+ 1270              		.thumb_func
+ 1272              	inv_set_compass_state:
+ 1273              	.LVL78:
+ 1274              	.LFB32:
+ 360:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 361:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Sets the compass state.
+ 362:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] state Compass state. It can be retrieved with inv_get_compass_state().
+ 363:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 364:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_compass_state(int state)
+ 365:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1275              		.loc 1 365 1 is_stmt 1 view -0
+ 1276              		.cfi_startproc
+ 1277              		@ args = 0, pretend = 0, frame = 0
+ 1278              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1279              		@ link register save eliminated.
+ 366:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.compass_state = state;
+ 1280              		.loc 1 366 5 view .LVU262
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 33
+
+
+ 1281              		.loc 1 366 22 is_stmt 0 view .LVU263
+ 1282 0000 014B     		ldr	r3, .L109
+ 1283 0002 9867     		str	r0, [r3, #120]
+ 367:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1284              		.loc 1 367 1 view .LVU264
+ 1285 0004 7047     		bx	lr
+ 1286              	.L110:
+ 1287 0006 00BF     		.align	2
+ 1288              	.L109:
+ 1289 0008 00000000 		.word	rh
+ 1290              		.cfi_endproc
+ 1291              	.LFE32:
+ 1293              		.section	.text.inv_get_compass_state,"ax",%progbits
+ 1294              		.align	1
+ 1295              		.global	inv_get_compass_state
+ 1296              		.syntax unified
+ 1297              		.thumb
+ 1298              		.thumb_func
+ 1300              	inv_get_compass_state:
+ 1301              	.LFB33:
+ 368:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 369:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Get's the compass state
+ 370:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @return the compass state that was set with inv_set_compass_state()
+ 371:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 372:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** int inv_get_compass_state()
+ 373:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1302              		.loc 1 373 1 is_stmt 1 view -0
+ 1303              		.cfi_startproc
+ 1304              		@ args = 0, pretend = 0, frame = 0
+ 1305              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1306              		@ link register save eliminated.
+ 374:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.compass_state;
+ 1307              		.loc 1 374 5 view .LVU266
+ 375:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1308              		.loc 1 375 1 is_stmt 0 view .LVU267
+ 1309 0000 014B     		ldr	r3, .L112
+ 1310 0002 986F     		ldr	r0, [r3, #120]
+ 1311 0004 7047     		bx	lr
+ 1312              	.L113:
+ 1313 0006 00BF     		.align	2
+ 1314              	.L112:
+ 1315 0008 00000000 		.word	rh
+ 1316              		.cfi_endproc
+ 1317              	.LFE33:
+ 1319              		.section	.text.inv_set_compass_bias_error,"ax",%progbits
+ 1320              		.align	1
+ 1321              		.global	inv_set_compass_bias_error
+ 1322              		.syntax unified
+ 1323              		.thumb
+ 1324              		.thumb_func
+ 1326              	inv_set_compass_bias_error:
+ 1327              	.LVL79:
+ 1328              	.LFB34:
+ 376:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 377:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Set compass bias error. See inv_get_compass_bias_error()
+ 378:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[in] bias_error Set's how accurate we know the compass bias. It is the 
+ 379:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * error squared.
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 34
+
+
+ 380:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 381:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_compass_bias_error(const long *bias_error)
+ 382:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1329              		.loc 1 382 1 is_stmt 1 view -0
+ 1330              		.cfi_startproc
+ 1331              		@ args = 0, pretend = 0, frame = 0
+ 1332              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1333              		@ link register save eliminated.
+ 1334              		.loc 1 382 1 is_stmt 0 view .LVU269
+ 1335 0000 0246     		mov	r2, r0
+ 383:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(rh.compass_bias_error, bias_error, sizeof(rh.compass_bias_error));
+ 1336              		.loc 1 383 5 is_stmt 1 view .LVU270
+ 1337 0002 034B     		ldr	r3, .L115
+ 1338 0004 0068     		ldr	r0, [r0]	@ unaligned
+ 1339              	.LVL80:
+ 1340              		.loc 1 383 5 is_stmt 0 view .LVU271
+ 1341 0006 5168     		ldr	r1, [r2, #4]	@ unaligned
+ 1342 0008 9268     		ldr	r2, [r2, #8]	@ unaligned
+ 1343              	.LVL81:
+ 1344              		.loc 1 383 5 view .LVU272
+ 1345 000a 07C3     		stmia	r3!, {r0, r1, r2}
+ 384:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1346              		.loc 1 384 1 view .LVU273
+ 1347 000c 7047     		bx	lr
+ 1348              	.L116:
+ 1349 000e 00BF     		.align	2
+ 1350              	.L115:
+ 1351 0010 58000000 		.word	rh+88
+ 1352              		.cfi_endproc
+ 1353              	.LFE34:
+ 1355              		.section	.text.inv_get_compass_bias_error,"ax",%progbits
+ 1356              		.align	1
+ 1357              		.global	inv_get_compass_bias_error
+ 1358              		.syntax unified
+ 1359              		.thumb
+ 1360              		.thumb_func
+ 1362              	inv_get_compass_bias_error:
+ 1363              	.LVL82:
+ 1364              	.LFB35:
+ 385:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 386:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Get's compass bias error. See inv_set_compass_bias_error() for setting.
+ 387:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  * @param[out] bias_error Accuracy as to how well the compass bias is known. It is the error square
+ 388:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 389:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_get_compass_bias_error(long *bias_error)
+ 390:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1365              		.loc 1 390 1 is_stmt 1 view -0
+ 1366              		.cfi_startproc
+ 1367              		@ args = 0, pretend = 0, frame = 0
+ 1368              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1369              		@ link register save eliminated.
+ 1370              		.loc 1 390 1 is_stmt 0 view .LVU275
+ 1371 0000 10B4     		push	{r4}
+ 1372              	.LCFI21:
+ 1373              		.cfi_def_cfa_offset 4
+ 1374              		.cfi_offset 4, -4
+ 1375 0002 0346     		mov	r3, r0
+ 391:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     memcpy(bias_error, rh.compass_bias_error, sizeof(rh.compass_bias_error));
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 35
+
+
+ 1376              		.loc 1 391 5 is_stmt 1 view .LVU276
+ 1377 0004 034C     		ldr	r4, .L119
+ 1378 0006 07CC     		ldmia	r4!, {r0, r1, r2}
+ 1379              	.LVL83:
+ 1380              		.loc 1 391 5 is_stmt 0 view .LVU277
+ 1381 0008 1860     		str	r0, [r3]	@ unaligned
+ 1382 000a 5960     		str	r1, [r3, #4]	@ unaligned
+ 1383 000c 9A60     		str	r2, [r3, #8]	@ unaligned
+ 392:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1384              		.loc 1 392 1 view .LVU278
+ 1385 000e 5DF8044B 		ldr	r4, [sp], #4
+ 1386              	.LCFI22:
+ 1387              		.cfi_restore 4
+ 1388              		.cfi_def_cfa_offset 0
+ 1389 0012 7047     		bx	lr
+ 1390              	.L120:
+ 1391              		.align	2
+ 1392              	.L119:
+ 1393 0014 58000000 		.word	rh+88
+ 1394              		.cfi_endproc
+ 1395              	.LFE35:
+ 1397              		.section	.text.inv_get_linear_accel,"ax",%progbits
+ 1398              		.align	1
+ 1399              		.global	inv_get_linear_accel
+ 1400              		.syntax unified
+ 1401              		.thumb
+ 1402              		.thumb_func
+ 1404              	inv_get_linear_accel:
+ 1405              	.LVL84:
+ 1406              	.LFB36:
+ 393:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 394:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /**
+ 395:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @brief      Returns 3-element vector of accelerometer data in body frame
+ 396:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *                with gravity removed
+ 397:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @param[out] data    3-element vector of accelerometer data in body frame
+ 398:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *                with gravity removed
+ 399:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @return     INV_SUCCESS if successful
+ 400:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *              INV_ERROR_INVALID_PARAMETER if invalid input pointer
+ 401:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 402:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_linear_accel(long *data)
+ 403:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1407              		.loc 1 403 1 is_stmt 1 view -0
+ 1408              		.cfi_startproc
+ 1409              		@ args = 0, pretend = 0, frame = 16
+ 1410              		@ frame_needed = 0, uses_anonymous_args = 0
+ 404:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long gravity[3];
+ 1411              		.loc 1 404 5 view .LVU280
+ 405:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 406:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (data != NULL)
+ 1412              		.loc 1 406 5 view .LVU281
+ 1413              		.loc 1 406 8 is_stmt 0 view .LVU282
+ 1414 0000 D8B1     		cbz	r0, .L123
+ 403:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long gravity[3];
+ 1415              		.loc 1 403 1 view .LVU283
+ 1416 0002 10B5     		push	{r4, lr}
+ 1417              	.LCFI23:
+ 1418              		.cfi_def_cfa_offset 8
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 36
+
+
+ 1419              		.cfi_offset 4, -8
+ 1420              		.cfi_offset 14, -4
+ 1421 0004 84B0     		sub	sp, sp, #16
+ 1422              	.LCFI24:
+ 1423              		.cfi_def_cfa_offset 24
+ 1424 0006 0446     		mov	r4, r0
+ 407:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     {
+ 408:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_get_accel_set(data, NULL, NULL);
+ 1425              		.loc 1 408 9 is_stmt 1 view .LVU284
+ 1426 0008 0022     		movs	r2, #0
+ 1427 000a 1146     		mov	r1, r2
+ 1428 000c FFF7FEFF 		bl	inv_get_accel_set
+ 1429              	.LVL85:
+ 409:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_get_gravity(gravity);
+ 1430              		.loc 1 409 9 view .LVU285
+ 1431 0010 01A8     		add	r0, sp, #4
+ 1432 0012 FFF7FEFF 		bl	inv_get_gravity
+ 1433              	.LVL86:
+ 410:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         data[0] -= gravity[0] >> 14;
+ 1434              		.loc 1 410 9 view .LVU286
+ 1435              		.loc 1 410 13 is_stmt 0 view .LVU287
+ 1436 0016 2368     		ldr	r3, [r4]
+ 1437              		.loc 1 410 17 view .LVU288
+ 1438 0018 019A     		ldr	r2, [sp, #4]
+ 1439 001a A3EBA233 		sub	r3, r3, r2, asr #14
+ 1440 001e 2360     		str	r3, [r4]
+ 411:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         data[1] -= gravity[1] >> 14;
+ 1441              		.loc 1 411 9 is_stmt 1 view .LVU289
+ 1442              		.loc 1 411 13 is_stmt 0 view .LVU290
+ 1443 0020 6368     		ldr	r3, [r4, #4]
+ 1444              		.loc 1 411 17 view .LVU291
+ 1445 0022 029A     		ldr	r2, [sp, #8]
+ 1446 0024 A3EBA233 		sub	r3, r3, r2, asr #14
+ 1447 0028 6360     		str	r3, [r4, #4]
+ 412:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         data[2] -= gravity[2] >> 14;
+ 1448              		.loc 1 412 9 is_stmt 1 view .LVU292
+ 1449              		.loc 1 412 13 is_stmt 0 view .LVU293
+ 1450 002a A368     		ldr	r3, [r4, #8]
+ 1451              		.loc 1 412 17 view .LVU294
+ 1452 002c 039A     		ldr	r2, [sp, #12]
+ 1453 002e A3EBA233 		sub	r3, r3, r2, asr #14
+ 1454 0032 A360     		str	r3, [r4, #8]
+ 413:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_SUCCESS;
+ 1455              		.loc 1 413 9 is_stmt 1 view .LVU295
+ 1456              		.loc 1 413 16 is_stmt 0 view .LVU296
+ 1457 0034 0020     		movs	r0, #0
+ 414:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 415:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     else {
+ 416:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 417:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 418:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1458              		.loc 1 418 1 view .LVU297
+ 1459 0036 04B0     		add	sp, sp, #16
+ 1460              	.LCFI25:
+ 1461              		.cfi_def_cfa_offset 8
+ 1462              		@ sp needed
+ 1463 0038 10BD     		pop	{r4, pc}
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 37
+
+
+ 1464              	.LVL87:
+ 1465              	.L123:
+ 1466              	.LCFI26:
+ 1467              		.cfi_def_cfa_offset 0
+ 1468              		.cfi_restore 4
+ 1469              		.cfi_restore 14
+ 416:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1470              		.loc 1 416 16 view .LVU298
+ 1471 003a 1620     		movs	r0, #22
+ 1472              	.LVL88:
+ 1473              		.loc 1 418 1 view .LVU299
+ 1474 003c 7047     		bx	lr
+ 1475              		.cfi_endproc
+ 1476              	.LFE36:
+ 1478              		.section	.text.inv_get_accel,"ax",%progbits
+ 1479              		.align	1
+ 1480              		.global	inv_get_accel
+ 1481              		.syntax unified
+ 1482              		.thumb
+ 1483              		.thumb_func
+ 1485              	inv_get_accel:
+ 1486              	.LVL89:
+ 1487              	.LFB37:
+ 419:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 420:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /**
+ 421:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @brief      Returns 3-element vector of accelerometer data in body frame
+ 422:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @param[out] data    3-element vector of accelerometer data in body frame
+ 423:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @return     INV_SUCCESS if successful
+ 424:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *              INV_ERROR_INVALID_PARAMETER if invalid input pointer
+ 425:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 426:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_accel(long *data)
+ 427:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1488              		.loc 1 427 1 is_stmt 1 view -0
+ 1489              		.cfi_startproc
+ 1490              		@ args = 0, pretend = 0, frame = 0
+ 1491              		@ frame_needed = 0, uses_anonymous_args = 0
+ 428:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (data != NULL) {
+ 1492              		.loc 1 428 5 view .LVU301
+ 1493              		.loc 1 428 8 is_stmt 0 view .LVU302
+ 1494 0000 30B1     		cbz	r0, .L130
+ 427:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (data != NULL) {
+ 1495              		.loc 1 427 1 view .LVU303
+ 1496 0002 08B5     		push	{r3, lr}
+ 1497              	.LCFI27:
+ 1498              		.cfi_def_cfa_offset 8
+ 1499              		.cfi_offset 3, -8
+ 1500              		.cfi_offset 14, -4
+ 429:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_get_accel_set(data, NULL, NULL);
+ 1501              		.loc 1 429 9 is_stmt 1 view .LVU304
+ 1502 0004 0022     		movs	r2, #0
+ 1503 0006 1146     		mov	r1, r2
+ 1504 0008 FFF7FEFF 		bl	inv_get_accel_set
+ 1505              	.LVL90:
+ 430:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_SUCCESS;
+ 1506              		.loc 1 430 9 view .LVU305
+ 1507              		.loc 1 430 16 is_stmt 0 view .LVU306
+ 1508 000c 0020     		movs	r0, #0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 38
+
+
+ 431:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 432:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     else {
+ 433:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 434:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 435:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1509              		.loc 1 435 1 view .LVU307
+ 1510 000e 08BD     		pop	{r3, pc}
+ 1511              	.LVL91:
+ 1512              	.L130:
+ 1513              	.LCFI28:
+ 1514              		.cfi_def_cfa_offset 0
+ 1515              		.cfi_restore 3
+ 1516              		.cfi_restore 14
+ 433:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1517              		.loc 1 433 16 view .LVU308
+ 1518 0010 1620     		movs	r0, #22
+ 1519              	.LVL92:
+ 1520              		.loc 1 435 1 view .LVU309
+ 1521 0012 7047     		bx	lr
+ 1522              		.cfi_endproc
+ 1523              	.LFE37:
+ 1525              		.section	.text.inv_get_accel_float,"ax",%progbits
+ 1526              		.align	1
+ 1527              		.global	inv_get_accel_float
+ 1528              		.syntax unified
+ 1529              		.thumb
+ 1530              		.thumb_func
+ 1532              	inv_get_accel_float:
+ 1533              	.LVL93:
+ 1534              	.LFB38:
+ 436:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 437:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /**
+ 438:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @brief      Returns 3-element vector of accelerometer float data
+ 439:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @param[out] data    3-element vector of accelerometer float data
+ 440:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @return     INV_SUCCESS if successful
+ 441:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *              INV_ERROR_INVALID_PARAMETER if invalid input pointer
+ 442:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 443:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_accel_float(float *data)
+ 444:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1535              		.loc 1 444 1 is_stmt 1 view -0
+ 1536              		.cfi_startproc
+ 1537              		@ args = 0, pretend = 0, frame = 16
+ 1538              		@ frame_needed = 0, uses_anonymous_args = 0
+ 445:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long tdata[3];
+ 1539              		.loc 1 445 5 view .LVU311
+ 446:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     unsigned char i;
+ 1540              		.loc 1 446 5 view .LVU312
+ 447:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 448:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (data != NULL && !inv_get_accel(tdata)) {
+ 1541              		.loc 1 448 5 view .LVU313
+ 1542              		.loc 1 448 8 is_stmt 0 view .LVU314
+ 1543 0000 F8B1     		cbz	r0, .L142
+ 444:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long tdata[3];
+ 1544              		.loc 1 444 1 discriminator 1 view .LVU315
+ 1545 0002 10B5     		push	{r4, lr}
+ 1546              	.LCFI29:
+ 1547              		.cfi_def_cfa_offset 8
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 39
+
+
+ 1548              		.cfi_offset 4, -8
+ 1549              		.cfi_offset 14, -4
+ 1550 0004 84B0     		sub	sp, sp, #16
+ 1551              	.LCFI30:
+ 1552              		.cfi_def_cfa_offset 24
+ 1553 0006 0446     		mov	r4, r0
+ 1554              		.loc 1 448 26 discriminator 1 view .LVU316
+ 1555 0008 01A8     		add	r0, sp, #4
+ 1556              	.LVL94:
+ 1557              		.loc 1 448 26 discriminator 1 view .LVU317
+ 1558 000a FFF7FEFF 		bl	inv_get_accel
+ 1559              	.LVL95:
+ 1560              		.loc 1 448 22 discriminator 1 view .LVU318
+ 1561 000e B0B9     		cbnz	r0, .L146
+ 449:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1562              		.loc 1 449 16 view .LVU319
+ 1563 0010 0023     		movs	r3, #0
+ 1564 0012 10E0     		b	.L137
+ 1565              	.LVL96:
+ 1566              	.L138:
+ 450:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             data[i] = ((float)tdata[i] / (1L << 16));
+ 1567              		.loc 1 450 13 is_stmt 1 discriminator 3 view .LVU320
+ 1568              		.loc 1 450 36 is_stmt 0 discriminator 3 view .LVU321
+ 1569 0014 04AA     		add	r2, sp, #16
+ 1570 0016 02EB8302 		add	r2, r2, r3, lsl #2
+ 1571 001a 52ED037A 		vldr.32	s15, [r2, #-12]	@ int
+ 1572              		.loc 1 450 24 discriminator 3 view .LVU322
+ 1573 001e F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1574              		.loc 1 450 17 discriminator 3 view .LVU323
+ 1575 0022 04EB8302 		add	r2, r4, r3, lsl #2
+ 1576              		.loc 1 450 40 discriminator 3 view .LVU324
+ 1577 0026 9FED087A 		vldr.32	s14, .L147
+ 1578 002a 67EE877A 		vmul.f32	s15, s15, s14
+ 1579              		.loc 1 450 21 discriminator 3 view .LVU325
+ 1580 002e C2ED007A 		vstr.32	s15, [r2]
+ 449:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1581              		.loc 1 449 28 is_stmt 1 discriminator 3 view .LVU326
+ 1582 0032 0133     		adds	r3, r3, #1
+ 1583              	.LVL97:
+ 449:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1584              		.loc 1 449 28 is_stmt 0 discriminator 3 view .LVU327
+ 1585 0034 DBB2     		uxtb	r3, r3
+ 1586              	.LVL98:
+ 1587              	.L137:
+ 449:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1588              		.loc 1 449 23 is_stmt 1 discriminator 1 view .LVU328
+ 1589 0036 022B     		cmp	r3, #2
+ 1590 0038 ECD9     		bls	.L138
+ 1591              	.LVL99:
+ 1592              	.L135:
+ 451:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         }
+ 452:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_SUCCESS;
+ 453:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 454:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     else {
+ 455:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 456:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 457:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 40
+
+
+ 1593              		.loc 1 457 1 is_stmt 0 view .LVU329
+ 1594 003a 04B0     		add	sp, sp, #16
+ 1595              	.LCFI31:
+ 1596              		.cfi_remember_state
+ 1597              		.cfi_def_cfa_offset 8
+ 1598              		@ sp needed
+ 1599 003c 10BD     		pop	{r4, pc}
+ 1600              	.LVL100:
+ 1601              	.L146:
+ 1602              	.LCFI32:
+ 1603              		.cfi_restore_state
+ 455:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1604              		.loc 1 455 9 is_stmt 1 view .LVU330
+ 455:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1605              		.loc 1 455 16 is_stmt 0 view .LVU331
+ 1606 003e 1620     		movs	r0, #22
+ 1607 0040 FBE7     		b	.L135
+ 1608              	.LVL101:
+ 1609              	.L142:
+ 1610              	.LCFI33:
+ 1611              		.cfi_def_cfa_offset 0
+ 1612              		.cfi_restore 4
+ 1613              		.cfi_restore 14
+ 455:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1614              		.loc 1 455 9 is_stmt 1 view .LVU332
+ 455:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1615              		.loc 1 455 16 is_stmt 0 view .LVU333
+ 1616 0042 1620     		movs	r0, #22
+ 1617              	.LVL102:
+ 1618              		.loc 1 457 1 view .LVU334
+ 1619 0044 7047     		bx	lr
+ 1620              	.L148:
+ 1621 0046 00BF     		.align	2
+ 1622              	.L147:
+ 1623 0048 00008037 		.word	931135488
+ 1624              		.cfi_endproc
+ 1625              	.LFE38:
+ 1627              		.section	.text.inv_get_gyro_float,"ax",%progbits
+ 1628              		.align	1
+ 1629              		.global	inv_get_gyro_float
+ 1630              		.syntax unified
+ 1631              		.thumb
+ 1632              		.thumb_func
+ 1634              	inv_get_gyro_float:
+ 1635              	.LVL103:
+ 1636              	.LFB39:
+ 458:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 459:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /**
+ 460:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @brief      Returns 3-element vector of gyro float data
+ 461:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @param[out] data    3-element vector of gyro float data
+ 462:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @return     INV_SUCCESS if successful
+ 463:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *              INV_ERROR_INVALID_PARAMETER if invalid input pointer
+ 464:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 465:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_gyro_float(float *data)
+ 466:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1637              		.loc 1 466 1 is_stmt 1 view -0
+ 1638              		.cfi_startproc
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 41
+
+
+ 1639              		@ args = 0, pretend = 0, frame = 16
+ 1640              		@ frame_needed = 0, uses_anonymous_args = 0
+ 467:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long tdata[3];
+ 1641              		.loc 1 467 5 view .LVU336
+ 468:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     unsigned char i;
+ 1642              		.loc 1 468 5 view .LVU337
+ 469:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 470:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (data != NULL) {
+ 1643              		.loc 1 470 5 view .LVU338
+ 1644              		.loc 1 470 8 is_stmt 0 view .LVU339
+ 1645 0000 F8B1     		cbz	r0, .L153
+ 466:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long tdata[3];
+ 1646              		.loc 1 466 1 view .LVU340
+ 1647 0002 10B5     		push	{r4, lr}
+ 1648              	.LCFI34:
+ 1649              		.cfi_def_cfa_offset 8
+ 1650              		.cfi_offset 4, -8
+ 1651              		.cfi_offset 14, -4
+ 1652 0004 84B0     		sub	sp, sp, #16
+ 1653              	.LCFI35:
+ 1654              		.cfi_def_cfa_offset 24
+ 1655 0006 0446     		mov	r4, r0
+ 471:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         inv_get_gyro_set(tdata, NULL, NULL);
+ 1656              		.loc 1 471 9 is_stmt 1 view .LVU341
+ 1657 0008 0022     		movs	r2, #0
+ 1658 000a 1146     		mov	r1, r2
+ 1659 000c 01A8     		add	r0, sp, #4
+ 1660              	.LVL104:
+ 1661              		.loc 1 471 9 is_stmt 0 view .LVU342
+ 1662 000e FFF7FEFF 		bl	inv_get_gyro_set
+ 1663              	.LVL105:
+ 472:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1664              		.loc 1 472 9 is_stmt 1 view .LVU343
+ 1665              		.loc 1 472 16 is_stmt 0 view .LVU344
+ 1666 0012 0023     		movs	r3, #0
+ 1667              		.loc 1 472 9 view .LVU345
+ 1668 0014 10E0     		b	.L151
+ 1669              	.LVL106:
+ 1670              	.L152:
+ 473:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             data[i] = ((float)tdata[i] / (1L << 16));
+ 1671              		.loc 1 473 13 is_stmt 1 discriminator 3 view .LVU346
+ 1672              		.loc 1 473 36 is_stmt 0 discriminator 3 view .LVU347
+ 1673 0016 04AA     		add	r2, sp, #16
+ 1674 0018 02EB8302 		add	r2, r2, r3, lsl #2
+ 1675 001c 52ED037A 		vldr.32	s15, [r2, #-12]	@ int
+ 1676              		.loc 1 473 24 discriminator 3 view .LVU348
+ 1677 0020 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1678              		.loc 1 473 17 discriminator 3 view .LVU349
+ 1679 0024 04EB8302 		add	r2, r4, r3, lsl #2
+ 1680              		.loc 1 473 40 discriminator 3 view .LVU350
+ 1681 0028 9FED077A 		vldr.32	s14, .L158
+ 1682 002c 67EE877A 		vmul.f32	s15, s15, s14
+ 1683              		.loc 1 473 21 discriminator 3 view .LVU351
+ 1684 0030 C2ED007A 		vstr.32	s15, [r2]
+ 472:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1685              		.loc 1 472 28 is_stmt 1 discriminator 3 view .LVU352
+ 1686 0034 0133     		adds	r3, r3, #1
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 42
+
+
+ 1687              	.LVL107:
+ 472:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1688              		.loc 1 472 28 is_stmt 0 discriminator 3 view .LVU353
+ 1689 0036 DBB2     		uxtb	r3, r3
+ 1690              	.LVL108:
+ 1691              	.L151:
+ 472:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1692              		.loc 1 472 23 is_stmt 1 discriminator 1 view .LVU354
+ 1693 0038 022B     		cmp	r3, #2
+ 1694 003a ECD9     		bls	.L152
+ 474:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         }
+ 475:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_SUCCESS;
+ 1695              		.loc 1 475 16 is_stmt 0 view .LVU355
+ 1696 003c 0020     		movs	r0, #0
+ 476:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 477:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     else {
+ 478:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 479:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 480:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1697              		.loc 1 480 1 view .LVU356
+ 1698 003e 04B0     		add	sp, sp, #16
+ 1699              	.LCFI36:
+ 1700              		.cfi_def_cfa_offset 8
+ 1701              		@ sp needed
+ 1702 0040 10BD     		pop	{r4, pc}
+ 1703              	.LVL109:
+ 1704              	.L153:
+ 1705              	.LCFI37:
+ 1706              		.cfi_def_cfa_offset 0
+ 1707              		.cfi_restore 4
+ 1708              		.cfi_restore 14
+ 478:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1709              		.loc 1 478 16 view .LVU357
+ 1710 0042 1620     		movs	r0, #22
+ 1711              	.LVL110:
+ 1712              		.loc 1 480 1 view .LVU358
+ 1713 0044 7047     		bx	lr
+ 1714              	.L159:
+ 1715 0046 00BF     		.align	2
+ 1716              	.L158:
+ 1717 0048 00008037 		.word	931135488
+ 1718              		.cfi_endproc
+ 1719              	.LFE39:
+ 1721              		.section	.text.inv_set_heading_confidence_interval,"ax",%progbits
+ 1722              		.align	1
+ 1723              		.global	inv_set_heading_confidence_interval
+ 1724              		.syntax unified
+ 1725              		.thumb
+ 1726              		.thumb_func
+ 1728              	inv_set_heading_confidence_interval:
+ 1729              	.LVL111:
+ 1730              	.LFB40:
+ 481:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 482:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Set 9 axis 95% heading confidence interval for quaternion
+ 483:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @param[in] ci Confidence interval in radians.
+ 484:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 485:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** void inv_set_heading_confidence_interval(float ci)
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 43
+
+
+ 486:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1731              		.loc 1 486 1 is_stmt 1 view -0
+ 1732              		.cfi_startproc
+ 1733              		@ args = 0, pretend = 0, frame = 0
+ 1734              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1735              		@ link register save eliminated.
+ 487:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     rh.quat_confidence_interval = ci;
+ 1736              		.loc 1 487 5 view .LVU360
+ 1737              		.loc 1 487 33 is_stmt 0 view .LVU361
+ 1738 0000 014B     		ldr	r3, .L161
+ 1739 0002 83ED210A 		vstr.32	s0, [r3, #132]
+ 488:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1740              		.loc 1 488 1 view .LVU362
+ 1741 0006 7047     		bx	lr
+ 1742              	.L162:
+ 1743              		.align	2
+ 1744              	.L161:
+ 1745 0008 00000000 		.word	rh
+ 1746              		.cfi_endproc
+ 1747              	.LFE40:
+ 1749              		.section	.text.inv_get_heading_confidence_interval,"ax",%progbits
+ 1750              		.align	1
+ 1751              		.global	inv_get_heading_confidence_interval
+ 1752              		.syntax unified
+ 1753              		.thumb
+ 1754              		.thumb_func
+ 1756              	inv_get_heading_confidence_interval:
+ 1757              	.LFB41:
+ 489:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 490:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /** Get 9 axis 95% heading confidence interval for quaternion
+ 491:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** * @return Confidence interval in radians.
+ 492:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** */
+ 493:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** float inv_get_heading_confidence_interval(void)
+ 494:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1758              		.loc 1 494 1 is_stmt 1 view -0
+ 1759              		.cfi_startproc
+ 1760              		@ args = 0, pretend = 0, frame = 0
+ 1761              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1762              		@ link register save eliminated.
+ 495:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     return rh.quat_confidence_interval;
+ 1763              		.loc 1 495 5 view .LVU364
+ 496:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1764              		.loc 1 496 1 is_stmt 0 view .LVU365
+ 1765 0000 014B     		ldr	r3, .L164
+ 1766 0002 93ED210A 		vldr.32	s0, [r3, #132]
+ 1767 0006 7047     		bx	lr
+ 1768              	.L165:
+ 1769              		.align	2
+ 1770              	.L164:
+ 1771 0008 00000000 		.word	rh
+ 1772              		.cfi_endproc
+ 1773              	.LFE41:
+ 1775              		.section	.text.inv_get_linear_accel_float,"ax",%progbits
+ 1776              		.align	1
+ 1777              		.global	inv_get_linear_accel_float
+ 1778              		.syntax unified
+ 1779              		.thumb
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 44
+
+
+ 1780              		.thumb_func
+ 1782              	inv_get_linear_accel_float:
+ 1783              	.LVL112:
+ 1784              	.LFB42:
+ 497:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 498:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** /**
+ 499:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @brief      Returns 3-element vector of linear accel float data
+ 500:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @param[out] data    3-element vector of linear aceel float data
+ 501:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *  @return     INV_SUCCESS if successful
+ 502:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  *              INV_ERROR_INVALID_PARAMETER if invalid input pointer
+ 503:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****  */
+ 504:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** inv_error_t inv_get_linear_accel_float(float *data)
+ 505:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** {
+ 1785              		.loc 1 505 1 is_stmt 1 view -0
+ 1786              		.cfi_startproc
+ 1787              		@ args = 0, pretend = 0, frame = 16
+ 1788              		@ frame_needed = 0, uses_anonymous_args = 0
+ 506:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long tdata[3];
+ 1789              		.loc 1 506 5 view .LVU367
+ 507:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     unsigned char i;
+ 1790              		.loc 1 507 5 view .LVU368
+ 508:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** 
+ 509:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     if (data != NULL && !inv_get_linear_accel(tdata)) {
+ 1791              		.loc 1 509 5 view .LVU369
+ 1792              		.loc 1 509 8 is_stmt 0 view .LVU370
+ 1793 0000 F8B1     		cbz	r0, .L173
+ 505:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     long tdata[3];
+ 1794              		.loc 1 505 1 discriminator 1 view .LVU371
+ 1795 0002 10B5     		push	{r4, lr}
+ 1796              	.LCFI38:
+ 1797              		.cfi_def_cfa_offset 8
+ 1798              		.cfi_offset 4, -8
+ 1799              		.cfi_offset 14, -4
+ 1800 0004 84B0     		sub	sp, sp, #16
+ 1801              	.LCFI39:
+ 1802              		.cfi_def_cfa_offset 24
+ 1803 0006 0446     		mov	r4, r0
+ 1804              		.loc 1 509 26 discriminator 1 view .LVU372
+ 1805 0008 01A8     		add	r0, sp, #4
+ 1806              	.LVL113:
+ 1807              		.loc 1 509 26 discriminator 1 view .LVU373
+ 1808 000a FFF7FEFF 		bl	inv_get_linear_accel
+ 1809              	.LVL114:
+ 1810              		.loc 1 509 22 discriminator 1 view .LVU374
+ 1811 000e B0B9     		cbnz	r0, .L177
+ 510:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1812              		.loc 1 510 16 view .LVU375
+ 1813 0010 0023     		movs	r3, #0
+ 1814 0012 10E0     		b	.L168
+ 1815              	.LVL115:
+ 1816              	.L169:
+ 511:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****             data[i] = ((float)tdata[i] / (1L << 16));
+ 1817              		.loc 1 511 13 is_stmt 1 discriminator 3 view .LVU376
+ 1818              		.loc 1 511 36 is_stmt 0 discriminator 3 view .LVU377
+ 1819 0014 04AA     		add	r2, sp, #16
+ 1820 0016 02EB8302 		add	r2, r2, r3, lsl #2
+ 1821 001a 52ED037A 		vldr.32	s15, [r2, #-12]	@ int
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 45
+
+
+ 1822              		.loc 1 511 24 discriminator 3 view .LVU378
+ 1823 001e F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1824              		.loc 1 511 17 discriminator 3 view .LVU379
+ 1825 0022 04EB8302 		add	r2, r4, r3, lsl #2
+ 1826              		.loc 1 511 40 discriminator 3 view .LVU380
+ 1827 0026 9FED087A 		vldr.32	s14, .L178
+ 1828 002a 67EE877A 		vmul.f32	s15, s15, s14
+ 1829              		.loc 1 511 21 discriminator 3 view .LVU381
+ 1830 002e C2ED007A 		vstr.32	s15, [r2]
+ 510:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1831              		.loc 1 510 28 is_stmt 1 discriminator 3 view .LVU382
+ 1832 0032 0133     		adds	r3, r3, #1
+ 1833              	.LVL116:
+ 510:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1834              		.loc 1 510 28 is_stmt 0 discriminator 3 view .LVU383
+ 1835 0034 DBB2     		uxtb	r3, r3
+ 1836              	.LVL117:
+ 1837              	.L168:
+ 510:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         for (i = 0; i < 3; ++i) {
+ 1838              		.loc 1 510 23 is_stmt 1 discriminator 1 view .LVU384
+ 1839 0036 022B     		cmp	r3, #2
+ 1840 0038 ECD9     		bls	.L169
+ 1841              	.LVL118:
+ 1842              	.L166:
+ 512:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         }
+ 513:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_SUCCESS;
+ 514:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 515:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     else {
+ 516:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 517:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 518:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c **** }
+ 1843              		.loc 1 518 1 is_stmt 0 view .LVU385
+ 1844 003a 04B0     		add	sp, sp, #16
+ 1845              	.LCFI40:
+ 1846              		.cfi_remember_state
+ 1847              		.cfi_def_cfa_offset 8
+ 1848              		@ sp needed
+ 1849 003c 10BD     		pop	{r4, pc}
+ 1850              	.LVL119:
+ 1851              	.L177:
+ 1852              	.LCFI41:
+ 1853              		.cfi_restore_state
+ 516:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1854              		.loc 1 516 9 is_stmt 1 view .LVU386
+ 516:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1855              		.loc 1 516 16 is_stmt 0 view .LVU387
+ 1856 003e 1620     		movs	r0, #22
+ 1857 0040 FBE7     		b	.L166
+ 1858              	.LVL120:
+ 1859              	.L173:
+ 1860              	.LCFI42:
+ 1861              		.cfi_def_cfa_offset 0
+ 1862              		.cfi_restore 4
+ 1863              		.cfi_restore 14
+ 516:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ 1864              		.loc 1 516 9 is_stmt 1 view .LVU388
+ 516:Middlewares/MPU6050_Motion_Driver/mllite/results_holder.c ****     }
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 46
+
+
+ 1865              		.loc 1 516 16 is_stmt 0 view .LVU389
+ 1866 0042 1620     		movs	r0, #22
+ 1867              	.LVL121:
+ 1868              		.loc 1 518 1 view .LVU390
+ 1869 0044 7047     		bx	lr
+ 1870              	.L179:
+ 1871 0046 00BF     		.align	2
+ 1872              	.L178:
+ 1873 0048 00008037 		.word	931135488
+ 1874              		.cfi_endproc
+ 1875              	.LFE42:
+ 1877              		.section	.bss.rh,"aw",%nobits
+ 1878              		.align	2
+ 1881              	rh:
+ 1882 0000 00000000 		.space	136
+ 1882      00000000 
+ 1882      00000000 
+ 1882      00000000 
+ 1882      00000000 
+ 1883              		.text
+ 1884              	.Letext0:
+ 1885              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/lib/gcc/arm-none-eabi/12.
+ 1886              		.file 4 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 1887              		.file 5 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 1888              		.file 6 "Middlewares/MPU6050_Motion_Driver/driver/include/mltypes.h"
+ 1889              		.file 7 "Middlewares/MPU6050_Motion_Driver/mllite/data_builder.h"
+ 1890              		.file 8 "Middlewares/MPU6050_Motion_Driver/mllite/start_manager.h"
+ 1891              		.file 9 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/str
+ 1892              		.file 10 "Middlewares/MPU6050_Motion_Driver/mllite/message_layer.h"
+ 1893              		.file 11 "<built-in>"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 47
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 results_holder.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:21     .text.inv_generate_results:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:27     .text.inv_generate_results:00000000 inv_generate_results
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:48     .text.inv_generate_results:0000000c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1881   .bss.rh:00000000 rh
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:53     .text.inv_start_results_holder:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:59     .text.inv_start_results_holder:00000000 inv_start_results_holder
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:83     .text.inv_start_results_holder:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:88     .text.inv_store_gaming_quaternion:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:94     .text.inv_store_gaming_quaternion:00000000 inv_store_gaming_quaternion
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:145    .text.inv_store_gaming_quaternion:00000028 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:150    .text.inv_set_compass_correction:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:156    .text.inv_set_compass_correction:00000000 inv_set_compass_correction
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:207    .text.inv_set_compass_correction:00000028 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:212    .text.inv_get_compass_correction:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:218    .text.inv_get_compass_correction:00000000 inv_get_compass_correction
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:256    .text.inv_get_compass_correction:00000028 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:261    .text.inv_get_large_mag_field:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:267    .text.inv_get_large_mag_field:00000000 inv_get_large_mag_field
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:282    .text.inv_get_large_mag_field:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:287    .text.inv_set_large_mag_field:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:293    .text.inv_set_large_mag_field:00000000 inv_set_large_mag_field
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:310    .text.inv_set_large_mag_field:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:315    .text.inv_get_acc_state:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:321    .text.inv_get_acc_state:00000000 inv_get_acc_state
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:336    .text.inv_get_acc_state:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:341    .text.inv_set_acc_state:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:347    .text.inv_set_acc_state:00000000 inv_set_acc_state
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:365    .text.inv_set_acc_state:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:370    .text.inv_get_motion_state:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:376    .text.inv_get_motion_state:00000000 inv_get_motion_state
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:399    .text.inv_get_motion_state:0000000c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:404    .text.inv_set_motion_state:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:410    .text.inv_set_motion_state:00000000 inv_set_motion_state
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:480    .text.inv_set_motion_state:0000003c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:485    .text.inv_set_local_field:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:491    .text.inv_set_local_field:00000000 inv_set_local_field
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:516    .text.inv_set_local_field:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:521    .text.inv_get_local_field:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:527    .text.inv_get_local_field:00000000 inv_get_local_field
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:558    .text.inv_get_local_field:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:563    .text.inv_set_mag_scale:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:569    .text.inv_set_mag_scale:00000000 inv_set_mag_scale
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:594    .text.inv_set_mag_scale:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:599    .text.inv_get_mag_scale:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:605    .text.inv_get_mag_scale:00000000 inv_get_mag_scale
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:636    .text.inv_get_mag_scale:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:641    .text.inv_get_gravity:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:647    .text.inv_get_gravity:00000000 inv_get_gravity
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:725    .text.inv_get_gravity:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:730    .text.inv_get_6axis_quaternion:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:736    .text.inv_get_6axis_quaternion:00000000 inv_get_6axis_quaternion
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:770    .text.inv_get_6axis_quaternion:00000020 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:775    .text.inv_get_quaternion:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:781    .text.inv_get_quaternion:00000000 inv_get_quaternion
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:838    .text.inv_get_quaternion:00000038 $d
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 48
+
+
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:843    .text.inv_get_quaternion_float:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:849    .text.inv_get_quaternion_float:00000000 inv_get_quaternion_float
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:959    .text.inv_get_quaternion_float:00000054 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:964    .text.inv_get_quaternion_set:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:970    .text.inv_get_quaternion_set:00000000 inv_get_quaternion_set
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1051   .text.inv_init_results_holder:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1057   .text.inv_init_results_holder:00000000 inv_init_results_holder
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1105   .text.inv_init_results_holder:00000028 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1111   .text.inv_enable_results_holder:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1117   .text.inv_enable_results_holder:00000000 inv_enable_results_holder
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1153   .text.inv_enable_results_holder:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1158   .text.inv_got_accel_bias:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1164   .text.inv_got_accel_bias:00000000 inv_got_accel_bias
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1179   .text.inv_got_accel_bias:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1184   .text.inv_set_accel_bias_found:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1190   .text.inv_set_accel_bias_found:00000000 inv_set_accel_bias_found
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1207   .text.inv_set_accel_bias_found:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1212   .text.inv_got_compass_bias:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1218   .text.inv_got_compass_bias:00000000 inv_got_compass_bias
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1233   .text.inv_got_compass_bias:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1238   .text.inv_set_compass_bias_found:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1244   .text.inv_set_compass_bias_found:00000000 inv_set_compass_bias_found
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1261   .text.inv_set_compass_bias_found:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1266   .text.inv_set_compass_state:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1272   .text.inv_set_compass_state:00000000 inv_set_compass_state
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1289   .text.inv_set_compass_state:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1294   .text.inv_get_compass_state:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1300   .text.inv_get_compass_state:00000000 inv_get_compass_state
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1315   .text.inv_get_compass_state:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1320   .text.inv_set_compass_bias_error:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1326   .text.inv_set_compass_bias_error:00000000 inv_set_compass_bias_error
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1351   .text.inv_set_compass_bias_error:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1356   .text.inv_get_compass_bias_error:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1362   .text.inv_get_compass_bias_error:00000000 inv_get_compass_bias_error
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1393   .text.inv_get_compass_bias_error:00000014 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1398   .text.inv_get_linear_accel:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1404   .text.inv_get_linear_accel:00000000 inv_get_linear_accel
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1479   .text.inv_get_accel:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1485   .text.inv_get_accel:00000000 inv_get_accel
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1526   .text.inv_get_accel_float:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1532   .text.inv_get_accel_float:00000000 inv_get_accel_float
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1623   .text.inv_get_accel_float:00000048 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1628   .text.inv_get_gyro_float:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1634   .text.inv_get_gyro_float:00000000 inv_get_gyro_float
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1717   .text.inv_get_gyro_float:00000048 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1722   .text.inv_set_heading_confidence_interval:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1728   .text.inv_set_heading_confidence_interval:00000000 inv_set_heading_confidence_interval
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1745   .text.inv_set_heading_confidence_interval:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1750   .text.inv_get_heading_confidence_interval:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1756   .text.inv_get_heading_confidence_interval:00000000 inv_get_heading_confidence_interval
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1771   .text.inv_get_heading_confidence_interval:00000008 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1776   .text.inv_get_linear_accel_float:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1782   .text.inv_get_linear_accel_float:00000000 inv_get_linear_accel_float
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1873   .text.inv_get_linear_accel_float:00000048 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s:1878   .bss.rh:00000000 $d
+
+UNDEFINED SYMBOLS
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cc0QzW0t.s 			page 49
+
+
+inv_register_data_cb
+inv_set_message
+inv_q29_mult
+inv_q_mult
+inv_get_last_timestamp
+inv_get_compass_on
+inv_get_mag_accuracy
+inv_get_gyro_on
+inv_get_gyro_accuracy
+inv_get_accel_on
+inv_get_accel_accuracy
+memset
+inv_register_mpl_start_notification
+inv_get_accel_set
+inv_get_gyro_set

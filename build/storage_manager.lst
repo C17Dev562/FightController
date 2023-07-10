@@ -1,0 +1,1019 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"storage_manager.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c"
+  20              		.section	.text.inv_find_entry,"ax",%progbits
+  21              		.align	1
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	inv_find_entry:
+  27              	.LVL0:
+  28              	.LFB9:
+   1:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /*
+   2:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  $License:
+   3:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     Copyright (C) 2011-2012 InvenSense Corporation, All Rights Reserved.
+   4:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     See included License.txt for License information.
+   5:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  $
+   6:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  */
+   7:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+   8:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /**
+   9:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *   @defgroup  Storage_Manager storage_manager
+  10:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *   @brief     Motion Library - Stores Data for functions.
+  11:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *
+  12:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *
+  13:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *   @{
+  14:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *       @file storage_manager.c
+  15:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  *       @brief Load and Store Manager.
+  16:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  */
+  17:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  18:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #include <string.h>
+  19:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  20:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #include "storage_manager.h"
+  21:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #include "log.h"
+  22:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #include "ml_math_func.h"
+  23:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #include "mlmath.h"
+  24:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  25:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /* Must be changed if the format of storage changes */
+  26:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #define DEFAULT_KEY 29681
+  27:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  28:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** typedef inv_error_t (*load_func_t)(const unsigned char *data);
+  29:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** typedef inv_error_t (*save_func_t)(unsigned char *data);
+  30:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** Max number of entites that can be stored */
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 2
+
+
+  31:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** #define NUM_STORAGE_BOXES 20
+  32:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  33:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** struct data_header_t {
+  34:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     long size;
+  35:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     uint32_t checksum;
+  36:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     unsigned int key;
+  37:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** };
+  38:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  39:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** struct data_storage_t {
+  40:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int num; /**< Number of differnt save entities */
+  41:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     size_t total_size; /**< Size in bytes to store non volatile data */
+  42:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     load_func_t load[NUM_STORAGE_BOXES]; /**< Callback to load data */
+  43:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     save_func_t save[NUM_STORAGE_BOXES]; /**< Callback to save data */
+  44:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     struct data_header_t hd[NUM_STORAGE_BOXES]; /**< Header info for each entity */
+  45:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** };
+  46:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** static struct data_storage_t ds;
+  47:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  48:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** Should be called once before using any of the storage methods. Typically
+  49:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * called first by inv_init_mpl().*/
+  50:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** void inv_init_storage_manager()
+  51:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** {
+  52:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     memset(&ds, 0, sizeof(ds));
+  53:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.total_size = sizeof(struct data_header_t);
+  54:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+  55:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  56:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** Used to register your mechanism to load and store non-volative data. This should typical be
+  57:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * called during the enable function for your feature.
+  58:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] load_func function pointer you will use to receive data that was stored for you.
+  59:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] save_func function pointer you will use to save any data you want saved to
+  60:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** *            non-volatile memory between runs.
+  61:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] size The size in bytes of the amount of data you want loaded and saved.
+  62:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] key The key associated with your data type should be unique across MPL.
+  63:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** *                    The key should change when your type of data for storage changes.
+  64:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+  65:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** */
+  66:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** inv_error_t inv_register_load_store(inv_error_t (*load_func)(const unsigned char *data),
+  67:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                                     inv_error_t (*save_func)(unsigned char *data), size_t size, uns
+  68:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** {
+  69:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int kk;
+  70:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     // Check if this has been registered already
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     for (kk=0; kk<ds.num; ++kk) {
+  72:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+  73:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             return INV_ERROR_INVALID_PARAMETER;
+  74:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         }
+  75:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+  76:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     // Make sure there is room
+  77:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (ds.num >= NUM_STORAGE_BOXES) {
+  78:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_INVALID_PARAMETER;
+  79:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+  80:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     // Add to list
+  81:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.hd[ds.num].key = key;
+  82:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.hd[ds.num].size = size;
+  83:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.load[ds.num] = load_func;
+  84:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.save[ds.num] = save_func;
+  85:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.total_size += size + sizeof(struct data_header_t);
+  86:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.num++;
+  87:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 3
+
+
+  88:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+  89:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+  90:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+  91:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** Returns the memory size needed to perform a store
+  92:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[out] size Size in bytes of memory needed to store.
+  93:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+  94:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** */
+  95:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** inv_error_t inv_get_mpl_state_size(size_t *size)
+  96:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** {
+  97:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     *size = ds.total_size;
+  98:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+  99:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 100:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 101:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** @internal
+ 102:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  * Finds key in ds.hd[] array and returns location
+ 103:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  * @return location where key exists in array, -1 if not found.
+ 104:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****  */
+ 105:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** static int inv_find_entry(unsigned int key)
+ 106:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** {
+  29              		.loc 1 106 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  34              		.loc 1 106 1 is_stmt 0 view .LVU1
+  35 0000 0146     		mov	r1, r0
+ 107:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int kk;
+  36              		.loc 1 107 5 is_stmt 1 view .LVU2
+ 108:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     for (kk=0; kk<ds.num; ++kk) {
+  37              		.loc 1 108 5 view .LVU3
+  38              	.LVL1:
+  39              		.loc 1 108 12 is_stmt 0 view .LVU4
+  40 0002 0020     		movs	r0, #0
+  41              	.LVL2:
+  42              		.loc 1 108 5 view .LVU5
+  43 0004 00E0     		b	.L2
+  44              	.LVL3:
+  45              	.L6:
+  46              		.loc 1 108 27 is_stmt 1 discriminator 2 view .LVU6
+  47 0006 0130     		adds	r0, r0, #1
+  48              	.LVL4:
+  49              	.L2:
+  50              		.loc 1 108 18 discriminator 1 view .LVU7
+  51              		.loc 1 108 21 is_stmt 0 discriminator 1 view .LVU8
+  52 0008 084B     		ldr	r3, .L7
+  53 000a 1B68     		ldr	r3, [r3]
+  54              		.loc 1 108 18 discriminator 1 view .LVU9
+  55 000c 8342     		cmp	r3, r0
+  56 000e 09DD     		ble	.L5
+ 109:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+  57              		.loc 1 109 9 is_stmt 1 view .LVU10
+  58              		.loc 1 109 29 is_stmt 0 view .LVU11
+  59 0010 00EB4002 		add	r2, r0, r0, lsl #1
+  60 0014 054B     		ldr	r3, .L7
+  61 0016 03EB8203 		add	r3, r3, r2, lsl #2
+  62 001a D3F8B030 		ldr	r3, [r3, #176]
+  63              		.loc 1 109 12 view .LVU12
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 4
+
+
+  64 001e 8B42     		cmp	r3, r1
+  65 0020 F1D1     		bne	.L6
+  66 0022 01E0     		b	.L1
+  67              	.L5:
+ 110:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             return kk;
+ 111:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         }
+ 112:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 113:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return -1;
+  68              		.loc 1 113 12 view .LVU13
+  69 0024 4FF0FF30 		mov	r0, #-1
+  70              	.LVL5:
+  71              	.L1:
+ 114:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+  72              		.loc 1 114 1 view .LVU14
+  73 0028 7047     		bx	lr
+  74              	.L8:
+  75 002a 00BF     		.align	2
+  76              	.L7:
+  77 002c 00000000 		.word	ds
+  78              		.cfi_endproc
+  79              	.LFE9:
+  81              		.section	.text.inv_init_storage_manager,"ax",%progbits
+  82              		.align	1
+  83              		.global	inv_init_storage_manager
+  84              		.syntax unified
+  85              		.thumb
+  86              		.thumb_func
+  88              	inv_init_storage_manager:
+  89              	.LFB6:
+  51:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     memset(&ds, 0, sizeof(ds));
+  90              		.loc 1 51 1 is_stmt 1 view -0
+  91              		.cfi_startproc
+  92              		@ args = 0, pretend = 0, frame = 0
+  93              		@ frame_needed = 0, uses_anonymous_args = 0
+  94 0000 10B5     		push	{r4, lr}
+  95              	.LCFI0:
+  96              		.cfi_def_cfa_offset 8
+  97              		.cfi_offset 4, -8
+  98              		.cfi_offset 14, -4
+  52:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.total_size = sizeof(struct data_header_t);
+  99              		.loc 1 52 5 view .LVU16
+ 100 0002 054C     		ldr	r4, .L11
+ 101 0004 4FF4CC72 		mov	r2, #408
+ 102 0008 0021     		movs	r1, #0
+ 103 000a 2046     		mov	r0, r4
+ 104 000c FFF7FEFF 		bl	memset
+ 105              	.LVL6:
+  53:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 106              		.loc 1 53 5 view .LVU17
+  53:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 107              		.loc 1 53 19 is_stmt 0 view .LVU18
+ 108 0010 0C23     		movs	r3, #12
+ 109 0012 6360     		str	r3, [r4, #4]
+  54:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 110              		.loc 1 54 1 view .LVU19
+ 111 0014 10BD     		pop	{r4, pc}
+ 112              	.L12:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 5
+
+
+ 113 0016 00BF     		.align	2
+ 114              	.L11:
+ 115 0018 00000000 		.word	ds
+ 116              		.cfi_endproc
+ 117              	.LFE6:
+ 119              		.section	.text.inv_register_load_store,"ax",%progbits
+ 120              		.align	1
+ 121              		.global	inv_register_load_store
+ 122              		.syntax unified
+ 123              		.thumb
+ 124              		.thumb_func
+ 126              	inv_register_load_store:
+ 127              	.LVL7:
+ 128              	.LFB7:
+  68:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int kk;
+ 129              		.loc 1 68 1 is_stmt 1 view -0
+ 130              		.cfi_startproc
+ 131              		@ args = 0, pretend = 0, frame = 0
+ 132              		@ frame_needed = 0, uses_anonymous_args = 0
+  68:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int kk;
+ 133              		.loc 1 68 1 is_stmt 0 view .LVU21
+ 134 0000 30B5     		push	{r4, r5, lr}
+ 135              	.LCFI1:
+ 136              		.cfi_def_cfa_offset 12
+ 137              		.cfi_offset 4, -12
+ 138              		.cfi_offset 5, -8
+ 139              		.cfi_offset 14, -4
+  69:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     // Check if this has been registered already
+ 140              		.loc 1 69 5 is_stmt 1 view .LVU22
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 141              		.loc 1 71 5 view .LVU23
+ 142              	.LVL8:
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 143              		.loc 1 71 12 is_stmt 0 view .LVU24
+ 144 0002 4FF0000C 		mov	ip, #0
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 145              		.loc 1 71 5 view .LVU25
+ 146 0006 01E0     		b	.L14
+ 147              	.LVL9:
+ 148              	.L21:
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 149              		.loc 1 71 27 is_stmt 1 discriminator 2 view .LVU26
+ 150 0008 0CF1010C 		add	ip, ip, #1
+ 151              	.LVL10:
+ 152              	.L14:
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 153              		.loc 1 71 18 discriminator 1 view .LVU27
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 154              		.loc 1 71 21 is_stmt 0 discriminator 1 view .LVU28
+ 155 000c 154C     		ldr	r4, .L22
+ 156 000e 2468     		ldr	r4, [r4]
+  71:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (key == ds.hd[kk].key) {
+ 157              		.loc 1 71 18 discriminator 1 view .LVU29
+ 158 0010 6445     		cmp	r4, ip
+ 159 0012 0ADD     		ble	.L20
+  72:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             return INV_ERROR_INVALID_PARAMETER;
+ 160              		.loc 1 72 9 is_stmt 1 view .LVU30
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 6
+
+
+  72:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             return INV_ERROR_INVALID_PARAMETER;
+ 161              		.loc 1 72 29 is_stmt 0 view .LVU31
+ 162 0014 0CEB4C0E 		add	lr, ip, ip, lsl #1
+ 163 0018 124C     		ldr	r4, .L22
+ 164 001a 04EB8E0E 		add	lr, r4, lr, lsl #2
+ 165 001e DEF8B040 		ldr	r4, [lr, #176]
+  72:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             return INV_ERROR_INVALID_PARAMETER;
+ 166              		.loc 1 72 12 view .LVU32
+ 167 0022 9C42     		cmp	r4, r3
+ 168 0024 F0D1     		bne	.L21
+  73:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         }
+ 169              		.loc 1 73 20 view .LVU33
+ 170 0026 1620     		movs	r0, #22
+ 171              	.LVL11:
+ 172              	.L13:
+  89:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 173              		.loc 1 89 1 view .LVU34
+ 174 0028 30BD     		pop	{r4, r5, pc}
+ 175              	.LVL12:
+ 176              	.L20:
+  77:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 177              		.loc 1 77 5 is_stmt 1 view .LVU35
+  77:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_INVALID_PARAMETER;
+ 178              		.loc 1 77 8 is_stmt 0 view .LVU36
+ 179 002a 132C     		cmp	r4, #19
+ 180 002c 17DC     		bgt	.L18
+  81:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.hd[ds.num].size = size;
+ 181              		.loc 1 81 5 is_stmt 1 view .LVU37
+  81:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.hd[ds.num].size = size;
+ 182              		.loc 1 81 23 is_stmt 0 view .LVU38
+ 183 002e 0D4D     		ldr	r5, .L22
+ 184 0030 04EB440C 		add	ip, r4, r4, lsl #1
+ 185              	.LVL13:
+  81:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.hd[ds.num].size = size;
+ 186              		.loc 1 81 23 view .LVU39
+ 187 0034 05EB8C0C 		add	ip, r5, ip, lsl #2
+ 188 0038 CCF8B030 		str	r3, [ip, #176]
+  82:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.load[ds.num] = load_func;
+ 189              		.loc 1 82 5 is_stmt 1 view .LVU40
+  82:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.load[ds.num] = load_func;
+ 190              		.loc 1 82 24 is_stmt 0 view .LVU41
+ 191 003c CCF8A820 		str	r2, [ip, #168]
+  83:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.save[ds.num] = save_func;
+ 192              		.loc 1 83 5 is_stmt 1 view .LVU42
+  83:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.save[ds.num] = save_func;
+ 193              		.loc 1 83 21 is_stmt 0 view .LVU43
+ 194 0040 A31C     		adds	r3, r4, #2
+ 195              	.LVL14:
+  83:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.save[ds.num] = save_func;
+ 196              		.loc 1 83 21 view .LVU44
+ 197 0042 45F82300 		str	r0, [r5, r3, lsl #2]
+  84:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.total_size += size + sizeof(struct data_header_t);
+ 198              		.loc 1 84 5 is_stmt 1 view .LVU45
+  84:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.total_size += size + sizeof(struct data_header_t);
+ 199              		.loc 1 84 21 is_stmt 0 view .LVU46
+ 200 0046 04F11603 		add	r3, r4, #22
+ 201 004a 45F82310 		str	r1, [r5, r3, lsl #2]
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 7
+
+
+  85:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.num++;
+ 202              		.loc 1 85 5 is_stmt 1 view .LVU47
+  85:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.num++;
+ 203              		.loc 1 85 7 is_stmt 0 view .LVU48
+ 204 004e 6B68     		ldr	r3, [r5, #4]
+  85:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     ds.num++;
+ 205              		.loc 1 85 19 view .LVU49
+ 206 0050 1344     		add	r3, r3, r2
+ 207 0052 0C33     		adds	r3, r3, #12
+ 208 0054 6B60     		str	r3, [r5, #4]
+  86:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 209              		.loc 1 86 5 is_stmt 1 view .LVU50
+  86:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 210              		.loc 1 86 11 is_stmt 0 view .LVU51
+ 211 0056 0134     		adds	r4, r4, #1
+ 212 0058 2C60     		str	r4, [r5]
+  88:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 213              		.loc 1 88 5 is_stmt 1 view .LVU52
+  88:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 214              		.loc 1 88 12 is_stmt 0 view .LVU53
+ 215 005a 0020     		movs	r0, #0
+ 216              	.LVL15:
+  88:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 217              		.loc 1 88 12 view .LVU54
+ 218 005c E4E7     		b	.L13
+ 219              	.LVL16:
+ 220              	.L18:
+  78:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 221              		.loc 1 78 16 view .LVU55
+ 222 005e 1620     		movs	r0, #22
+ 223              	.LVL17:
+  78:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 224              		.loc 1 78 16 view .LVU56
+ 225 0060 E2E7     		b	.L13
+ 226              	.L23:
+ 227 0062 00BF     		.align	2
+ 228              	.L22:
+ 229 0064 00000000 		.word	ds
+ 230              		.cfi_endproc
+ 231              	.LFE7:
+ 233              		.section	.text.inv_get_mpl_state_size,"ax",%progbits
+ 234              		.align	1
+ 235              		.global	inv_get_mpl_state_size
+ 236              		.syntax unified
+ 237              		.thumb
+ 238              		.thumb_func
+ 240              	inv_get_mpl_state_size:
+ 241              	.LVL18:
+ 242              	.LFB8:
+  96:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     *size = ds.total_size;
+ 243              		.loc 1 96 1 is_stmt 1 view -0
+ 244              		.cfi_startproc
+ 245              		@ args = 0, pretend = 0, frame = 0
+ 246              		@ frame_needed = 0, uses_anonymous_args = 0
+ 247              		@ link register save eliminated.
+  97:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+ 248              		.loc 1 97 5 view .LVU58
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 8
+
+
+  97:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+ 249              		.loc 1 97 15 is_stmt 0 view .LVU59
+ 250 0000 024B     		ldr	r3, .L25
+ 251 0002 5B68     		ldr	r3, [r3, #4]
+  97:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+ 252              		.loc 1 97 11 view .LVU60
+ 253 0004 0360     		str	r3, [r0]
+  98:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 254              		.loc 1 98 5 is_stmt 1 view .LVU61
+  99:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 255              		.loc 1 99 1 is_stmt 0 view .LVU62
+ 256 0006 0020     		movs	r0, #0
+ 257              	.LVL19:
+  99:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 258              		.loc 1 99 1 view .LVU63
+ 259 0008 7047     		bx	lr
+ 260              	.L26:
+ 261 000a 00BF     		.align	2
+ 262              	.L25:
+ 263 000c 00000000 		.word	ds
+ 264              		.cfi_endproc
+ 265              	.LFE8:
+ 267              		.section	.text.inv_load_mpl_states,"ax",%progbits
+ 268              		.align	1
+ 269              		.global	inv_load_mpl_states
+ 270              		.syntax unified
+ 271              		.thumb
+ 272              		.thumb_func
+ 274              	inv_load_mpl_states:
+ 275              	.LVL20:
+ 276              	.LFB10:
+ 115:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 116:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** This function takes a block of data that has been saved in non-volatile memory and pushes
+ 117:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * to the proper locations. Multiple error checks are performed on the data.
+ 118:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] data Data that was saved to be loaded up by MPL
+ 119:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] length Length of data vector in bytes
+ 120:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 121:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** */
+ 122:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** inv_error_t inv_load_mpl_states(const unsigned char *data, size_t length)
+ 123:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** {
+ 277              		.loc 1 123 1 is_stmt 1 view -0
+ 278              		.cfi_startproc
+ 279              		@ args = 0, pretend = 0, frame = 0
+ 280              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     struct data_header_t *hd;
+ 281              		.loc 1 124 5 view .LVU65
+ 125:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int entry;
+ 282              		.loc 1 125 5 view .LVU66
+ 126:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     uint32_t checksum;
+ 283              		.loc 1 126 5 view .LVU67
+ 127:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     long len;
+ 284              		.loc 1 127 5 view .LVU68
+ 128:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 129:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len = length; // Important so we get negative numbers
+ 285              		.loc 1 129 5 view .LVU69
+ 130:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (len < sizeof(struct data_header_t))
+ 286              		.loc 1 130 5 view .LVU70
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 9
+
+
+ 287              		.loc 1 130 8 is_stmt 0 view .LVU71
+ 288 0000 0B29     		cmp	r1, #11
+ 289 0002 3ED9     		bls	.L32
+ 123:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     struct data_header_t *hd;
+ 290              		.loc 1 123 1 view .LVU72
+ 291 0004 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 292              	.LCFI2:
+ 293              		.cfi_def_cfa_offset 24
+ 294              		.cfi_offset 3, -24
+ 295              		.cfi_offset 4, -20
+ 296              		.cfi_offset 5, -16
+ 297              		.cfi_offset 6, -12
+ 298              		.cfi_offset 7, -8
+ 299              		.cfi_offset 14, -4
+ 300 0006 0646     		mov	r6, r0
+ 131:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;	// No data
+ 132:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd = (struct data_header_t *)data;
+ 301              		.loc 1 132 5 is_stmt 1 view .LVU73
+ 302              	.LVL21:
+ 133:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (hd->key != DEFAULT_KEY)
+ 303              		.loc 1 133 5 view .LVU74
+ 304              		.loc 1 133 11 is_stmt 0 view .LVU75
+ 305 0008 8268     		ldr	r2, [r0, #8]
+ 306              		.loc 1 133 8 view .LVU76
+ 307 000a 47F2F133 		movw	r3, #29681
+ 308 000e 9A42     		cmp	r2, r3
+ 309 0010 01D0     		beq	.L41
+ 134:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;	// Key changed or data corruption
+ 310              		.loc 1 134 16 view .LVU77
+ 311 0012 6B20     		movs	r0, #107
+ 312              	.LVL22:
+ 313              	.L27:
+ 135:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len = MIN(hd->size, len);
+ 136:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len = hd->size;
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len -= sizeof(struct data_header_t);
+ 138:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     data += sizeof(struct data_header_t);
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     checksum = inv_checksum(data, len);
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (checksum != hd->checksum)
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;	// Data corruption
+ 142:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     while (len > (long)sizeof(struct data_header_t)) {
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         hd = (struct data_header_t *)data;
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         entry = inv_find_entry(hd->key);
+ 146:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         data += sizeof(struct data_header_t);
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         len -= sizeof(struct data_header_t);
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (entry >= 0 && len >= hd->size) {
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             if (hd->size == ds.hd[entry].size) {
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 checksum = inv_checksum(data, hd->size);
+ 151:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 if (checksum == hd->checksum) {
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                     ds.load[entry](data);
+ 153:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 } else {
+ 154:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                     return INV_ERROR_CALIBRATION_LOAD;
+ 155:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 }
+ 156:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             }
+ 157:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         }
+ 158:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         len -= hd->size;
+ 159:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (len >= 0)
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 10
+
+
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             data = data + hd->size;
+ 161:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 162:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+ 164:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 314              		.loc 1 164 1 view .LVU78
+ 315 0014 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 316              	.LVL23:
+ 317              	.L41:
+ 135:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len = MIN(hd->size, len);
+ 318              		.loc 1 135 5 is_stmt 1 view .LVU79
+ 135:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len = MIN(hd->size, len);
+ 319              		.loc 1 135 11 is_stmt 0 view .LVU80
+ 320 0016 0446     		mov	r4, r0
+ 321 0018 54F80C5B 		ldr	r5, [r4], #12
+ 322              	.LVL24:
+ 136:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     len -= sizeof(struct data_header_t);
+ 323              		.loc 1 136 5 is_stmt 1 view .LVU81
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     data += sizeof(struct data_header_t);
+ 324              		.loc 1 137 5 view .LVU82
+ 137:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     data += sizeof(struct data_header_t);
+ 325              		.loc 1 137 9 is_stmt 0 view .LVU83
+ 326 001c 0C3D     		subs	r5, r5, #12
+ 327              	.LVL25:
+ 138:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     checksum = inv_checksum(data, len);
+ 328              		.loc 1 138 5 is_stmt 1 view .LVU84
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (checksum != hd->checksum)
+ 329              		.loc 1 139 5 view .LVU85
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (checksum != hd->checksum)
+ 330              		.loc 1 139 16 is_stmt 0 view .LVU86
+ 331 001e 2946     		mov	r1, r5
+ 332              	.LVL26:
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (checksum != hd->checksum)
+ 333              		.loc 1 139 16 view .LVU87
+ 334 0020 2046     		mov	r0, r4
+ 335              	.LVL27:
+ 139:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (checksum != hd->checksum)
+ 336              		.loc 1 139 16 view .LVU88
+ 337 0022 FFF7FEFF 		bl	inv_checksum
+ 338              	.LVL28:
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;	// Data corruption
+ 339              		.loc 1 140 5 is_stmt 1 view .LVU89
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;	// Data corruption
+ 340              		.loc 1 140 23 is_stmt 0 view .LVU90
+ 341 0026 7368     		ldr	r3, [r6, #4]
+ 140:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;	// Data corruption
+ 342              		.loc 1 140 8 view .LVU91
+ 343 0028 8342     		cmp	r3, r0
+ 344 002a 05D0     		beq	.L29
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 345              		.loc 1 141 16 view .LVU92
+ 346 002c 6B20     		movs	r0, #107
+ 347              	.LVL29:
+ 141:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 348              		.loc 1 141 16 view .LVU93
+ 349 002e F1E7     		b	.L27
+ 350              	.LVL30:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 11
+
+
+ 351              	.L30:
+ 158:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (len >= 0)
+ 352              		.loc 1 158 9 is_stmt 1 view .LVU94
+ 158:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (len >= 0)
+ 353              		.loc 1 158 18 is_stmt 0 view .LVU95
+ 354 0030 2468     		ldr	r4, [r4]
+ 355              	.LVL31:
+ 159:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             data = data + hd->size;
+ 356              		.loc 1 159 9 is_stmt 1 view .LVU96
+ 159:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             data = data + hd->size;
+ 357              		.loc 1 159 12 is_stmt 0 view .LVU97
+ 358 0032 2D1B     		subs	r5, r5, r4
+ 359              	.LVL32:
+ 159:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             data = data + hd->size;
+ 360              		.loc 1 159 12 view .LVU98
+ 361 0034 29D4     		bmi	.L36
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 362              		.loc 1 160 13 is_stmt 1 view .LVU99
+ 160:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 363              		.loc 1 160 18 is_stmt 0 view .LVU100
+ 364 0036 3C44     		add	r4, r4, r7
+ 365              	.LVL33:
+ 366              	.L29:
+ 143:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         hd = (struct data_header_t *)data;
+ 367              		.loc 1 143 16 is_stmt 1 view .LVU101
+ 368 0038 0C2D     		cmp	r5, #12
+ 369 003a 20DD     		ble	.L42
+ 144:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         entry = inv_find_entry(hd->key);
+ 370              		.loc 1 144 9 view .LVU102
+ 371              	.LVL34:
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         data += sizeof(struct data_header_t);
+ 372              		.loc 1 145 9 view .LVU103
+ 145:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         data += sizeof(struct data_header_t);
+ 373              		.loc 1 145 17 is_stmt 0 view .LVU104
+ 374 003c A068     		ldr	r0, [r4, #8]
+ 375 003e FFF7FEFF 		bl	inv_find_entry
+ 376              	.LVL35:
+ 146:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         len -= sizeof(struct data_header_t);
+ 377              		.loc 1 146 9 is_stmt 1 view .LVU105
+ 146:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         len -= sizeof(struct data_header_t);
+ 378              		.loc 1 146 14 is_stmt 0 view .LVU106
+ 379 0042 04F10C07 		add	r7, r4, #12
+ 380              	.LVL36:
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (entry >= 0 && len >= hd->size) {
+ 381              		.loc 1 147 9 is_stmt 1 view .LVU107
+ 147:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         if (entry >= 0 && len >= hd->size) {
+ 382              		.loc 1 147 13 is_stmt 0 view .LVU108
+ 383 0046 0C3D     		subs	r5, r5, #12
+ 384              	.LVL37:
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             if (hd->size == ds.hd[entry].size) {
+ 385              		.loc 1 148 9 is_stmt 1 view .LVU109
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             if (hd->size == ds.hd[entry].size) {
+ 386              		.loc 1 148 12 is_stmt 0 view .LVU110
+ 387 0048 061E     		subs	r6, r0, #0
+ 388 004a F1DB     		blt	.L30
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             if (hd->size == ds.hd[entry].size) {
+ 389              		.loc 1 148 36 discriminator 1 view .LVU111
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 12
+
+
+ 390 004c 2168     		ldr	r1, [r4]
+ 148:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             if (hd->size == ds.hd[entry].size) {
+ 391              		.loc 1 148 24 discriminator 1 view .LVU112
+ 392 004e A942     		cmp	r1, r5
+ 393 0050 EEDC     		bgt	.L30
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 checksum = inv_checksum(data, hd->size);
+ 394              		.loc 1 149 13 is_stmt 1 view .LVU113
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 checksum = inv_checksum(data, hd->size);
+ 395              		.loc 1 149 41 is_stmt 0 view .LVU114
+ 396 0052 06EB4602 		add	r2, r6, r6, lsl #1
+ 397 0056 0E4B     		ldr	r3, .L43
+ 398 0058 03EB8203 		add	r3, r3, r2, lsl #2
+ 399 005c D3F8A830 		ldr	r3, [r3, #168]
+ 149:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 checksum = inv_checksum(data, hd->size);
+ 400              		.loc 1 149 16 view .LVU115
+ 401 0060 9942     		cmp	r1, r3
+ 402 0062 E5D1     		bne	.L30
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 if (checksum == hd->checksum) {
+ 403              		.loc 1 150 17 is_stmt 1 view .LVU116
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 if (checksum == hd->checksum) {
+ 404              		.loc 1 150 28 is_stmt 0 view .LVU117
+ 405 0064 3846     		mov	r0, r7
+ 406              	.LVL38:
+ 150:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 if (checksum == hd->checksum) {
+ 407              		.loc 1 150 28 view .LVU118
+ 408 0066 FFF7FEFF 		bl	inv_checksum
+ 409              	.LVL39:
+ 151:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                     ds.load[entry](data);
+ 410              		.loc 1 151 17 is_stmt 1 view .LVU119
+ 151:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                     ds.load[entry](data);
+ 411              		.loc 1 151 35 is_stmt 0 view .LVU120
+ 412 006a 6368     		ldr	r3, [r4, #4]
+ 151:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                     ds.load[entry](data);
+ 413              		.loc 1 151 20 view .LVU121
+ 414 006c 8342     		cmp	r3, r0
+ 415 006e 0AD1     		bne	.L35
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 } else {
+ 416              		.loc 1 152 21 is_stmt 1 view .LVU122
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 } else {
+ 417              		.loc 1 152 28 is_stmt 0 view .LVU123
+ 418 0070 B01C     		adds	r0, r6, #2
+ 419              	.LVL40:
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 } else {
+ 420              		.loc 1 152 28 view .LVU124
+ 421 0072 074B     		ldr	r3, .L43
+ 422 0074 53F82030 		ldr	r3, [r3, r0, lsl #2]
+ 152:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 } else {
+ 423              		.loc 1 152 21 view .LVU125
+ 424 0078 3846     		mov	r0, r7
+ 425 007a 9847     		blx	r3
+ 426              	.LVL41:
+ 427 007c D8E7     		b	.L30
+ 428              	.LVL42:
+ 429              	.L42:
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 430              		.loc 1 163 12 view .LVU126
+ 431 007e 0020     		movs	r0, #0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 13
+
+
+ 432 0080 C8E7     		b	.L27
+ 433              	.LVL43:
+ 434              	.L32:
+ 435              	.LCFI3:
+ 436              		.cfi_def_cfa_offset 0
+ 437              		.cfi_restore 3
+ 438              		.cfi_restore 4
+ 439              		.cfi_restore 5
+ 440              		.cfi_restore 6
+ 441              		.cfi_restore 7
+ 442              		.cfi_restore 14
+ 131:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd = (struct data_header_t *)data;
+ 443              		.loc 1 131 16 view .LVU127
+ 444 0082 6B20     		movs	r0, #107
+ 445              	.LVL44:
+ 446              		.loc 1 164 1 view .LVU128
+ 447 0084 7047     		bx	lr
+ 448              	.LVL45:
+ 449              	.L35:
+ 450              	.LCFI4:
+ 451              		.cfi_def_cfa_offset 24
+ 452              		.cfi_offset 3, -24
+ 453              		.cfi_offset 4, -20
+ 454              		.cfi_offset 5, -16
+ 455              		.cfi_offset 6, -12
+ 456              		.cfi_offset 7, -8
+ 457              		.cfi_offset 14, -4
+ 154:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 }
+ 458              		.loc 1 154 28 view .LVU129
+ 459 0086 6B20     		movs	r0, #107
+ 460              	.LVL46:
+ 154:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                 }
+ 461              		.loc 1 154 28 view .LVU130
+ 462 0088 C4E7     		b	.L27
+ 463              	.LVL47:
+ 464              	.L36:
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 465              		.loc 1 163 12 view .LVU131
+ 466 008a 0020     		movs	r0, #0
+ 467              	.LVL48:
+ 163:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 468              		.loc 1 163 12 view .LVU132
+ 469 008c C2E7     		b	.L27
+ 470              	.L44:
+ 471 008e 00BF     		.align	2
+ 472              	.L43:
+ 473 0090 00000000 		.word	ds
+ 474              		.cfi_endproc
+ 475              	.LFE10:
+ 477              		.section	.text.inv_save_mpl_states,"ax",%progbits
+ 478              		.align	1
+ 479              		.global	inv_save_mpl_states
+ 480              		.syntax unified
+ 481              		.thumb
+ 482              		.thumb_func
+ 484              	inv_save_mpl_states:
+ 485              	.LVL49:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 14
+
+
+ 486              	.LFB11:
+ 165:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 166:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** /** This function fills up a block of memory to be stored in non-volatile memory.
+ 167:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[out] data Place to store data, size of sz, must be at least size
+ 168:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** *                  returned by inv_get_mpl_state_size()
+ 169:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @param[in] sz Size of data.
+ 170:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** * @return Returns INV_SUCCESS if successful or an error code if not.
+ 171:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** */
+ 172:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** inv_error_t inv_save_mpl_states(unsigned char *data, size_t sz)
+ 173:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** {
+ 487              		.loc 1 173 1 is_stmt 1 view -0
+ 488              		.cfi_startproc
+ 489              		@ args = 0, pretend = 0, frame = 0
+ 490              		@ frame_needed = 0, uses_anonymous_args = 0
+ 491              		.loc 1 173 1 is_stmt 0 view .LVU134
+ 492 0000 2DE9F843 		push	{r3, r4, r5, r6, r7, r8, r9, lr}
+ 493              	.LCFI5:
+ 494              		.cfi_def_cfa_offset 32
+ 495              		.cfi_offset 3, -32
+ 496              		.cfi_offset 4, -28
+ 497              		.cfi_offset 5, -24
+ 498              		.cfi_offset 6, -20
+ 499              		.cfi_offset 7, -16
+ 500              		.cfi_offset 8, -12
+ 501              		.cfi_offset 9, -8
+ 502              		.cfi_offset 14, -4
+ 174:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     unsigned char *cur;
+ 503              		.loc 1 174 5 is_stmt 1 view .LVU135
+ 175:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     int kk;
+ 504              		.loc 1 175 5 view .LVU136
+ 176:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     struct data_header_t *hd;
+ 505              		.loc 1 176 5 view .LVU137
+ 177:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 178:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     if (sz >= ds.total_size) {
+ 506              		.loc 1 178 5 view .LVU138
+ 507              		.loc 1 178 17 is_stmt 0 view .LVU139
+ 508 0004 1F4B     		ldr	r3, .L51
+ 509 0006 5B68     		ldr	r3, [r3, #4]
+ 510              		.loc 1 178 8 view .LVU140
+ 511 0008 8B42     		cmp	r3, r1
+ 512 000a 38D8     		bhi	.L49
+ 513 000c 8046     		mov	r8, r0
+ 179:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         cur = data + sizeof(struct data_header_t);
+ 514              		.loc 1 179 9 is_stmt 1 view .LVU141
+ 515              		.loc 1 179 13 is_stmt 0 view .LVU142
+ 516 000e 00F10C09 		add	r9, r0, #12
+ 517              	.LVL50:
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         for (kk = 0; kk < ds.num; ++kk) {
+ 518              		.loc 1 180 9 is_stmt 1 view .LVU143
+ 179:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         cur = data + sizeof(struct data_header_t);
+ 519              		.loc 1 179 13 is_stmt 0 view .LVU144
+ 520 0012 4D46     		mov	r5, r9
+ 521              		.loc 1 180 17 view .LVU145
+ 522 0014 0026     		movs	r6, #0
+ 523              		.loc 1 180 9 view .LVU146
+ 524 0016 1CE0     		b	.L47
+ 525              	.LVL51:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 15
+
+
+ 526              	.L48:
+ 181:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd = (struct data_header_t *)cur;
+ 527              		.loc 1 181 13 is_stmt 1 discriminator 3 view .LVU147
+ 182:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             cur += sizeof(struct data_header_t);
+ 528              		.loc 1 182 13 discriminator 3 view .LVU148
+ 529              		.loc 1 182 17 is_stmt 0 discriminator 3 view .LVU149
+ 530 0018 05F10C07 		add	r7, r5, #12
+ 531              	.LVL52:
+ 183:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             ds.save[kk](cur);
+ 532              		.loc 1 183 13 is_stmt 1 discriminator 3 view .LVU150
+ 533              		.loc 1 183 20 is_stmt 0 discriminator 3 view .LVU151
+ 534 001c 194C     		ldr	r4, .L51
+ 535 001e 06F11603 		add	r3, r6, #22
+ 536 0022 54F82330 		ldr	r3, [r4, r3, lsl #2]
+ 537              		.loc 1 183 13 discriminator 3 view .LVU152
+ 538 0026 3846     		mov	r0, r7
+ 539 0028 9847     		blx	r3
+ 540              	.LVL53:
+ 184:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd->checksum = inv_checksum(cur, ds.hd[kk].size);
+ 541              		.loc 1 184 13 is_stmt 1 discriminator 3 view .LVU153
+ 542              		.loc 1 184 55 is_stmt 0 discriminator 3 view .LVU154
+ 543 002a 06EB4603 		add	r3, r6, r6, lsl #1
+ 544 002e 04EB8304 		add	r4, r4, r3, lsl #2
+ 545              		.loc 1 184 28 discriminator 3 view .LVU155
+ 546 0032 D4F8A810 		ldr	r1, [r4, #168]
+ 547 0036 3846     		mov	r0, r7
+ 548 0038 FFF7FEFF 		bl	inv_checksum
+ 549              	.LVL54:
+ 550              		.loc 1 184 26 discriminator 3 view .LVU156
+ 551 003c 6860     		str	r0, [r5, #4]
+ 185:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd->size = ds.hd[kk].size;
+ 552              		.loc 1 185 13 is_stmt 1 discriminator 3 view .LVU157
+ 553              		.loc 1 185 33 is_stmt 0 discriminator 3 view .LVU158
+ 554 003e D4F8A830 		ldr	r3, [r4, #168]
+ 555              		.loc 1 185 22 discriminator 3 view .LVU159
+ 556 0042 2B60     		str	r3, [r5]
+ 186:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd->key = ds.hd[kk].key;
+ 557              		.loc 1 186 13 is_stmt 1 discriminator 3 view .LVU160
+ 558              		.loc 1 186 32 is_stmt 0 discriminator 3 view .LVU161
+ 559 0044 D4F8B030 		ldr	r3, [r4, #176]
+ 560              		.loc 1 186 21 discriminator 3 view .LVU162
+ 561 0048 AB60     		str	r3, [r5, #8]
+ 187:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             cur += ds.hd[kk].size;
+ 562              		.loc 1 187 13 is_stmt 1 discriminator 3 view .LVU163
+ 563              		.loc 1 187 29 is_stmt 0 discriminator 3 view .LVU164
+ 564 004a D4F8A850 		ldr	r5, [r4, #168]
+ 565              	.LVL55:
+ 566              		.loc 1 187 17 discriminator 3 view .LVU165
+ 567 004e 3D44     		add	r5, r5, r7
+ 568              	.LVL56:
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd = (struct data_header_t *)cur;
+ 569              		.loc 1 180 35 is_stmt 1 discriminator 3 view .LVU166
+ 570 0050 0136     		adds	r6, r6, #1
+ 571              	.LVL57:
+ 572              	.L47:
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd = (struct data_header_t *)cur;
+ 573              		.loc 1 180 25 discriminator 1 view .LVU167
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 16
+
+
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd = (struct data_header_t *)cur;
+ 574              		.loc 1 180 29 is_stmt 0 discriminator 1 view .LVU168
+ 575 0052 0C4B     		ldr	r3, .L51
+ 576 0054 1B68     		ldr	r3, [r3]
+ 180:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****             hd = (struct data_header_t *)cur;
+ 577              		.loc 1 180 25 discriminator 1 view .LVU169
+ 578 0056 B342     		cmp	r3, r6
+ 579 0058 DEDC     		bgt	.L48
+ 188:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         }
+ 189:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     } else {
+ 190:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****         return INV_ERROR_CALIBRATION_LOAD;
+ 191:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 192:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 193:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd = (struct data_header_t *)data;
+ 580              		.loc 1 193 5 is_stmt 1 view .LVU170
+ 581              	.LVL58:
+ 194:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd->checksum = inv_checksum(data + sizeof(struct data_header_t),
+ 582              		.loc 1 194 5 view .LVU171
+ 195:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****                                 ds.total_size - sizeof(struct data_header_t));
+ 583              		.loc 1 195 35 is_stmt 0 view .LVU172
+ 584 005a 0A4C     		ldr	r4, .L51
+ 585 005c 6168     		ldr	r1, [r4, #4]
+ 194:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd->checksum = inv_checksum(data + sizeof(struct data_header_t),
+ 586              		.loc 1 194 20 view .LVU173
+ 587 005e 0C39     		subs	r1, r1, #12
+ 588 0060 4846     		mov	r0, r9
+ 589 0062 FFF7FEFF 		bl	inv_checksum
+ 590              	.LVL59:
+ 194:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd->checksum = inv_checksum(data + sizeof(struct data_header_t),
+ 591              		.loc 1 194 18 view .LVU174
+ 592 0066 C8F80400 		str	r0, [r8, #4]
+ 196:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd->key = DEFAULT_KEY;
+ 593              		.loc 1 196 5 is_stmt 1 view .LVU175
+ 594              		.loc 1 196 13 is_stmt 0 view .LVU176
+ 595 006a 47F2F133 		movw	r3, #29681
+ 596 006e C8F80830 		str	r3, [r8, #8]
+ 197:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     hd->size = ds.total_size;
+ 597              		.loc 1 197 5 is_stmt 1 view .LVU177
+ 598              		.loc 1 197 18 is_stmt 0 view .LVU178
+ 599 0072 6368     		ldr	r3, [r4, #4]
+ 600              		.loc 1 197 14 view .LVU179
+ 601 0074 C8F80030 		str	r3, [r8]
+ 198:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** 
+ 199:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     return INV_SUCCESS;
+ 602              		.loc 1 199 5 is_stmt 1 view .LVU180
+ 603              		.loc 1 199 12 is_stmt 0 view .LVU181
+ 604 0078 0020     		movs	r0, #0
+ 605              	.LVL60:
+ 606              	.L45:
+ 200:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c **** }
+ 607              		.loc 1 200 1 view .LVU182
+ 608 007a BDE8F883 		pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+ 609              	.LVL61:
+ 610              	.L49:
+ 190:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 611              		.loc 1 190 16 view .LVU183
+ 612 007e 6B20     		movs	r0, #107
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 17
+
+
+ 613              	.LVL62:
+ 190:Middlewares/MPU6050_Motion_Driver/mllite/storage_manager.c ****     }
+ 614              		.loc 1 190 16 view .LVU184
+ 615 0080 FBE7     		b	.L45
+ 616              	.L52:
+ 617 0082 00BF     		.align	2
+ 618              	.L51:
+ 619 0084 00000000 		.word	ds
+ 620              		.cfi_endproc
+ 621              	.LFE11:
+ 623              		.section	.bss.ds,"aw",%nobits
+ 624              		.align	2
+ 627              	ds:
+ 628 0000 00000000 		.space	408
+ 628      00000000 
+ 628      00000000 
+ 628      00000000 
+ 628      00000000 
+ 629              		.text
+ 630              	.Letext0:
+ 631              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/lib/gcc/arm-none-eabi/12.
+ 632              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 633              		.file 4 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 634              		.file 5 "Middlewares/MPU6050_Motion_Driver/driver/include/mltypes.h"
+ 635              		.file 6 "Middlewares/MPU6050_Motion_Driver/mllite/ml_math_func.h"
+ 636              		.file 7 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/str
+ 637              		.file 8 "<built-in>"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s 			page 18
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 storage_manager.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:21     .text.inv_find_entry:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:26     .text.inv_find_entry:00000000 inv_find_entry
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:77     .text.inv_find_entry:0000002c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:627    .bss.ds:00000000 ds
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:82     .text.inv_init_storage_manager:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:88     .text.inv_init_storage_manager:00000000 inv_init_storage_manager
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:115    .text.inv_init_storage_manager:00000018 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:120    .text.inv_register_load_store:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:126    .text.inv_register_load_store:00000000 inv_register_load_store
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:229    .text.inv_register_load_store:00000064 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:234    .text.inv_get_mpl_state_size:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:240    .text.inv_get_mpl_state_size:00000000 inv_get_mpl_state_size
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:263    .text.inv_get_mpl_state_size:0000000c $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:268    .text.inv_load_mpl_states:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:274    .text.inv_load_mpl_states:00000000 inv_load_mpl_states
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:473    .text.inv_load_mpl_states:00000090 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:478    .text.inv_save_mpl_states:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:484    .text.inv_save_mpl_states:00000000 inv_save_mpl_states
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:619    .text.inv_save_mpl_states:00000084 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cciJv2vk.s:624    .bss.ds:00000000 $d
+
+UNDEFINED SYMBOLS
+memset
+inv_checksum

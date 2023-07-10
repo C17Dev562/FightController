@@ -1,0 +1,499 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"STM32F4_porting.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c"
+  20              		.section	.text.I2Cx_Error,"ax",%progbits
+  21              		.align	1
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	I2Cx_Error:
+  27              	.LVL0:
+  28              	.LFB225:
+   1:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "STM32F4_porting.h"
+   2:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+   3:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "stm32f4xx_hal.h"
+   4:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "stm32f4xx_hal_def.h"
+   5:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "stm32f4xx_hal_i2c.h"
+   6:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "FreeRTOS.h"
+   7:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "task.h"
+   8:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "micros.h"
+   9:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** #include "timecouter.h"
+  10:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+  11:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+  12:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** static void I2Cx_Error(uint8_t Addr) {
+  29              		.loc 1 12 38 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 12 38 is_stmt 0 view .LVU1
+  34 0000 08B5     		push	{r3, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 3, -8
+  38              		.cfi_offset 14, -4
+  13:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   /* 恢复I2C寄存器为默认值 */
+  14:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   HAL_I2C_DeInit(&MPU6050_I2C_Handle);
+  39              		.loc 1 14 3 is_stmt 1 view .LVU2
+  40 0002 0348     		ldr	r0, .L3
+  41              	.LVL1:
+  42              		.loc 1 14 3 is_stmt 0 view .LVU3
+  43 0004 FFF7FEFF 		bl	HAL_I2C_DeInit
+  44              	.LVL2:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 2
+
+
+  15:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   MX_I2C1_Init();
+  45              		.loc 1 15 3 is_stmt 1 view .LVU4
+  46 0008 FFF7FEFF 		bl	MX_I2C1_Init
+  47              	.LVL3:
+  16:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** }
+  48              		.loc 1 16 1 is_stmt 0 view .LVU5
+  49 000c 08BD     		pop	{r3, pc}
+  50              	.L4:
+  51 000e 00BF     		.align	2
+  52              	.L3:
+  53 0010 00000000 		.word	hi2c1
+  54              		.cfi_endproc
+  55              	.LFE225:
+  57              		.section	.text.Sensors_I2C_ReadRegister,"ax",%progbits
+  58              		.align	1
+  59              		.global	Sensors_I2C_ReadRegister
+  60              		.syntax unified
+  61              		.thumb
+  62              		.thumb_func
+  64              	Sensors_I2C_ReadRegister:
+  65              	.LVL4:
+  66              	.LFB226:
+  17:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+  18:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** /**
+  19:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @brif 读寄存器，这是提供给上层对借口
+  20:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param slave_addr: 从机地址
+  21:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param reg_addr: 寄存器地址
+  22:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param len: 要读取对长度
+  23:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param data_ptr: 指向要存储数据对指针
+  24:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @retval 正常为0，不正常为非0
+  25:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  */
+  26:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** int Sensors_I2C_ReadRegister(unsigned char slave_addr, unsigned char reg_addr,
+  27:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                              unsigned short len, unsigned char *data_ptr) {
+  67              		.loc 1 27 75 is_stmt 1 view -0
+  68              		.cfi_startproc
+  69              		@ args = 0, pretend = 0, frame = 0
+  70              		@ frame_needed = 0, uses_anonymous_args = 0
+  71              		.loc 1 27 75 is_stmt 0 view .LVU7
+  72 0000 30B5     		push	{r4, r5, lr}
+  73              	.LCFI1:
+  74              		.cfi_def_cfa_offset 12
+  75              		.cfi_offset 4, -12
+  76              		.cfi_offset 5, -8
+  77              		.cfi_offset 14, -4
+  78 0002 83B0     		sub	sp, sp, #12
+  79              	.LCFI2:
+  80              		.cfi_def_cfa_offset 24
+  28:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   HAL_StatusTypeDef status = HAL_OK;
+  81              		.loc 1 28 3 is_stmt 1 view .LVU8
+  82              	.LVL5:
+  29:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   slave_addr <<= 1;
+  83              		.loc 1 29 3 view .LVU9
+  84              		.loc 1 29 14 is_stmt 0 view .LVU10
+  85 0004 4000     		lsls	r0, r0, #1
+  86              	.LVL6:
+  87              		.loc 1 29 14 view .LVU11
+  88 0006 C4B2     		uxtb	r4, r0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 3
+
+
+  89              	.LVL7:
+  30:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   status =
+  90              		.loc 1 30 3 is_stmt 1 view .LVU12
+  31:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****       // HAL_I2C_Mem_Read(&MPU6050_I2C_Handle, slave_addr, reg_addr,
+  32:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                        // I2C_MEMADD_SIZE_8BIT, data_ptr, len, I2Cx_FLAG_TIMEOUT);
+  33:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****       HAL_I2C_Mem_Read_DMA(&MPU6050_I2C_Handle, slave_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, data_pt
+  91              		.loc 1 33 7 is_stmt 0 view .LVU13
+  92 0008 0192     		str	r2, [sp, #4]
+  93 000a 0093     		str	r3, [sp]
+  94 000c 0123     		movs	r3, #1
+  95              	.LVL8:
+  96              		.loc 1 33 7 view .LVU14
+  97 000e 0A46     		mov	r2, r1
+  98              	.LVL9:
+  99              		.loc 1 33 7 view .LVU15
+ 100 0010 2146     		mov	r1, r4
+ 101              	.LVL10:
+ 102              		.loc 1 33 7 view .LVU16
+ 103 0012 0F48     		ldr	r0, .L12
+ 104 0014 FFF7FEFF 		bl	HAL_I2C_Mem_Read_DMA
+ 105              	.LVL11:
+  34:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+  35:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   /* 检查通讯状态 */
+  36:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   if (status != HAL_OK) {
+ 106              		.loc 1 36 3 is_stmt 1 view .LVU17
+ 107              		.loc 1 36 6 is_stmt 0 view .LVU18
+ 108 0018 0546     		mov	r5, r0
+ 109 001a A8B9     		cbnz	r0, .L11
+ 110              	.LVL12:
+ 111              	.L7:
+  37:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     I2Cx_Error(slave_addr);
+  38:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+  39:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   while (HAL_I2C_GetState(&MPU6050_I2C_Handle) != HAL_I2C_STATE_READY) {
+  40:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 112              		.loc 1 40 3 is_stmt 1 discriminator 1 view .LVU19
+  39:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 113              		.loc 1 39 48 discriminator 1 view .LVU20
+  39:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 114              		.loc 1 39 10 is_stmt 0 discriminator 1 view .LVU21
+ 115 001c 0C48     		ldr	r0, .L12
+ 116 001e FFF7FEFF 		bl	HAL_I2C_GetState
+ 117              	.LVL13:
+  39:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 118              		.loc 1 39 48 discriminator 1 view .LVU22
+ 119 0022 2028     		cmp	r0, #32
+ 120 0024 FAD1     		bne	.L7
+ 121              	.L8:
+  41:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   /* 检查SENSOR是否就绪进行下一次读写操作 */
+  42:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   while (HAL_I2C_IsDeviceReady(&MPU6050_I2C_Handle, slave_addr,
+  43:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                                I2Cx_FLAG_TIMEOUT,
+  44:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                                I2Cx_FLAG_TIMEOUT) == HAL_TIMEOUT)
+ 122              		.loc 1 44 51 is_stmt 1 discriminator 1 view .LVU23
+  42:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                                I2Cx_FLAG_TIMEOUT,
+ 123              		.loc 1 42 10 is_stmt 0 discriminator 1 view .LVU24
+ 124 0026 4FF47A73 		mov	r3, #1000
+ 125 002a 1A46     		mov	r2, r3
+ 126 002c 2146     		mov	r1, r4
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 4
+
+
+ 127 002e 0848     		ldr	r0, .L12
+ 128 0030 FFF7FEFF 		bl	HAL_I2C_IsDeviceReady
+ 129              	.LVL14:
+ 130              		.loc 1 44 51 discriminator 1 view .LVU25
+ 131 0034 0328     		cmp	r0, #3
+ 132 0036 F6D0     		beq	.L8
+ 133              	.L9:
+  45:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     ;
+  46:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   /* 等待传输结束 */
+  47:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   while (HAL_I2C_GetState(&MPU6050_I2C_Handle) != HAL_I2C_STATE_READY) {
+  48:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 134              		.loc 1 48 3 is_stmt 1 discriminator 1 view .LVU26
+  47:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 135              		.loc 1 47 48 discriminator 1 view .LVU27
+  47:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 136              		.loc 1 47 10 is_stmt 0 discriminator 1 view .LVU28
+ 137 0038 0548     		ldr	r0, .L12
+ 138 003a FFF7FEFF 		bl	HAL_I2C_GetState
+ 139              	.LVL15:
+  47:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 140              		.loc 1 47 48 discriminator 1 view .LVU29
+ 141 003e 2028     		cmp	r0, #32
+ 142 0040 FAD1     		bne	.L9
+  49:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   return status;
+ 143              		.loc 1 49 3 is_stmt 1 view .LVU30
+  50:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** }
+ 144              		.loc 1 50 1 is_stmt 0 view .LVU31
+ 145 0042 2846     		mov	r0, r5
+ 146 0044 03B0     		add	sp, sp, #12
+ 147              	.LCFI3:
+ 148              		.cfi_remember_state
+ 149              		.cfi_def_cfa_offset 12
+ 150              		@ sp needed
+ 151 0046 30BD     		pop	{r4, r5, pc}
+ 152              	.LVL16:
+ 153              	.L11:
+ 154              	.LCFI4:
+ 155              		.cfi_restore_state
+  37:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 156              		.loc 1 37 5 is_stmt 1 view .LVU32
+ 157 0048 2046     		mov	r0, r4
+ 158              	.LVL17:
+  37:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****   }
+ 159              		.loc 1 37 5 is_stmt 0 view .LVU33
+ 160 004a FFF7FEFF 		bl	I2Cx_Error
+ 161              	.LVL18:
+ 162 004e E5E7     		b	.L7
+ 163              	.L13:
+ 164              		.align	2
+ 165              	.L12:
+ 166 0050 00000000 		.word	hi2c1
+ 167              		.cfi_endproc
+ 168              	.LFE226:
+ 170              		.section	.text.Sensors_I2C_WriteRegister,"ax",%progbits
+ 171              		.align	1
+ 172              		.global	Sensors_I2C_WriteRegister
+ 173              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 5
+
+
+ 174              		.thumb
+ 175              		.thumb_func
+ 177              	Sensors_I2C_WriteRegister:
+ 178              	.LVL19:
+ 179              	.LFB227:
+  51:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+  52:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** /**
+  53:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @brief  写寄存器，这是提供给上层的接口
+  54:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param  slave_addr: 从机地址
+  55:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param 	reg_addr:寄存器地址
+  56:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @param len：写入的长度
+  57:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  *	@param data_ptr:指向要写入的数据
+  58:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  * @retval 正常为0，不正常为非0
+  59:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****  */
+  60:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** int Sensors_I2C_WriteRegister(unsigned char slave_addr, unsigned char reg_addr, unsigned short len,
+  61:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                               unsigned char *data_ptr)
+  62:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** {
+ 180              		.loc 1 62 1 is_stmt 1 view -0
+ 181              		.cfi_startproc
+ 182              		@ args = 0, pretend = 0, frame = 0
+ 183              		@ frame_needed = 0, uses_anonymous_args = 0
+ 184              		.loc 1 62 1 is_stmt 0 view .LVU35
+ 185 0000 30B5     		push	{r4, r5, lr}
+ 186              	.LCFI5:
+ 187              		.cfi_def_cfa_offset 12
+ 188              		.cfi_offset 4, -12
+ 189              		.cfi_offset 5, -8
+ 190              		.cfi_offset 14, -4
+ 191 0002 83B0     		sub	sp, sp, #12
+ 192              	.LCFI6:
+ 193              		.cfi_def_cfa_offset 24
+  63:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     HAL_StatusTypeDef status = HAL_OK;
+ 194              		.loc 1 63 5 is_stmt 1 view .LVU36
+ 195              	.LVL20:
+  64:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     slave_addr <<= 1;
+ 196              		.loc 1 64 5 view .LVU37
+ 197              		.loc 1 64 16 is_stmt 0 view .LVU38
+ 198 0004 4000     		lsls	r0, r0, #1
+ 199              	.LVL21:
+ 200              		.loc 1 64 16 view .LVU39
+ 201 0006 C4B2     		uxtb	r4, r0
+ 202              	.LVL22:
+  65:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     status = 
+ 203              		.loc 1 65 5 is_stmt 1 view .LVU40
+  66:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     // HAL_I2C_Mem_Write(&MPU6050_I2C_Handle, slave_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, data_ptr,
+  67:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****                                // I2Cx_FLAG_TIMEOUT);
+  68:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     HAL_I2C_Mem_Write_DMA(&MPU6050_I2C_Handle, slave_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, data_ptr
+ 204              		.loc 1 68 5 is_stmt 0 view .LVU41
+ 205 0008 0192     		str	r2, [sp, #4]
+ 206 000a 0093     		str	r3, [sp]
+ 207 000c 0123     		movs	r3, #1
+ 208              	.LVL23:
+ 209              		.loc 1 68 5 view .LVU42
+ 210 000e 0A46     		mov	r2, r1
+ 211              	.LVL24:
+ 212              		.loc 1 68 5 view .LVU43
+ 213 0010 2146     		mov	r1, r4
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 6
+
+
+ 214              	.LVL25:
+ 215              		.loc 1 68 5 view .LVU44
+ 216 0012 0F48     		ldr	r0, .L21
+ 217 0014 FFF7FEFF 		bl	HAL_I2C_Mem_Write_DMA
+ 218              	.LVL26:
+  69:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     /* 检查通讯状态 */
+  70:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     if (status != HAL_OK)
+ 219              		.loc 1 70 5 is_stmt 1 view .LVU45
+ 220              		.loc 1 70 8 is_stmt 0 view .LVU46
+ 221 0018 0546     		mov	r5, r0
+ 222 001a A8B9     		cbnz	r0, .L20
+ 223              	.LVL27:
+ 224              	.L16:
+  71:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+  72:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****         /* 总线出错处理 */
+  73:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****         I2Cx_Error(slave_addr);
+  74:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     }
+  75:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     while (HAL_I2C_GetState(&MPU6050_I2C_Handle) != HAL_I2C_STATE_READY)
+  76:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+  77:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     }
+ 225              		.loc 1 77 5 is_stmt 1 discriminator 1 view .LVU47
+  75:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+ 226              		.loc 1 75 50 discriminator 1 view .LVU48
+  75:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+ 227              		.loc 1 75 12 is_stmt 0 discriminator 1 view .LVU49
+ 228 001c 0C48     		ldr	r0, .L21
+ 229 001e FFF7FEFF 		bl	HAL_I2C_GetState
+ 230              	.LVL28:
+  75:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+ 231              		.loc 1 75 50 discriminator 1 view .LVU50
+ 232 0022 2028     		cmp	r0, #32
+ 233 0024 FAD1     		bne	.L16
+ 234              	.L17:
+  78:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     /* 检查SENSOR是否就绪进行下一次读写操作 */
+  79:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     while (HAL_I2C_IsDeviceReady(&MPU6050_I2C_Handle, slave_addr, I2Cx_FLAG_TIMEOUT, I2Cx_FLAG_TIME
+ 235              		.loc 1 79 105 is_stmt 1 discriminator 1 view .LVU51
+ 236              		.loc 1 79 12 is_stmt 0 discriminator 1 view .LVU52
+ 237 0026 4FF47A73 		mov	r3, #1000
+ 238 002a 1A46     		mov	r2, r3
+ 239 002c 2146     		mov	r1, r4
+ 240 002e 0848     		ldr	r0, .L21
+ 241 0030 FFF7FEFF 		bl	HAL_I2C_IsDeviceReady
+ 242              	.LVL29:
+ 243              		.loc 1 79 105 discriminator 1 view .LVU53
+ 244 0034 0328     		cmp	r0, #3
+ 245 0036 F6D0     		beq	.L17
+ 246              	.L18:
+  80:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****         ;
+  81:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     /* 等待传输结束 */
+  82:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     while (HAL_I2C_GetState(&MPU6050_I2C_Handle) != HAL_I2C_STATE_READY)
+  83:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+  84:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     }
+ 247              		.loc 1 84 5 is_stmt 1 discriminator 1 view .LVU54
+  82:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+ 248              		.loc 1 82 50 discriminator 1 view .LVU55
+  82:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+ 249              		.loc 1 82 12 is_stmt 0 discriminator 1 view .LVU56
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 7
+
+
+ 250 0038 0548     		ldr	r0, .L21
+ 251 003a FFF7FEFF 		bl	HAL_I2C_GetState
+ 252              	.LVL30:
+  82:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     {
+ 253              		.loc 1 82 50 discriminator 1 view .LVU57
+ 254 003e 2028     		cmp	r0, #32
+ 255 0040 FAD1     		bne	.L18
+  85:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     return status;
+ 256              		.loc 1 85 5 is_stmt 1 view .LVU58
+  86:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** }
+ 257              		.loc 1 86 1 is_stmt 0 view .LVU59
+ 258 0042 2846     		mov	r0, r5
+ 259 0044 03B0     		add	sp, sp, #12
+ 260              	.LCFI7:
+ 261              		.cfi_remember_state
+ 262              		.cfi_def_cfa_offset 12
+ 263              		@ sp needed
+ 264 0046 30BD     		pop	{r4, r5, pc}
+ 265              	.LVL31:
+ 266              	.L20:
+ 267              	.LCFI8:
+ 268              		.cfi_restore_state
+  73:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     }
+ 269              		.loc 1 73 9 is_stmt 1 view .LVU60
+ 270 0048 2046     		mov	r0, r4
+ 271              	.LVL32:
+  73:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     }
+ 272              		.loc 1 73 9 is_stmt 0 view .LVU61
+ 273 004a FFF7FEFF 		bl	I2Cx_Error
+ 274              	.LVL33:
+ 275 004e E5E7     		b	.L16
+ 276              	.L22:
+ 277              		.align	2
+ 278              	.L21:
+ 279 0050 00000000 		.word	hi2c1
+ 280              		.cfi_endproc
+ 281              	.LFE227:
+ 283              		.section	.text.get_ms_user,"ax",%progbits
+ 284              		.align	1
+ 285              		.global	get_ms_user
+ 286              		.syntax unified
+ 287              		.thumb
+ 288              		.thumb_func
+ 290              	get_ms_user:
+ 291              	.LVL34:
+ 292              	.LFB228:
+  87:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** int get_ms_user(unsigned long *count) //换壳函数  inline修饰（内联）减少出入栈开销
+  88:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** {
+ 293              		.loc 1 88 1 is_stmt 1 view -0
+ 294              		.cfi_startproc
+ 295              		@ args = 0, pretend = 0, frame = 0
+ 296              		@ frame_needed = 0, uses_anonymous_args = 0
+  89:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     if (!count)
+ 297              		.loc 1 89 5 view .LVU63
+ 298              		.loc 1 89 8 is_stmt 0 view .LVU64
+ 299 0000 30B1     		cbz	r0, .L25
+  88:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     if (!count)
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 8
+
+
+ 300              		.loc 1 88 1 view .LVU65
+ 301 0002 10B5     		push	{r4, lr}
+ 302              	.LCFI9:
+ 303              		.cfi_def_cfa_offset 8
+ 304              		.cfi_offset 4, -8
+ 305              		.cfi_offset 14, -4
+ 306 0004 0446     		mov	r4, r0
+  90:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****         return 1;
+  91:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     // count[0] = HAL_GetTick();
+  92:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****        // *count = getTime();
+  93:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****       *count = xTaskGetTickCount();
+ 307              		.loc 1 93 7 is_stmt 1 view .LVU66
+ 308              		.loc 1 93 16 is_stmt 0 view .LVU67
+ 309 0006 FFF7FEFF 		bl	xTaskGetTickCount
+ 310              	.LVL35:
+ 311              		.loc 1 93 14 view .LVU68
+ 312 000a 2060     		str	r0, [r4]
+  94:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** 
+  95:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****     return 0;
+ 313              		.loc 1 95 5 is_stmt 1 view .LVU69
+ 314              		.loc 1 95 12 is_stmt 0 view .LVU70
+ 315 000c 0020     		movs	r0, #0
+  96:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c **** }
+ 316              		.loc 1 96 1 view .LVU71
+ 317 000e 10BD     		pop	{r4, pc}
+ 318              	.LVL36:
+ 319              	.L25:
+ 320              	.LCFI10:
+ 321              		.cfi_def_cfa_offset 0
+ 322              		.cfi_restore 4
+ 323              		.cfi_restore 14
+  90:Middlewares/MPU6050_Motion_Driver/porting/STM32F4_porting.c ****         return 1;
+ 324              		.loc 1 90 16 view .LVU72
+ 325 0010 0120     		movs	r0, #1
+ 326              	.LVL37:
+ 327              		.loc 1 96 1 view .LVU73
+ 328 0012 7047     		bx	lr
+ 329              		.cfi_endproc
+ 330              	.LFE228:
+ 332              		.text
+ 333              	.Letext0:
+ 334              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 335              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 336              		.file 4 "Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f411xe.h"
+ 337              		.file 5 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h"
+ 338              		.file 6 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h"
+ 339              		.file 7 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c.h"
+ 340              		.file 8 "Middlewares/FreeRTOS/portable/GCC/ARM_CM4F/portmacro.h"
+ 341              		.file 9 "Core/Inc/driver/iic.h"
+ 342              		.file 10 "Middlewares/FreeRTOS/include/task.h"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 STM32F4_porting.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:21     .text.I2Cx_Error:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:26     .text.I2Cx_Error:00000000 I2Cx_Error
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:53     .text.I2Cx_Error:00000010 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:58     .text.Sensors_I2C_ReadRegister:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:64     .text.Sensors_I2C_ReadRegister:00000000 Sensors_I2C_ReadRegister
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:166    .text.Sensors_I2C_ReadRegister:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:171    .text.Sensors_I2C_WriteRegister:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:177    .text.Sensors_I2C_WriteRegister:00000000 Sensors_I2C_WriteRegister
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:279    .text.Sensors_I2C_WriteRegister:00000050 $d
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:284    .text.get_ms_user:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cce0PiLl.s:290    .text.get_ms_user:00000000 get_ms_user
+
+UNDEFINED SYMBOLS
+HAL_I2C_DeInit
+MX_I2C1_Init
+hi2c1
+HAL_I2C_Mem_Read_DMA
+HAL_I2C_GetState
+HAL_I2C_IsDeviceReady
+HAL_I2C_Mem_Write_DMA
+xTaskGetTickCount

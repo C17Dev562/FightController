@@ -1,0 +1,149 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"syscalls.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Core/Src/syscalls.c"
+  20              		.section	.text._write,"ax",%progbits
+  21              		.align	1
+  22              		.global	_write
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	_write:
+  28              	.LVL0:
+  29              	.LFB216:
+   1:Core/Src/syscalls.c **** // syscalls.c文件
+   2:Core/Src/syscalls.c **** 
+   3:Core/Src/syscalls.c **** #include "driver/uart.h"
+   4:Core/Src/syscalls.c **** #include "main.h"
+   5:Core/Src/syscalls.c **** #include <errno.h>
+   6:Core/Src/syscalls.c **** #include <sys/unistd.h> // STDOUT_FILENO, STDERR_FILENO
+   7:Core/Src/syscalls.c **** extern UART_HandleTypeDef UART1_Handler;
+   8:Core/Src/syscalls.c **** 
+   9:Core/Src/syscalls.c **** int _write(int file, char *data, int len) {
+  30              		.loc 1 9 43 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		.loc 1 9 43 is_stmt 0 view .LVU1
+  35 0000 10B5     		push	{r4, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 4, -8
+  39              		.cfi_offset 14, -4
+  10:Core/Src/syscalls.c ****   if ((file != STDOUT_FILENO) && (file != STDERR_FILENO)) {
+  40              		.loc 1 10 3 is_stmt 1 view .LVU2
+  41              		.loc 1 10 31 is_stmt 0 view .LVU3
+  42 0002 0138     		subs	r0, r0, #1
+  43              	.LVL1:
+  44              		.loc 1 10 6 view .LVU4
+  45 0004 0128     		cmp	r0, #1
+  46 0006 09D8     		bhi	.L6
+  47 0008 1446     		mov	r4, r2
+  11:Core/Src/syscalls.c ****     errno = EBADF;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s 			page 2
+
+
+  12:Core/Src/syscalls.c ****     return -1;
+  13:Core/Src/syscalls.c ****   }
+  14:Core/Src/syscalls.c **** 
+  15:Core/Src/syscalls.c ****   // arbitrary timeout 1000
+  16:Core/Src/syscalls.c ****   HAL_StatusTypeDef status =
+  48              		.loc 1 16 3 is_stmt 1 view .LVU5
+  17:Core/Src/syscalls.c ****       HAL_UART_Transmit(&UART1_Handler, (uint8_t *)data, len, 1000);
+  49              		.loc 1 17 7 is_stmt 0 view .LVU6
+  50 000a 4FF47A73 		mov	r3, #1000
+  51 000e 92B2     		uxth	r2, r2
+  52              	.LVL2:
+  53              		.loc 1 17 7 view .LVU7
+  54 0010 0748     		ldr	r0, .L7
+  55              	.LVL3:
+  56              		.loc 1 17 7 view .LVU8
+  57 0012 FFF7FEFF 		bl	HAL_UART_Transmit
+  58              	.LVL4:
+  18:Core/Src/syscalls.c **** 
+  19:Core/Src/syscalls.c ****   // return # of bytes written - as best we can tell
+  20:Core/Src/syscalls.c ****   return (status == HAL_OK ? len : 0);
+  59              		.loc 1 20 3 is_stmt 1 view .LVU9
+  60              		.loc 1 20 34 is_stmt 0 view .LVU10
+  61 0016 40B9     		cbnz	r0, .L4
+  62 0018 2046     		mov	r0, r4
+  63              	.LVL5:
+  64              	.L1:
+  21:Core/Src/syscalls.c **** }
+  65              		.loc 1 21 1 view .LVU11
+  66 001a 10BD     		pop	{r4, pc}
+  67              	.LVL6:
+  68              	.L6:
+  11:Core/Src/syscalls.c ****     return -1;
+  69              		.loc 1 11 5 is_stmt 1 view .LVU12
+  70 001c FFF7FEFF 		bl	__errno
+  71              	.LVL7:
+  11:Core/Src/syscalls.c ****     return -1;
+  72              		.loc 1 11 11 is_stmt 0 view .LVU13
+  73 0020 0923     		movs	r3, #9
+  74 0022 0360     		str	r3, [r0]
+  12:Core/Src/syscalls.c ****   }
+  75              		.loc 1 12 5 is_stmt 1 view .LVU14
+  12:Core/Src/syscalls.c ****   }
+  76              		.loc 1 12 12 is_stmt 0 view .LVU15
+  77 0024 4FF0FF30 		mov	r0, #-1
+  78 0028 F7E7     		b	.L1
+  79              	.LVL8:
+  80              	.L4:
+  20:Core/Src/syscalls.c **** }
+  81              		.loc 1 20 34 view .LVU16
+  82 002a 0020     		movs	r0, #0
+  83              	.LVL9:
+  20:Core/Src/syscalls.c **** }
+  84              		.loc 1 20 34 view .LVU17
+  85 002c F5E7     		b	.L1
+  86              	.L8:
+  87 002e 00BF     		.align	2
+  88              	.L7:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s 			page 3
+
+
+  89 0030 00000000 		.word	UART1_Handler
+  90              		.cfi_endproc
+  91              	.LFE216:
+  93              		.text
+  94              	.Letext0:
+  95              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+  96              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+  97              		.file 4 "Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f411xe.h"
+  98              		.file 5 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h"
+  99              		.file 6 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h"
+ 100              		.file 7 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h"
+ 101              		.file 8 "Core/Inc/driver/uart.h"
+ 102              		.file 9 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s 			page 4
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 syscalls.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s:21     .text._write:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s:27     .text._write:00000000 _write
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//cckZOCwK.s:89     .text._write:00000030 $d
+
+UNDEFINED SYMBOLS
+HAL_UART_Transmit
+__errno
+UART1_Handler

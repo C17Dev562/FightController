@@ -1,0 +1,773 @@
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"crc.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Core/Src/common/crc.c"
+  20              		.section	.text.crc16_ccitt,"ax",%progbits
+  21              		.align	1
+  22              		.global	crc16_ccitt
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	crc16_ccitt:
+  28              	.LVL0:
+  29              	.LFB216:
+   1:Core/Src/common/crc.c **** /*
+   2:Core/Src/common/crc.c ****  * This file is part of Cleanflight and Betaflight.
+   3:Core/Src/common/crc.c ****  *
+   4:Core/Src/common/crc.c ****  * Cleanflight and Betaflight are free software. You can redistribute
+   5:Core/Src/common/crc.c ****  * this software and/or modify this software under the terms of the
+   6:Core/Src/common/crc.c ****  * GNU General Public License as published by the Free Software
+   7:Core/Src/common/crc.c ****  * Foundation, either version 3 of the License, or (at your option)
+   8:Core/Src/common/crc.c ****  * any later version.
+   9:Core/Src/common/crc.c ****  *
+  10:Core/Src/common/crc.c ****  * Cleanflight and Betaflight are distributed in the hope that they
+  11:Core/Src/common/crc.c ****  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  12:Core/Src/common/crc.c ****  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  13:Core/Src/common/crc.c ****  * See the GNU General Public License for more details.
+  14:Core/Src/common/crc.c ****  *
+  15:Core/Src/common/crc.c ****  * You should have received a copy of the GNU General Public License
+  16:Core/Src/common/crc.c ****  * along with this software.
+  17:Core/Src/common/crc.c ****  *
+  18:Core/Src/common/crc.c ****  * If not, see <http://www.gnu.org/licenses/>.
+  19:Core/Src/common/crc.c ****  */
+  20:Core/Src/common/crc.c **** 
+  21:Core/Src/common/crc.c **** #include "common/crc.h"
+  22:Core/Src/common/crc.c **** 
+  23:Core/Src/common/crc.c **** #include <stdint.h>
+  24:Core/Src/common/crc.c **** 
+  25:Core/Src/common/crc.c **** #include "common/streambuf.h"
+  26:Core/Src/common/crc.c **** 
+  27:Core/Src/common/crc.c **** uint16_t crc16_ccitt(uint16_t crc, unsigned char a) {
+  30              		.loc 1 27 53 view -0
+  31              		.cfi_startproc
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 2
+
+
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		@ link register save eliminated.
+  28:Core/Src/common/crc.c ****   crc ^= (uint16_t)a << 8;
+  35              		.loc 1 28 3 view .LVU1
+  36              		.loc 1 28 7 is_stmt 0 view .LVU2
+  37 0000 80EA0120 		eor	r0, r0, r1, lsl #8
+  38              	.LVL1:
+  29:Core/Src/common/crc.c ****   for (int ii = 0; ii < 8; ++ii) {
+  39              		.loc 1 29 3 is_stmt 1 view .LVU3
+  40              	.LBB2:
+  41              		.loc 1 29 8 view .LVU4
+  42              		.loc 1 29 12 is_stmt 0 view .LVU5
+  43 0004 0023     		movs	r3, #0
+  44              		.loc 1 29 3 view .LVU6
+  45 0006 02E0     		b	.L2
+  46              	.LVL2:
+  47              	.L3:
+  30:Core/Src/common/crc.c ****     if (crc & 0x8000) {
+  31:Core/Src/common/crc.c ****       crc = (crc << 1) ^ 0x1021;
+  32:Core/Src/common/crc.c ****     } else {
+  33:Core/Src/common/crc.c ****       crc = crc << 1;
+  48              		.loc 1 33 7 is_stmt 1 view .LVU7
+  49              		.loc 1 33 11 is_stmt 0 view .LVU8
+  50 0008 4000     		lsls	r0, r0, #1
+  51              	.LVL3:
+  52              		.loc 1 33 11 view .LVU9
+  53 000a 80B2     		uxth	r0, r0
+  54              	.LVL4:
+  55              	.L4:
+  29:Core/Src/common/crc.c ****   for (int ii = 0; ii < 8; ++ii) {
+  56              		.loc 1 29 28 is_stmt 1 discriminator 2 view .LVU10
+  57 000c 0133     		adds	r3, r3, #1
+  58              	.LVL5:
+  59              	.L2:
+  29:Core/Src/common/crc.c ****   for (int ii = 0; ii < 8; ++ii) {
+  60              		.loc 1 29 23 discriminator 1 view .LVU11
+  61 000e 072B     		cmp	r3, #7
+  62 0010 08DC     		bgt	.L6
+  30:Core/Src/common/crc.c ****     if (crc & 0x8000) {
+  63              		.loc 1 30 5 view .LVU12
+  30:Core/Src/common/crc.c ****     if (crc & 0x8000) {
+  64              		.loc 1 30 8 is_stmt 0 view .LVU13
+  65 0012 10F4004F 		tst	r0, #32768
+  66 0016 F7D0     		beq	.L3
+  31:Core/Src/common/crc.c ****     } else {
+  67              		.loc 1 31 7 is_stmt 1 view .LVU14
+  31:Core/Src/common/crc.c ****     } else {
+  68              		.loc 1 31 24 is_stmt 0 view .LVU15
+  69 0018 41F22102 		movw	r2, #4129
+  70 001c 82EA4000 		eor	r0, r2, r0, lsl #1
+  71              	.LVL6:
+  31:Core/Src/common/crc.c ****     } else {
+  72              		.loc 1 31 11 view .LVU16
+  73 0020 80B2     		uxth	r0, r0
+  74              	.LVL7:
+  31:Core/Src/common/crc.c ****     } else {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 3
+
+
+  75              		.loc 1 31 11 view .LVU17
+  76 0022 F3E7     		b	.L4
+  77              	.L6:
+  31:Core/Src/common/crc.c ****     } else {
+  78              		.loc 1 31 11 view .LVU18
+  79              	.LBE2:
+  34:Core/Src/common/crc.c ****     }
+  35:Core/Src/common/crc.c ****   }
+  36:Core/Src/common/crc.c ****   return crc;
+  80              		.loc 1 36 3 is_stmt 1 view .LVU19
+  37:Core/Src/common/crc.c **** }
+  81              		.loc 1 37 1 is_stmt 0 view .LVU20
+  82 0024 7047     		bx	lr
+  83              		.cfi_endproc
+  84              	.LFE216:
+  86              		.section	.text.crc16_ccitt_update,"ax",%progbits
+  87              		.align	1
+  88              		.global	crc16_ccitt_update
+  89              		.syntax unified
+  90              		.thumb
+  91              		.thumb_func
+  93              	crc16_ccitt_update:
+  94              	.LVL8:
+  95              	.LFB217:
+  38:Core/Src/common/crc.c **** 
+  39:Core/Src/common/crc.c **** uint16_t crc16_ccitt_update(uint16_t crc, const void *data, uint32_t length) {
+  96              		.loc 1 39 78 is_stmt 1 view -0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 0
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100              		.loc 1 39 78 is_stmt 0 view .LVU22
+ 101 0000 38B5     		push	{r3, r4, r5, lr}
+ 102              	.LCFI0:
+ 103              		.cfi_def_cfa_offset 16
+ 104              		.cfi_offset 3, -16
+ 105              		.cfi_offset 4, -12
+ 106              		.cfi_offset 5, -8
+ 107              		.cfi_offset 14, -4
+ 108 0002 0C46     		mov	r4, r1
+  40:Core/Src/common/crc.c ****   const uint8_t *p = (const uint8_t *)data;
+ 109              		.loc 1 40 3 is_stmt 1 view .LVU23
+ 110              	.LVL9:
+  41:Core/Src/common/crc.c ****   const uint8_t *pend = p + length;
+ 111              		.loc 1 41 3 view .LVU24
+ 112              		.loc 1 41 18 is_stmt 0 view .LVU25
+ 113 0004 8D18     		adds	r5, r1, r2
+ 114              	.LVL10:
+  42:Core/Src/common/crc.c **** 
+  43:Core/Src/common/crc.c ****   for (; p != pend; p++) {
+ 115              		.loc 1 43 3 is_stmt 1 view .LVU26
+ 116 0006 03E0     		b	.L8
+ 117              	.LVL11:
+ 118              	.L9:
+  44:Core/Src/common/crc.c ****     crc = crc16_ccitt(crc, *p);
+ 119              		.loc 1 44 5 discriminator 2 view .LVU27
+ 120              		.loc 1 44 11 is_stmt 0 discriminator 2 view .LVU28
+ 121 0008 14F8011B 		ldrb	r1, [r4], #1	@ zero_extendqisi2
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 4
+
+
+ 122              	.LVL12:
+ 123              		.loc 1 44 11 discriminator 2 view .LVU29
+ 124 000c FFF7FEFF 		bl	crc16_ccitt
+ 125              	.LVL13:
+  43:Core/Src/common/crc.c ****     crc = crc16_ccitt(crc, *p);
+ 126              		.loc 1 43 22 is_stmt 1 discriminator 2 view .LVU30
+ 127              	.L8:
+  43:Core/Src/common/crc.c ****     crc = crc16_ccitt(crc, *p);
+ 128              		.loc 1 43 12 discriminator 1 view .LVU31
+ 129 0010 AC42     		cmp	r4, r5
+ 130 0012 F9D1     		bne	.L9
+  45:Core/Src/common/crc.c ****   }
+  46:Core/Src/common/crc.c ****   return crc;
+ 131              		.loc 1 46 3 view .LVU32
+  47:Core/Src/common/crc.c **** }
+ 132              		.loc 1 47 1 is_stmt 0 view .LVU33
+ 133 0014 38BD     		pop	{r3, r4, r5, pc}
+ 134              		.loc 1 47 1 view .LVU34
+ 135              		.cfi_endproc
+ 136              	.LFE217:
+ 138              		.section	.text.crc16_ccitt_sbuf_append,"ax",%progbits
+ 139              		.align	1
+ 140              		.global	crc16_ccitt_sbuf_append
+ 141              		.syntax unified
+ 142              		.thumb
+ 143              		.thumb_func
+ 145              	crc16_ccitt_sbuf_append:
+ 146              	.LVL14:
+ 147              	.LFB218:
+  48:Core/Src/common/crc.c **** 
+  49:Core/Src/common/crc.c **** void crc16_ccitt_sbuf_append(sbuf_t *dst, uint8_t *start) {
+ 148              		.loc 1 49 59 is_stmt 1 view -0
+ 149              		.cfi_startproc
+ 150              		@ args = 0, pretend = 0, frame = 0
+ 151              		@ frame_needed = 0, uses_anonymous_args = 0
+ 152              		.loc 1 49 59 is_stmt 0 view .LVU36
+ 153 0000 70B5     		push	{r4, r5, r6, lr}
+ 154              	.LCFI1:
+ 155              		.cfi_def_cfa_offset 16
+ 156              		.cfi_offset 4, -16
+ 157              		.cfi_offset 5, -12
+ 158              		.cfi_offset 6, -8
+ 159              		.cfi_offset 14, -4
+ 160 0002 0646     		mov	r6, r0
+ 161 0004 0C46     		mov	r4, r1
+  50:Core/Src/common/crc.c ****   uint16_t crc = 0;
+ 162              		.loc 1 50 3 is_stmt 1 view .LVU37
+ 163              	.LVL15:
+  51:Core/Src/common/crc.c ****   const uint8_t *const end = sbufPtr(dst);
+ 164              		.loc 1 51 3 view .LVU38
+ 165              		.loc 1 51 30 is_stmt 0 view .LVU39
+ 166 0006 FFF7FEFF 		bl	sbufPtr
+ 167              	.LVL16:
+ 168              		.loc 1 51 30 view .LVU40
+ 169 000a 0546     		mov	r5, r0
+ 170              	.LVL17:
+  52:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 5
+
+
+ 171              		.loc 1 52 3 is_stmt 1 view .LVU41
+ 172              	.LBB3:
+ 173              		.loc 1 52 8 view .LVU42
+ 174              		.loc 1 52 8 is_stmt 0 view .LVU43
+ 175              	.LBE3:
+  50:Core/Src/common/crc.c ****   uint16_t crc = 0;
+ 176              		.loc 1 50 12 view .LVU44
+ 177 000c 0020     		movs	r0, #0
+ 178              	.LVL18:
+ 179              	.LBB4:
+ 180              		.loc 1 52 3 view .LVU45
+ 181 000e 03E0     		b	.L12
+ 182              	.LVL19:
+ 183              	.L13:
+  53:Core/Src/common/crc.c ****     crc = crc16_ccitt(crc, *ptr);
+ 184              		.loc 1 53 5 is_stmt 1 discriminator 3 view .LVU46
+ 185              		.loc 1 53 11 is_stmt 0 discriminator 3 view .LVU47
+ 186 0010 14F8011B 		ldrb	r1, [r4], #1	@ zero_extendqisi2
+ 187              	.LVL20:
+ 188              		.loc 1 53 11 discriminator 3 view .LVU48
+ 189 0014 FFF7FEFF 		bl	crc16_ccitt
+ 190              	.LVL21:
+  52:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 191              		.loc 1 52 47 is_stmt 1 discriminator 3 view .LVU49
+ 192              	.L12:
+  52:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 193              		.loc 1 52 40 discriminator 1 view .LVU50
+ 194 0018 AC42     		cmp	r4, r5
+ 195 001a F9D3     		bcc	.L13
+  52:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 196              		.loc 1 52 40 is_stmt 0 discriminator 1 view .LVU51
+ 197              	.LBE4:
+  54:Core/Src/common/crc.c ****   }
+  55:Core/Src/common/crc.c ****   sbufWriteU16(dst, crc);
+ 198              		.loc 1 55 3 is_stmt 1 view .LVU52
+ 199 001c 0146     		mov	r1, r0
+ 200 001e 3046     		mov	r0, r6
+ 201              	.LVL22:
+ 202              		.loc 1 55 3 is_stmt 0 view .LVU53
+ 203 0020 FFF7FEFF 		bl	sbufWriteU16
+ 204              	.LVL23:
+  56:Core/Src/common/crc.c **** }
+ 205              		.loc 1 56 1 view .LVU54
+ 206 0024 70BD     		pop	{r4, r5, r6, pc}
+ 207              		.loc 1 56 1 view .LVU55
+ 208              		.cfi_endproc
+ 209              	.LFE218:
+ 211              		.section	.text.crc8_calc,"ax",%progbits
+ 212              		.align	1
+ 213              		.global	crc8_calc
+ 214              		.syntax unified
+ 215              		.thumb
+ 216              		.thumb_func
+ 218              	crc8_calc:
+ 219              	.LVL24:
+ 220              	.LFB219:
+  57:Core/Src/common/crc.c **** 
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 6
+
+
+  58:Core/Src/common/crc.c **** uint8_t crc8_calc(uint8_t crc, unsigned char a, uint8_t poly) {
+ 221              		.loc 1 58 63 is_stmt 1 view -0
+ 222              		.cfi_startproc
+ 223              		@ args = 0, pretend = 0, frame = 0
+ 224              		@ frame_needed = 0, uses_anonymous_args = 0
+ 225              		@ link register save eliminated.
+  59:Core/Src/common/crc.c ****   crc ^= a;
+ 226              		.loc 1 59 3 view .LVU57
+ 227              		.loc 1 59 7 is_stmt 0 view .LVU58
+ 228 0000 4840     		eors	r0, r0, r1
+ 229              	.LVL25:
+  60:Core/Src/common/crc.c ****   for (int ii = 0; ii < 8; ++ii) {
+ 230              		.loc 1 60 3 is_stmt 1 view .LVU59
+ 231              	.LBB5:
+ 232              		.loc 1 60 8 view .LVU60
+ 233              		.loc 1 60 12 is_stmt 0 view .LVU61
+ 234 0002 0023     		movs	r3, #0
+ 235              		.loc 1 60 3 view .LVU62
+ 236 0004 02E0     		b	.L16
+ 237              	.LVL26:
+ 238              	.L17:
+  61:Core/Src/common/crc.c ****     if (crc & 0x80) {
+  62:Core/Src/common/crc.c ****       crc = (crc << 1) ^ poly;
+  63:Core/Src/common/crc.c ****     } else {
+  64:Core/Src/common/crc.c ****       crc = crc << 1;
+ 239              		.loc 1 64 7 is_stmt 1 view .LVU63
+ 240              		.loc 1 64 11 is_stmt 0 view .LVU64
+ 241 0006 4000     		lsls	r0, r0, #1
+ 242              	.LVL27:
+ 243              		.loc 1 64 11 view .LVU65
+ 244 0008 C0B2     		uxtb	r0, r0
+ 245              	.LVL28:
+ 246              	.L18:
+  60:Core/Src/common/crc.c ****   for (int ii = 0; ii < 8; ++ii) {
+ 247              		.loc 1 60 28 is_stmt 1 discriminator 2 view .LVU66
+ 248 000a 0133     		adds	r3, r3, #1
+ 249              	.LVL29:
+ 250              	.L16:
+  60:Core/Src/common/crc.c ****   for (int ii = 0; ii < 8; ++ii) {
+ 251              		.loc 1 60 23 discriminator 1 view .LVU67
+ 252 000c 072B     		cmp	r3, #7
+ 253 000e 06DC     		bgt	.L20
+  61:Core/Src/common/crc.c ****     if (crc & 0x80) {
+ 254              		.loc 1 61 5 view .LVU68
+  61:Core/Src/common/crc.c ****     if (crc & 0x80) {
+ 255              		.loc 1 61 8 is_stmt 0 view .LVU69
+ 256 0010 10F0800F 		tst	r0, #128
+ 257 0014 F7D0     		beq	.L17
+  62:Core/Src/common/crc.c ****     } else {
+ 258              		.loc 1 62 7 is_stmt 1 view .LVU70
+  62:Core/Src/common/crc.c ****     } else {
+ 259              		.loc 1 62 11 is_stmt 0 view .LVU71
+ 260 0016 82EA4000 		eor	r0, r2, r0, lsl #1
+ 261              	.LVL30:
+  62:Core/Src/common/crc.c ****     } else {
+ 262              		.loc 1 62 11 view .LVU72
+ 263 001a C0B2     		uxtb	r0, r0
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 7
+
+
+ 264              	.LVL31:
+  62:Core/Src/common/crc.c ****     } else {
+ 265              		.loc 1 62 11 view .LVU73
+ 266 001c F5E7     		b	.L18
+ 267              	.L20:
+  62:Core/Src/common/crc.c ****     } else {
+ 268              		.loc 1 62 11 view .LVU74
+ 269              	.LBE5:
+  65:Core/Src/common/crc.c ****     }
+  66:Core/Src/common/crc.c ****   }
+  67:Core/Src/common/crc.c ****   return crc;
+ 270              		.loc 1 67 3 is_stmt 1 view .LVU75
+  68:Core/Src/common/crc.c **** }
+ 271              		.loc 1 68 1 is_stmt 0 view .LVU76
+ 272 001e 7047     		bx	lr
+ 273              		.cfi_endproc
+ 274              	.LFE219:
+ 276              		.section	.text.crc8_update,"ax",%progbits
+ 277              		.align	1
+ 278              		.global	crc8_update
+ 279              		.syntax unified
+ 280              		.thumb
+ 281              		.thumb_func
+ 283              	crc8_update:
+ 284              	.LVL32:
+ 285              	.LFB220:
+  69:Core/Src/common/crc.c **** 
+  70:Core/Src/common/crc.c **** uint8_t crc8_update(uint8_t crc, const void *data, uint32_t length,
+  71:Core/Src/common/crc.c ****                     uint8_t poly) {
+ 286              		.loc 1 71 35 is_stmt 1 view -0
+ 287              		.cfi_startproc
+ 288              		@ args = 0, pretend = 0, frame = 0
+ 289              		@ frame_needed = 0, uses_anonymous_args = 0
+ 290              		.loc 1 71 35 is_stmt 0 view .LVU78
+ 291 0000 70B5     		push	{r4, r5, r6, lr}
+ 292              	.LCFI2:
+ 293              		.cfi_def_cfa_offset 16
+ 294              		.cfi_offset 4, -16
+ 295              		.cfi_offset 5, -12
+ 296              		.cfi_offset 6, -8
+ 297              		.cfi_offset 14, -4
+ 298 0002 0C46     		mov	r4, r1
+ 299 0004 1E46     		mov	r6, r3
+  72:Core/Src/common/crc.c ****   const uint8_t *p = (const uint8_t *)data;
+ 300              		.loc 1 72 3 is_stmt 1 view .LVU79
+ 301              	.LVL33:
+  73:Core/Src/common/crc.c ****   const uint8_t *pend = p + length;
+ 302              		.loc 1 73 3 view .LVU80
+ 303              		.loc 1 73 18 is_stmt 0 view .LVU81
+ 304 0006 8D18     		adds	r5, r1, r2
+ 305              	.LVL34:
+  74:Core/Src/common/crc.c **** 
+  75:Core/Src/common/crc.c ****   for (; p != pend; p++) {
+ 306              		.loc 1 75 3 is_stmt 1 view .LVU82
+ 307 0008 04E0     		b	.L22
+ 308              	.LVL35:
+ 309              	.L23:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 8
+
+
+  76:Core/Src/common/crc.c ****     crc = crc8_calc(crc, *p, poly);
+ 310              		.loc 1 76 5 discriminator 2 view .LVU83
+ 311              		.loc 1 76 11 is_stmt 0 discriminator 2 view .LVU84
+ 312 000a 3246     		mov	r2, r6
+ 313 000c 14F8011B 		ldrb	r1, [r4], #1	@ zero_extendqisi2
+ 314              	.LVL36:
+ 315              		.loc 1 76 11 discriminator 2 view .LVU85
+ 316 0010 FFF7FEFF 		bl	crc8_calc
+ 317              	.LVL37:
+  75:Core/Src/common/crc.c ****     crc = crc8_calc(crc, *p, poly);
+ 318              		.loc 1 75 22 is_stmt 1 discriminator 2 view .LVU86
+ 319              	.L22:
+  75:Core/Src/common/crc.c ****     crc = crc8_calc(crc, *p, poly);
+ 320              		.loc 1 75 12 discriminator 1 view .LVU87
+ 321 0014 AC42     		cmp	r4, r5
+ 322 0016 F8D1     		bne	.L23
+  77:Core/Src/common/crc.c ****   }
+  78:Core/Src/common/crc.c ****   return crc;
+ 323              		.loc 1 78 3 view .LVU88
+  79:Core/Src/common/crc.c **** }
+ 324              		.loc 1 79 1 is_stmt 0 view .LVU89
+ 325 0018 70BD     		pop	{r4, r5, r6, pc}
+ 326              		.loc 1 79 1 view .LVU90
+ 327              		.cfi_endproc
+ 328              	.LFE220:
+ 330              		.section	.text.crc8_sbuf_append,"ax",%progbits
+ 331              		.align	1
+ 332              		.global	crc8_sbuf_append
+ 333              		.syntax unified
+ 334              		.thumb
+ 335              		.thumb_func
+ 337              	crc8_sbuf_append:
+ 338              	.LVL38:
+ 339              	.LFB221:
+  80:Core/Src/common/crc.c **** 
+  81:Core/Src/common/crc.c **** void crc8_sbuf_append(sbuf_t *dst, uint8_t *start, uint8_t poly) {
+ 340              		.loc 1 81 66 is_stmt 1 view -0
+ 341              		.cfi_startproc
+ 342              		@ args = 0, pretend = 0, frame = 0
+ 343              		@ frame_needed = 0, uses_anonymous_args = 0
+ 344              		.loc 1 81 66 is_stmt 0 view .LVU92
+ 345 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 346              	.LCFI3:
+ 347              		.cfi_def_cfa_offset 24
+ 348              		.cfi_offset 3, -24
+ 349              		.cfi_offset 4, -20
+ 350              		.cfi_offset 5, -16
+ 351              		.cfi_offset 6, -12
+ 352              		.cfi_offset 7, -8
+ 353              		.cfi_offset 14, -4
+ 354 0002 0746     		mov	r7, r0
+ 355 0004 0C46     		mov	r4, r1
+ 356 0006 1546     		mov	r5, r2
+  82:Core/Src/common/crc.c ****   uint8_t crc = 0;
+ 357              		.loc 1 82 3 is_stmt 1 view .LVU93
+ 358              	.LVL39:
+  83:Core/Src/common/crc.c ****   const uint8_t *const end = dst->ptr;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 9
+
+
+ 359              		.loc 1 83 3 view .LVU94
+ 360              		.loc 1 83 24 is_stmt 0 view .LVU95
+ 361 0008 0668     		ldr	r6, [r0]
+ 362              	.LVL40:
+  84:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 363              		.loc 1 84 3 is_stmt 1 view .LVU96
+ 364              	.LBB6:
+ 365              		.loc 1 84 8 view .LVU97
+ 366              		.loc 1 84 8 is_stmt 0 view .LVU98
+ 367              	.LBE6:
+  82:Core/Src/common/crc.c ****   uint8_t crc = 0;
+ 368              		.loc 1 82 11 view .LVU99
+ 369 000a 0020     		movs	r0, #0
+ 370              	.LVL41:
+ 371              	.LBB7:
+ 372              		.loc 1 84 3 view .LVU100
+ 373 000c 04E0     		b	.L26
+ 374              	.LVL42:
+ 375              	.L27:
+  85:Core/Src/common/crc.c ****     crc = crc8_calc(crc, *ptr, poly);
+ 376              		.loc 1 85 5 is_stmt 1 discriminator 3 view .LVU101
+ 377              		.loc 1 85 11 is_stmt 0 discriminator 3 view .LVU102
+ 378 000e 2A46     		mov	r2, r5
+ 379 0010 14F8011B 		ldrb	r1, [r4], #1	@ zero_extendqisi2
+ 380              	.LVL43:
+ 381              		.loc 1 85 11 discriminator 3 view .LVU103
+ 382 0014 FFF7FEFF 		bl	crc8_calc
+ 383              	.LVL44:
+  84:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 384              		.loc 1 84 47 is_stmt 1 discriminator 3 view .LVU104
+ 385              	.L26:
+  84:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 386              		.loc 1 84 40 discriminator 1 view .LVU105
+ 387 0018 B442     		cmp	r4, r6
+ 388 001a F8D3     		bcc	.L27
+  84:Core/Src/common/crc.c ****   for (const uint8_t *ptr = start; ptr < end; ++ptr) {
+ 389              		.loc 1 84 40 is_stmt 0 discriminator 1 view .LVU106
+ 390              	.LBE7:
+  86:Core/Src/common/crc.c ****   }
+  87:Core/Src/common/crc.c ****   sbufWriteU8(dst, crc);
+ 391              		.loc 1 87 3 is_stmt 1 view .LVU107
+ 392 001c 0146     		mov	r1, r0
+ 393 001e 3846     		mov	r0, r7
+ 394              	.LVL45:
+ 395              		.loc 1 87 3 is_stmt 0 view .LVU108
+ 396 0020 FFF7FEFF 		bl	sbufWriteU8
+ 397              	.LVL46:
+  88:Core/Src/common/crc.c **** }
+ 398              		.loc 1 88 1 view .LVU109
+ 399 0024 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 400              		.loc 1 88 1 view .LVU110
+ 401              		.cfi_endproc
+ 402              	.LFE221:
+ 404              		.section	.text.crc8_xor_update,"ax",%progbits
+ 405              		.align	1
+ 406              		.global	crc8_xor_update
+ 407              		.syntax unified
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 10
+
+
+ 408              		.thumb
+ 409              		.thumb_func
+ 411              	crc8_xor_update:
+ 412              	.LVL47:
+ 413              	.LFB222:
+  89:Core/Src/common/crc.c **** 
+  90:Core/Src/common/crc.c **** uint8_t crc8_xor_update(uint8_t crc, const void *data, uint32_t length) {
+ 414              		.loc 1 90 73 is_stmt 1 view -0
+ 415              		.cfi_startproc
+ 416              		@ args = 0, pretend = 0, frame = 0
+ 417              		@ frame_needed = 0, uses_anonymous_args = 0
+ 418              		@ link register save eliminated.
+  91:Core/Src/common/crc.c ****   const uint8_t *p = (const uint8_t *)data;
+ 419              		.loc 1 91 3 view .LVU112
+  92:Core/Src/common/crc.c ****   const uint8_t *pend = p + length;
+ 420              		.loc 1 92 3 view .LVU113
+ 421              		.loc 1 92 18 is_stmt 0 view .LVU114
+ 422 0000 0A44     		add	r2, r2, r1
+ 423              	.LVL48:
+  93:Core/Src/common/crc.c **** 
+  94:Core/Src/common/crc.c ****   for (; p != pend; p++) {
+ 424              		.loc 1 94 3 is_stmt 1 view .LVU115
+ 425 0002 02E0     		b	.L30
+ 426              	.LVL49:
+ 427              	.L31:
+  95:Core/Src/common/crc.c ****     crc ^= *p;
+ 428              		.loc 1 95 5 discriminator 2 view .LVU116
+ 429              		.loc 1 95 12 is_stmt 0 discriminator 2 view .LVU117
+ 430 0004 11F8013B 		ldrb	r3, [r1], #1	@ zero_extendqisi2
+ 431              	.LVL50:
+ 432              		.loc 1 95 9 discriminator 2 view .LVU118
+ 433 0008 5840     		eors	r0, r0, r3
+ 434              	.LVL51:
+  94:Core/Src/common/crc.c ****     crc ^= *p;
+ 435              		.loc 1 94 22 is_stmt 1 discriminator 2 view .LVU119
+ 436              	.L30:
+  94:Core/Src/common/crc.c ****     crc ^= *p;
+ 437              		.loc 1 94 12 discriminator 1 view .LVU120
+ 438 000a 9142     		cmp	r1, r2
+ 439 000c FAD1     		bne	.L31
+  96:Core/Src/common/crc.c ****   }
+  97:Core/Src/common/crc.c ****   return crc;
+ 440              		.loc 1 97 3 view .LVU121
+  98:Core/Src/common/crc.c **** }
+ 441              		.loc 1 98 1 is_stmt 0 view .LVU122
+ 442 000e 7047     		bx	lr
+ 443              		.cfi_endproc
+ 444              	.LFE222:
+ 446              		.section	.text.crc8_xor_sbuf_append,"ax",%progbits
+ 447              		.align	1
+ 448              		.global	crc8_xor_sbuf_append
+ 449              		.syntax unified
+ 450              		.thumb
+ 451              		.thumb_func
+ 453              	crc8_xor_sbuf_append:
+ 454              	.LVL52:
+ 455              	.LFB223:
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 11
+
+
+  99:Core/Src/common/crc.c **** 
+ 100:Core/Src/common/crc.c **** void crc8_xor_sbuf_append(sbuf_t *dst, uint8_t *start) {
+ 456              		.loc 1 100 56 is_stmt 1 view -0
+ 457              		.cfi_startproc
+ 458              		@ args = 0, pretend = 0, frame = 0
+ 459              		@ frame_needed = 0, uses_anonymous_args = 0
+ 460              		.loc 1 100 56 is_stmt 0 view .LVU124
+ 461 0000 10B5     		push	{r4, lr}
+ 462              	.LCFI4:
+ 463              		.cfi_def_cfa_offset 8
+ 464              		.cfi_offset 4, -8
+ 465              		.cfi_offset 14, -4
+ 466 0002 0B46     		mov	r3, r1
+ 101:Core/Src/common/crc.c ****   uint8_t crc = 0;
+ 467              		.loc 1 101 3 is_stmt 1 view .LVU125
+ 468              	.LVL53:
+ 102:Core/Src/common/crc.c ****   const uint8_t *end = dst->ptr;
+ 469              		.loc 1 102 3 view .LVU126
+ 470              		.loc 1 102 18 is_stmt 0 view .LVU127
+ 471 0004 0468     		ldr	r4, [r0]
+ 472              	.LVL54:
+ 103:Core/Src/common/crc.c ****   for (uint8_t *ptr = start; ptr < end; ++ptr) {
+ 473              		.loc 1 103 3 is_stmt 1 view .LVU128
+ 474              	.LBB8:
+ 475              		.loc 1 103 8 view .LVU129
+ 476              		.loc 1 103 8 is_stmt 0 view .LVU130
+ 477              	.LBE8:
+ 101:Core/Src/common/crc.c ****   uint8_t crc = 0;
+ 478              		.loc 1 101 11 view .LVU131
+ 479 0006 0021     		movs	r1, #0
+ 480              	.LVL55:
+ 481              	.LBB9:
+ 482              		.loc 1 103 3 view .LVU132
+ 483 0008 02E0     		b	.L33
+ 484              	.LVL56:
+ 485              	.L34:
+ 104:Core/Src/common/crc.c ****     crc ^= *ptr;
+ 486              		.loc 1 104 5 is_stmt 1 discriminator 3 view .LVU133
+ 487              		.loc 1 104 12 is_stmt 0 discriminator 3 view .LVU134
+ 488 000a 13F8012B 		ldrb	r2, [r3], #1	@ zero_extendqisi2
+ 489              	.LVL57:
+ 490              		.loc 1 104 9 discriminator 3 view .LVU135
+ 491 000e 5140     		eors	r1, r1, r2
+ 492              	.LVL58:
+ 103:Core/Src/common/crc.c ****   for (uint8_t *ptr = start; ptr < end; ++ptr) {
+ 493              		.loc 1 103 41 is_stmt 1 discriminator 3 view .LVU136
+ 494              	.L33:
+ 103:Core/Src/common/crc.c ****   for (uint8_t *ptr = start; ptr < end; ++ptr) {
+ 495              		.loc 1 103 34 discriminator 1 view .LVU137
+ 496 0010 A342     		cmp	r3, r4
+ 497 0012 FAD3     		bcc	.L34
+ 103:Core/Src/common/crc.c ****   for (uint8_t *ptr = start; ptr < end; ++ptr) {
+ 498              		.loc 1 103 34 is_stmt 0 discriminator 1 view .LVU138
+ 499              	.LBE9:
+ 105:Core/Src/common/crc.c ****   }
+ 106:Core/Src/common/crc.c ****   sbufWriteU8(dst, crc);
+ 500              		.loc 1 106 3 is_stmt 1 view .LVU139
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 12
+
+
+ 501 0014 FFF7FEFF 		bl	sbufWriteU8
+ 502              	.LVL59:
+ 107:Core/Src/common/crc.c **** }
+ 503              		.loc 1 107 1 is_stmt 0 view .LVU140
+ 504 0018 10BD     		pop	{r4, pc}
+ 505              		.loc 1 107 1 view .LVU141
+ 506              		.cfi_endproc
+ 507              	.LFE223:
+ 509              		.section	.text.fnv_update,"ax",%progbits
+ 510              		.align	1
+ 511              		.global	fnv_update
+ 512              		.syntax unified
+ 513              		.thumb
+ 514              		.thumb_func
+ 516              	fnv_update:
+ 517              	.LVL60:
+ 518              	.LFB224:
+ 108:Core/Src/common/crc.c **** 
+ 109:Core/Src/common/crc.c **** // Fowler–Noll–Vo hash function; see
+ 110:Core/Src/common/crc.c **** // https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
+ 111:Core/Src/common/crc.c **** uint32_t fnv_update(uint32_t hash, const void *data, uint32_t length) {
+ 519              		.loc 1 111 71 is_stmt 1 view -0
+ 520              		.cfi_startproc
+ 521              		@ args = 0, pretend = 0, frame = 0
+ 522              		@ frame_needed = 0, uses_anonymous_args = 0
+ 523              		@ link register save eliminated.
+ 112:Core/Src/common/crc.c ****   const uint8_t *p = (const uint8_t *)data;
+ 524              		.loc 1 112 3 view .LVU143
+ 113:Core/Src/common/crc.c ****   const uint8_t *pend = p + length;
+ 525              		.loc 1 113 3 view .LVU144
+ 526              		.loc 1 113 18 is_stmt 0 view .LVU145
+ 527 0000 0A44     		add	r2, r2, r1
+ 528              	.LVL61:
+ 114:Core/Src/common/crc.c **** 
+ 115:Core/Src/common/crc.c ****   for (; p != pend; p++) {
+ 529              		.loc 1 115 3 is_stmt 1 view .LVU146
+ 530 0002 05E0     		b	.L37
+ 531              	.LVL62:
+ 532              	.L38:
+ 116:Core/Src/common/crc.c ****     hash *= FNV_PRIME;
+ 533              		.loc 1 116 5 discriminator 2 view .LVU147
+ 534              		.loc 1 116 10 is_stmt 0 discriminator 2 view .LVU148
+ 535 0004 044B     		ldr	r3, .L39
+ 536 0006 03FB00F0 		mul	r0, r3, r0
+ 537              	.LVL63:
+ 117:Core/Src/common/crc.c ****     hash ^= *p;
+ 538              		.loc 1 117 5 is_stmt 1 discriminator 2 view .LVU149
+ 539              		.loc 1 117 13 is_stmt 0 discriminator 2 view .LVU150
+ 540 000a 11F8013B 		ldrb	r3, [r1], #1	@ zero_extendqisi2
+ 541              	.LVL64:
+ 542              		.loc 1 117 10 discriminator 2 view .LVU151
+ 543 000e 5840     		eors	r0, r0, r3
+ 544              	.LVL65:
+ 115:Core/Src/common/crc.c ****     hash *= FNV_PRIME;
+ 545              		.loc 1 115 22 is_stmt 1 discriminator 2 view .LVU152
+ 546              	.L37:
+ 115:Core/Src/common/crc.c ****     hash *= FNV_PRIME;
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 13
+
+
+ 547              		.loc 1 115 12 discriminator 1 view .LVU153
+ 548 0010 9142     		cmp	r1, r2
+ 549 0012 F7D1     		bne	.L38
+ 118:Core/Src/common/crc.c ****   }
+ 119:Core/Src/common/crc.c **** 
+ 120:Core/Src/common/crc.c ****   return hash;
+ 550              		.loc 1 120 3 view .LVU154
+ 121:Core/Src/common/crc.c **** }
+ 551              		.loc 1 121 1 is_stmt 0 view .LVU155
+ 552 0014 7047     		bx	lr
+ 553              	.L40:
+ 554 0016 00BF     		.align	2
+ 555              	.L39:
+ 556 0018 93010001 		.word	16777619
+ 557              		.cfi_endproc
+ 558              	.LFE224:
+ 560              		.text
+ 561              	.Letext0:
+ 562              		.file 2 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/mac
+ 563              		.file 3 "/Users/echo/Development/arm-gnu-toolchain/arm64-arm-none-eabi12/arm-none-eabi/include/sys
+ 564              		.file 4 "Core/Inc/common/streambuf.h"
+ARM GAS  /var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s 			page 14
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 crc.c
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:21     .text.crc16_ccitt:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:27     .text.crc16_ccitt:00000000 crc16_ccitt
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:87     .text.crc16_ccitt_update:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:93     .text.crc16_ccitt_update:00000000 crc16_ccitt_update
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:139    .text.crc16_ccitt_sbuf_append:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:145    .text.crc16_ccitt_sbuf_append:00000000 crc16_ccitt_sbuf_append
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:212    .text.crc8_calc:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:218    .text.crc8_calc:00000000 crc8_calc
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:277    .text.crc8_update:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:283    .text.crc8_update:00000000 crc8_update
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:331    .text.crc8_sbuf_append:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:337    .text.crc8_sbuf_append:00000000 crc8_sbuf_append
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:405    .text.crc8_xor_update:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:411    .text.crc8_xor_update:00000000 crc8_xor_update
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:447    .text.crc8_xor_sbuf_append:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:453    .text.crc8_xor_sbuf_append:00000000 crc8_xor_sbuf_append
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:510    .text.fnv_update:00000000 $t
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:516    .text.fnv_update:00000000 fnv_update
+/var/folders/mn/k5wp23016n9dfxcgh9w5nftw0000gn/T//ccXsdwfJ.s:556    .text.fnv_update:00000018 $d
+
+UNDEFINED SYMBOLS
+sbufPtr
+sbufWriteU16
+sbufWriteU8
